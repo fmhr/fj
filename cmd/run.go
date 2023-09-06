@@ -22,5 +22,5 @@ func Run(seed int) ([]int, error) {
 	fmt.Printf("------------------------ seed=%d\n", seed)
 	fmt.Print(string(out))
 	fmt.Println("------------------------")
-	return []int{0}, nil
+	return []int{}, nil
 }

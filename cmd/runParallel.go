@@ -17,7 +17,7 @@ func RunParallel(seeds []int) {
 				<-sem
 				wg.Done()
 			}()
-			_, err := tester(seed)
+			_, err := RunTester(seed)
 			if err != nil {
 				log.Printf("seed=%d %v\n", seed, err)
 			}

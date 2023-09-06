@@ -27,7 +27,7 @@ func script() {
 	//log.Println(args, *seed)
 	switch *app {
 	case "tester":
-		_, err := tester(*seed)
+		_, err := RunTester(*seed)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -57,7 +57,6 @@ func build() error {
 }
 
 func buildTester() error {
-
 	cmd2 := exec.Command("cargo", "build", "--manifest-path", "tools/Cargo.toml", "--release", "--bin", "tester")
 	err := cmd2.Run()
 	if err != nil {

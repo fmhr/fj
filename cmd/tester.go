@@ -6,18 +6,21 @@ import (
 	"os/exec"
 )
 
-func tester(seed int) ([]int, error) {
+var CMD = "bin/main"
+var TESTER = "./tools/target/release/tester"
+var VIS = "./tools/target/release/vis"
+var OUTFILE = "out.txt"
+var INFILE_FOLDER = "tools/in/"
+
+func RunTester(seed int) ([]byte, error) {
 	log.Println("seed=", seed)
-	err := build()
-	if err != nil {
-		return nil, err
-	}
-	cmdStr := fmt.Sprintf("bin/a < tools/in/%04d.txt > out.txt", seed)
+	cmdStr := fmt.Sprintf(CMD+" < tools/in/%04d.txt > out.txt", seed)
 	cmd := exec.Command("sh", "-c", cmdStr)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return nil, err
+		return []byte{}, fmt.Errorf("cmd.Run() for command %q failed with: %v", cmdStr, err)
 	}
+
 	fmt.Printf("------------------------ seed=%d\n", seed)
 	fmt.Print(string(out))
 	fmt.Println("------------------------")
@@ -26,13 +29,26 @@ func tester(seed int) ([]int, error) {
 	//for i, regexStr := range regexStrs {
 	//r[i+1] = parseInt(string(out), regexStr.re, regexStr.str)
 	//}
-	return []int{0}, nil
+	infile := INFILE_FOLDER + fmt.Sprintf("%04d.txt", seed)
+	outfile := OUTFILE
+	vis(infile, outfile)
+	return out, nil
+}
+
+func vis(infile, outfile string) {
+	cmdStr := fmt.Sprintf(VIS+" %s %s", infile, outfile)
+	cmd := exec.Command("sh", "-c", cmdStr)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Fatal(fmt.Errorf("cmd.Run() for command %q failed with: %v", cmdStr, err))
+	}
+	fmt.Println(string(out))
 }
 
 func tester10() error {
-	result := make([][]int, 10)
+	result := make([][]byte, 10)
 	for seed := 0; seed < 10; seed++ {
-		r, err := tester(seed)
+		r, err := RunTester(seed)
 		if err != nil {
 			return err
 		}
