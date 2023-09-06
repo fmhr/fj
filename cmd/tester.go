@@ -13,7 +13,7 @@ var VIS = "./tools/target/release/vis"
 var OUTFILE = "out.txt"
 var INFILE_FOLDER = "tools/in/"
 
-func RunTester(seed int) ([]byte, error) {
+func Run(seed int) ([]byte, error) {
 	if _, err := os.Stat(fmt.Sprintf("tools/in/%04d.txt", seed)); err != nil {
 		return []byte{}, fmt.Errorf("tools/in/%04d.txt not found", seed)
 	}
@@ -23,7 +23,14 @@ func RunTester(seed int) ([]byte, error) {
 	if err != nil {
 		return []byte{}, fmt.Errorf("cmd.Run() for command %q failed with: %v", cmdStr, err)
 	}
+	return out, nil
+}
 
+func RunVis(seed int) ([]byte, error) {
+	out, err := Run(seed)
+	if err != nil {
+		return nil, err
+	}
 	infile := INFILE_FOLDER + fmt.Sprintf("%04d.txt", seed)
 	outfile := OUTFILE
 	outVis := vis(infile, outfile)
@@ -51,7 +58,7 @@ func vis(infile, outfile string) []byte {
 func tester10() error {
 	result := make([][]byte, 10)
 	for seed := 0; seed < 10; seed++ {
-		r, err := RunTester(seed)
+		r, err := RunVis(seed)
 		if err != nil {
 			return err
 		}

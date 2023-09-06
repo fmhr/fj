@@ -9,6 +9,7 @@ func RunParallel(seeds []int) {
 	CORE := 4
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, CORE)
+	datas := make([]map[string]float64, len(seeds))
 	for _, seed := range seeds {
 		wg.Add(1)
 		sem <- struct{}{}
@@ -17,11 +18,20 @@ func RunParallel(seeds []int) {
 				<-sem
 				wg.Done()
 			}()
-			_, err := RunTester(seed)
+			out, err := Run(seed)
 			if err != nil {
 				log.Printf("seed=%d %v\n", seed, err)
 			}
+			data, err := ExtractKeyValuePairs(string(out))
+			if err != nil {
+				log.Printf("seed=%d %v\n", seed, err)
+			}
+			data["seed"] = float64(seed)
+			datas[seed] = data
 		}(seed)
 	}
 	wg.Wait()
+	for i := 0; i < len(datas); i++ {
+		log.Println(datas[i])
+	}
 }

@@ -21,14 +21,14 @@ func script() {
 
 	var seeds []int
 	if start != nil && end != nil {
-		for i := *start; i <= *end; i++ {
+		for i := *start; i < *end; i++ {
 			seeds = append(seeds, i)
 		}
 	}
 	//log.Println(args, *seed)
 	switch *app {
 	case "tester":
-		_, err := RunTester(*seed)
+		_, err := RunVis(*seed)
 		if err != nil {
 			log.Fatal(err)
 		}
