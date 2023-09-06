@@ -1,7 +1,7 @@
 # ビルド用の変数
 BINARY_NAME=fmj
 BUILD_DIR=build
-CMD_DIR=./cmd/fmj/
+CMD_DIR=./cmd
 
 all: build
 
