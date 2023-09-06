@@ -13,7 +13,6 @@ var OUTFILE = "out.txt"
 var INFILE_FOLDER = "tools/in/"
 
 func RunTester(seed int) ([]byte, error) {
-	log.Println("seed=", seed)
 	cmdStr := fmt.Sprintf(CMD+" < tools/in/%04d.txt > out.txt", seed)
 	cmd := exec.Command("sh", "-c", cmdStr)
 	out, err := cmd.CombinedOutput()
@@ -21,28 +20,28 @@ func RunTester(seed int) ([]byte, error) {
 		return []byte{}, fmt.Errorf("cmd.Run() for command %q failed with: %v", cmdStr, err)
 	}
 
-	fmt.Printf("------------------------ seed=%d\n", seed)
-	fmt.Print(string(out))
-	fmt.Println("------------------------")
-	//r := make([]int, len(regexStrs)+1)
-	//r[0] = seed
-	//for i, regexStr := range regexStrs {
-	//r[i+1] = parseInt(string(out), regexStr.re, regexStr.str)
-	//}
 	infile := INFILE_FOLDER + fmt.Sprintf("%04d.txt", seed)
 	outfile := OUTFILE
-	vis(infile, outfile)
+	outVis := vis(infile, outfile)
+	out = append(out, outVis...)
+	//log.Print(string(outVis))
+	pair, err := ExtractKeyValuePairs(string(out))
+	if err != nil {
+		return []byte{}, err
+	}
+	pair["seed"] = float64(seed)
+	log.Println(pair)
 	return out, nil
 }
 
-func vis(infile, outfile string) {
+func vis(infile, outfile string) []byte {
 	cmdStr := fmt.Sprintf(VIS+" %s %s", infile, outfile)
 	cmd := exec.Command("sh", "-c", cmdStr)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Fatal(fmt.Errorf("cmd.Run() for command %q failed with: %v", cmdStr, err))
 	}
-	fmt.Println(string(out))
+	return out
 }
 
 func tester10() error {
@@ -55,6 +54,13 @@ func tester10() error {
 		result[seed] = r
 	}
 	var sumScore int
+	for i := 0; i < 10; i++ {
+		data, err := ExtractKeyValuePairs(string(result[i]))
+		if err != nil {
+			return err
+		}
+		sumScore += int(data["score"])
+	}
 	//table := tablewriter.NewWriter(os.Stdout)
 	//table.SetHeader([]string{"seed", "N", "L", "S", "Score", "Hit", "Miss", "Placement cost", "Measurement cost", "count"})
 	//for _, v := range result {
