@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os/exec"
 )
@@ -14,13 +15,13 @@ func main() {
 func script() {
 	app := flag.String("app", "", "app name")
 	seed := flag.Int("seed", 0, "seed for testcase")
-	startSeed := flag.Int("startSeed", 0, "seed for start")
-	endSeed := flag.Int("endSeed", 0, "seed for end")
+	start := flag.Int("start", 0, "seed for start")
+	end := flag.Int("end", 0, "seed for end")
 	flag.Parse()
 
 	var seeds []int
-	if startSeed != nil && endSeed != nil {
-		for i := *startSeed; i <= *endSeed; i++ {
+	if start != nil && end != nil {
+		for i := *start; i <= *end; i++ {
 			seeds = append(seeds, i)
 		}
 	}
@@ -36,12 +37,13 @@ func script() {
 		if err != nil {
 			log.Fatal(err)
 		}
-	case "seedSearch":
-		seedSorting()
+	case "run":
+		fmt.Printf("start=%d end=%d\n", *start, *end)
+		RunParallel(seeds)
 	case "gcloud":
 		gcloud()
-	case "run":
-		RunParallel(seeds)
+	case "seedSearch":
+		seedSorting()
 	default:
 		log.Fatal("invalid command")
 	}
@@ -50,15 +52,6 @@ func script() {
 func build() error {
 	cmd := exec.Command("go", "build", "-o", "main", "src/main.go")
 	err := cmd.Run()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func buildTester() error {
-	cmd2 := exec.Command("cargo", "build", "--manifest-path", "tools/Cargo.toml", "--release", "--bin", "tester")
-	err := cmd2.Run()
 	if err != nil {
 		return err
 	}
