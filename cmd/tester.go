@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
 )
 
@@ -13,6 +14,9 @@ var OUTFILE = "out.txt"
 var INFILE_FOLDER = "tools/in/"
 
 func RunTester(seed int) ([]byte, error) {
+	if _, err := os.Stat(fmt.Sprintf("tools/in/%04d.txt", seed)); err != nil {
+		return []byte{}, fmt.Errorf("tools/in/%04d.txt not found", seed)
+	}
 	cmdStr := fmt.Sprintf(CMD+" < tools/in/%04d.txt > out.txt", seed)
 	cmd := exec.Command("sh", "-c", cmdStr)
 	out, err := cmd.CombinedOutput()
