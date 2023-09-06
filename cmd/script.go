@@ -48,7 +48,7 @@ func script() {
 }
 
 func build() error {
-	cmd := exec.Command("go", "build", "-o", "bin", "src/main.go")
+	cmd := exec.Command("go", "build", "-o", "main", "src/main.go")
 	err := cmd.Run()
 	if err != nil {
 		return err
