@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"sync"
 )
@@ -31,7 +32,11 @@ func RunParallel(seeds []int) {
 		}(seed)
 	}
 	wg.Wait()
+	sumScore := 0.0
 	for i := 0; i < len(datas); i++ {
 		log.Println(datas[i])
+		sumScore += datas[i]["score"]
 	}
+	log.Printf("sumScore=%.2f\n", sumScore)
+	fmt.Printf("%.2f\n", sumScore)
 }

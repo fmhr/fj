@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"os/exec"
 )
 
 func main() {
@@ -47,13 +46,4 @@ func script() {
 	default:
 		log.Fatal("invalid command")
 	}
-}
-
-func build() error {
-	cmd := exec.Command("go", "build", "-o", "main", "src/main.go")
-	err := cmd.Run()
-	if err != nil {
-		return err
-	}
-	return nil
 }
