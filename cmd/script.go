@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 )
 
@@ -16,7 +15,12 @@ func script() {
 	seed := flag.Int("seed", 0, "seed for testcase")
 	start := flag.Int("start", 0, "seed for start")
 	end := flag.Int("end", 0, "seed for end")
+	cmdArgs := flag.String("cmdArgs", "", "cmdArgs")
 	flag.Parse()
+
+	if cmdArgs != nil {
+		CMD = CMD + " " + *cmdArgs
+	}
 
 	var seeds []int
 	if start != nil && end != nil {
@@ -37,7 +41,7 @@ func script() {
 			log.Fatal(err)
 		}
 	case "run":
-		fmt.Printf("start=%d end=%d\n", *start, *end)
+		log.Printf("start=%d end=%d\n", *start, *end)
 		RunParallel(seeds)
 	case "gcloud":
 		gcloud()

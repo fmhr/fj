@@ -1,11 +1,9 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"net/http"
-	"os/exec"
 	"sync"
 )
 
@@ -49,16 +47,4 @@ func gcloud() {
 	for r := range results {
 		fmt.Println(r)
 	}
-}
-
-// コンテスト中はテスターが変わらないと仮定すれば、URLは変わらないので、いらないかも
-func getCloudRunURL(serviceName, region string) (string, error) {
-	cmd := exec.Command("gcloud", "run", "services", "describe", serviceName, "--region", region, "--format", "value(status.url)")
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	err := cmd.Run()
-	if err != nil {
-		return "", err
-	}
-	return out.String(), nil
 }

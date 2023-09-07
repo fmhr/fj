@@ -72,13 +72,6 @@ func tester10() error {
 		}
 		sumScore += int(data["score"])
 	}
-	//table := tablewriter.NewWriter(os.Stdout)
-	//table.SetHeader([]string{"seed", "N", "L", "S", "Score", "Hit", "Miss", "Placement cost", "Measurement cost", "count"})
-	//for _, v := range result {
-	//table.Append([]string{fmt.Sprintf("%d", v[0]), fmt.Sprintf("%d", v[1]), fmt.Sprintf("%d", v[2]), fmt.Sprintf("%d", v[3]), fmt.Sprintf("%d", v[4]), fmt.Sprintf("%d", v[1]-v[5]), fmt.Sprintf("%d", v[5]), fmt.Sprintf("%d", v[6]), fmt.Sprintf("%d", v[7]), fmt.Sprintf("%d", v[8])})
-	//sumScore += v[4]
-	//}
-	//table.Render()
 	log.Println("sumScore=", sumScore)
 	return nil
 }
