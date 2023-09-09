@@ -3,8 +3,11 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
+	"os/signal"
 	"sync"
 	"sync/atomic"
+	"syscall"
 )
 
 func RunParallel(seeds []int) {
@@ -12,17 +15,43 @@ func RunParallel(seeds []int) {
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, CORE)
 	datas := make([]map[string]float64, len(seeds))
+	errorChan := make(chan string, len(seeds))
 
 	var taskCompleted int32 = 0
 	totalTask := len(seeds)
 
-	errorChan := make(chan string, len(seeds))
+	// Ctrl+Cで中断したときに、現在実行中のseedを表示する
+	var currentlyRunnningSeeds []int
+	var seedMutex sync.Mutex
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	go func() {
+		<-sigCh
+		seedMutex.Lock()
+		log.Printf("\nCurrently running seeds: %v\n", currentlyRunnningSeeds)
+		os.Exit(1)
+	}()
+	// -----
 
 	for _, seed := range seeds {
 		wg.Add(1)
 		sem <- struct{}{}
 		go func(seed int) {
+			seedMutex.Lock()
+			currentlyRunnningSeeds = append(currentlyRunnningSeeds, seed)
+			seedMutex.Unlock()
+
 			defer func() {
+				//
+				seedMutex.Lock()
+				for i, s := range currentlyRunnningSeeds {
+					if s == seed {
+						currentlyRunnningSeeds = append(currentlyRunnningSeeds[:i], currentlyRunnningSeeds[i+1:]...)
+						break
+					}
+				}
+				seedMutex.Unlock()
+				//
 				<-sem
 				wg.Done()
 				atomic.AddInt32(&taskCompleted, 1)
@@ -45,7 +74,7 @@ func RunParallel(seeds []int) {
 	wg.Wait()
 	close(errorChan)
 
-	fmt.Println() // プログレスバーを改行
+	fmt.Fprintf(os.Stderr, "\n") // プログレスバーを改行
 
 	for err := range errorChan {
 		log.Println(err)
@@ -74,5 +103,5 @@ func printProgress(current, total int) {
 			progressBar[i] = ' '
 		}
 	}
-	fmt.Printf("\r[%d/%d] [%s] %.2f%%", current, total, string(progressBar), percentage*100)
+	fmt.Fprintf(os.Stderr, "\r[%d/%d] [%s] %.2f%%", current, total, string(progressBar), percentage*100)
 }
