@@ -17,7 +17,7 @@ func Run(seed int) ([]byte, error) {
 	if _, err := os.Stat(fmt.Sprintf("tools/in/%04d.txt", seed)); err != nil {
 		return []byte{}, fmt.Errorf("tools/in/%04d.txt not found", seed)
 	}
-	cmdStr := fmt.Sprintf(CMD+" < tools/in/%04d.txt > out.txt", seed)
+	cmdStr := fmt.Sprintf(CMD+" < tools/in/%04d.txt > tmp/%04d.out", seed, seed)
 	cmd := exec.Command("sh", "-c", cmdStr)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
