@@ -14,7 +14,7 @@ func RunParallel(cnf *config, seeds []int) {
 	CORE := 4
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, CORE)
-	datas := make([]map[string]float64, len(seeds))
+	datas := make([]map[string]float64, 0, len(seeds))
 	errorChan := make(chan string, len(seeds))
 
 	var taskCompleted int32 = 0
@@ -23,6 +23,7 @@ func RunParallel(cnf *config, seeds []int) {
 	// Ctrl+Cで中断したときに、現在実行中のseedを表示する
 	var currentlyRunnningSeeds []int
 	var seedMutex sync.Mutex
+	var datasMutex sync.Mutex
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	go func() {
@@ -68,7 +69,9 @@ func RunParallel(cnf *config, seeds []int) {
 				return
 			}
 			data["seed"] = float64(seed)
-			datas[seed] = data
+			datasMutex.Lock()
+			datas = append(datas, data)
+			datasMutex.Unlock()
 		}(seed)
 	}
 	wg.Wait()
@@ -82,10 +85,10 @@ func RunParallel(cnf *config, seeds []int) {
 
 	sumScore := 0.0
 	for i := 0; i < len(datas); i++ {
-		log.Println(datas[i])
+		fmt.Println(datas[i])
 		sumScore += datas[i]["score"]
 	}
-	log.Printf("sumScore=%.2f\n", sumScore)
+	fmt.Printf("sumScore=%.2f\n", sumScore)
 	fmt.Printf("%.2f\n", sumScore)
 }
 

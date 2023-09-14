@@ -8,13 +8,14 @@ import (
 	"github.com/pelletier/go-toml"
 )
 
-var ErrConfigNotFound = fmt.Errorf("config.toml not found, please run `fj -init`")
+var ErrConfigNotFound = fmt.Errorf("config.toml not found, please run `fj init`")
 
 type config struct {
 	Language  string `toml:"Language"`
 	Cmd       string `toml:"Cmd"`
 	Reactive  bool   `toml:"Reactive"`
 	ToolsPAHT string `toml:"ToolsPAHT"`
+	Jobs      int    `toml:"Jobs"`
 }
 
 func GenerateConfig() {
@@ -52,7 +53,7 @@ func generateConfig(conf *config) error {
 
 func LoadConfigFile() (*config, error) {
 	if _, err := os.Stat("config.toml"); err != nil {
-		log.Println("config.toml not found, please run `fj -init`")
+		log.Println("config.toml not found, please run `fj init`")
 		return &config{}, err
 	}
 	conf := &config{}

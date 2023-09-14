@@ -18,11 +18,6 @@ var INFILE_FOLDER = "tools/in/"
 var OUTFILE_FOLDER = "tmp/"
 
 func main() {
-	args := os.Args
-	if len(args) > 1 && args[1] == "init" {
-		GenerateConfig()
-		return
-	}
 
 	app := flag.String("app", "", "app name")
 	//reactive := flag.Bool("reactive", false, "reactive")
@@ -41,13 +36,20 @@ func main() {
 		cnf.Cmd = cnf.Cmd + " " + *cmdArgs
 	}
 	// ---------------------------------------
-	if len(args) > 1 && args[1] == "t" {
-		seeds := make([]int, 10)
-		for i := 0; i < 10; i++ {
-			seeds[i] = 1
+
+	args := os.Args
+	if len(args) > 1 {
+		if args[1] == "t" {
+			seeds := make([]int, 10)
+			for i := 0; i < 10; i++ {
+				seeds[i] = 1
+			}
+			RunVis10(cnf)
+			return
+		} else if args[1] == "init" {
+			GenerateConfig()
+			return
 		}
-		RunVis10(cnf)
-		return
 	}
 	// ---------------------------------------
 
@@ -66,8 +68,6 @@ func main() {
 
 	//log.Println(args, *seed)
 	switch *app {
-	case "init":
-		GenerateConfig()
 	case "runVis":
 		err := RunVis(cnf, *seed)
 		if err != nil {
@@ -85,12 +85,5 @@ func main() {
 		gcloud()
 	case "seedSearch":
 		seedSorting()
-	default:
-		if *seed != -1 {
-			err := RunVis(cnf, *seed)
-			if err != nil {
-				log.Println(err)
-			}
-		}
 	}
 }

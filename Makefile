@@ -3,7 +3,7 @@ BINARY_NAME=fj
 BUILD_DIR=bin
 BINARIES=$(BUILD_DIR)/$(BINARY_NAME)
 CMD_DIR=./cmd
-GO_FILES:= $(shell find . -name '*.go' -type f -not -path "./vendor/*")
+GO_FILES:= $(shell find . -name '*.go' -type f)
 
 all: build
 
