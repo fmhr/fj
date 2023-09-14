@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 )
@@ -14,6 +15,7 @@ var TESTER = "./tools/target/release/tester"
 var VIS = "./tools/target/release/vis"
 var OUTFILE = "out.txt"
 var INFILE_FOLDER = "tools/in/"
+var OUTFILE_FOLDER = "tmp/"
 
 func main() {
 	args := os.Args
@@ -27,7 +29,6 @@ func main() {
 	seed := flag.Int("seed", 0, "seed for testcase")
 	start := flag.Int("start", 0, "seed for start")
 	end := flag.Int("end", 0, "seed for end")
-	cmd := flag.String("cmd", "", "cmd")
 	cmdArgs := flag.String("cmdArgs", "", "cmdArgs")
 	flag.Parse()
 
@@ -36,9 +37,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if *cmd != "" {
-		cnf.Cmd = *cmd
-	}
 	if *cmdArgs != "" {
 		cnf.Cmd = cnf.Cmd + " " + *cmdArgs
 	}
@@ -49,7 +47,6 @@ func main() {
 			seeds[i] = 1
 		}
 		RunVis10(cnf)
-		log.Println("t")
 		return
 	}
 	// ---------------------------------------
@@ -82,13 +79,18 @@ func main() {
 			log.Fatal(err)
 		}
 	case "run":
-		log.Printf("start=%d end=%d\n", *start, *end)
+		fmt.Fprintf(os.Stderr, "start=%d end=%d\n", *start, *end)
 		RunParallel(cnf, seeds)
 	case "gcloud":
 		gcloud()
 	case "seedSearch":
 		seedSorting()
 	default:
-		log.Fatal("invalid command")
+		if *seed != -1 {
+			err := RunVis(cnf, *seed)
+			if err != nil {
+				log.Println(err)
+			}
+		}
 	}
 }

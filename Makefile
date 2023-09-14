@@ -1,12 +1,16 @@
 # ビルド用の変数
-BINARY_NAME=fmj
+BINARY_NAME=fj
 BUILD_DIR=bin
+BINARIES=$(BUILD_DIR)/$(BINARY_NAME)
 CMD_DIR=./cmd
+GO_FILES:= $(shell find . -name '*.go' -type f -not -path "./vendor/*")
 
 all: build
 
 # ビルドタスク
-build:
+build: $(BINARIES)
+
+$(BINARIES): $(GO_FILES)
 	@echo "Building..."
 	go build -o $(BUILD_DIR)/$(BINARY_NAME) $(CMD_DIR)
 

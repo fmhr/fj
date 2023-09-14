@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
 	"sort"
 )
@@ -19,7 +20,7 @@ func runVis(cnf *config, seed int) (map[string]float64, error) {
 	}
 	// vis
 	infile := INFILE_FOLDER + fmt.Sprintf("%04d.txt", seed)
-	outfile := OUTFILE
+	outfile := OUTFILE_FOLDER + fmt.Sprintf("%04d.out", seed)
 	outVis := vis(infile, outfile)
 	// score
 	sc, err := extractScore(string(string(outVis)))
@@ -45,7 +46,7 @@ func mapString(data map[string]float64) string {
 	str += fmt.Sprintf("seed=%d ", int(data["seed"]))
 	str += fmt.Sprintf("Score=%.2f ", data["TesterScore"])
 	orderKey := make([]string, 0)
-	for k, _ := range data {
+	for k := range data {
 		if k != "seed" && k != "TesterScore" {
 			orderKey = append(orderKey, k)
 		}
@@ -75,9 +76,9 @@ func RunVis10(cnf *config) error {
 			return err
 		}
 		// fmt.Fprintln(os.Stderr, mapString(r))
-		log.Println(mapString(r))
+		fmt.Fprintln(os.Stderr, mapString(r))
 		sumScore += int(r["TesterScore"])
 	}
-	log.Println("sumScore=", sumScore)
+	fmt.Fprintln(os.Stderr, "sumScore=", sumScore)
 	return nil
 }

@@ -8,7 +8,7 @@ import (
 )
 
 // 毎回URLを変える必要がある
-var GCR_URL = "https://go-cloud-run-sample-upxz55snfq-an.a.run.app/"
+var GCR_URL = ""
 
 func runJob(jobID int, wg *sync.WaitGroup, results chan<- string) {
 	defer wg.Done()
