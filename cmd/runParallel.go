@@ -10,7 +10,7 @@ import (
 	"syscall"
 )
 
-func RunParallel(seeds []int) {
+func RunParallel(cnf *config, seeds []int) {
 	CORE := 4
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, CORE)
@@ -57,7 +57,7 @@ func RunParallel(seeds []int) {
 				atomic.AddInt32(&taskCompleted, 1)
 				printProgress(int(taskCompleted), totalTask)
 			}()
-			out, err := Run(seed)
+			out, err := Run(cnf, seed)
 			if err != nil {
 				errorChan <- fmt.Sprintf("seed=%d %v\n", seed, err)
 				return
@@ -95,7 +95,6 @@ func printProgress(current, total int) {
 	percentage := float64(current) / float64(total)
 	barLength := int(percentage * float64(progressBarWidth))
 	progressBar := make([]rune, progressBarWidth)
-
 	for i := 0; i < progressBarWidth; i++ {
 		if i < barLength {
 			progressBar[i] = '■'

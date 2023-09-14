@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-// ExtractKeyValuePairs は文字列を受け取り、キーと値のマップを返します。
+// ExtractKeyValuePairs はコマンドから出力を、キーと値のマップで返します。
 func ExtractKeyValuePairs(msg string) (map[string]float64, error) {
 	re := regexp.MustCompile(`(\w+)=([\d.]+)`)
 	matches := re.FindAllStringSubmatch(msg, -1)
@@ -21,6 +21,15 @@ func ExtractKeyValuePairs(msg string) (map[string]float64, error) {
 		}
 		data[key] = value
 	}
-
 	return data, nil
+}
+
+// extractScore 公式toolのvisコマンドの出力からスコアを抽出します。
+func extractScore(s string) (int, error) {
+	re := regexp.MustCompile((`Score\s*=\s*(\d+)`))
+	matches := re.FindStringSubmatch(s)
+	if len(matches) < 2 {
+		return 0, fmt.Errorf("no score found in string: %s", s)
+	}
+	return strconv.Atoi(matches[1])
 }
