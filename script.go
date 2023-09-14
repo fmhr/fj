@@ -17,7 +17,7 @@ var OUTFILE = "out.txt"
 var INFILE_FOLDER = "tools/in/"
 var OUTFILE_FOLDER = "tmp/"
 
-func main() {
+func Fj() {
 
 	app := flag.String("app", "", "app name")
 	//reactive := flag.Bool("reactive", false, "reactive")

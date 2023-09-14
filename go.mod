@@ -1,4 +1,4 @@
-module github.com/fmhr/fmj
+module github.com/fmhr/fj
 
 go 1.21
 
