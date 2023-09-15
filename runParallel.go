@@ -12,6 +12,7 @@ import (
 )
 
 func RunParallel(cnf *config, seeds []int) {
+	// 並列実行数の設定
 	numCPUs := runtime.NumCPU() - 1
 	if cnf.Jobs > 0 {
 		numCPUs = cnf.Jobs
