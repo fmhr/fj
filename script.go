@@ -11,14 +11,15 @@ func init() {
 }
 
 func Fj() {
-	Mode := flag.String("mode", "run", "select mode (init, run, gcloud)")
-	seed := flag.Int("seed", 0, "seed for testcase")
-	start := flag.Int("start", 0, "seed for start")
-	end := flag.Int("end", 0, "seed for end")
-	cmdArgs := flag.String("cmdArgs", "", "cmdArgs")
+	mode := flag.String("mode", "help", "Chose mode [init(generage fj_config.toml), run(execute cmd), gcloud(TODO))")
+	seed := flag.Int("seed", 0, "Seed for testcase seed. If unset, the default is 0 (0000.txt)run 0 seeds(0000.txt). If -end is set, thid value is ignored.")
+	start := flag.Int("start", 0, "Specifies the starting seed number. Default is 0.")
+	end := flag.Int("end", 0, "If set, run for seeds in the range: [start, end).")
+	cmdArgs := flag.String("cmdArgs", "", "If provides, , will run `Cmd [cmdArgs]`")
+	jobs := flag.Int("jobs", -1, "Set the limit for concurrently executed jobs. if Above the number of CPU cores may decrease performance.")
 	flag.Parse()
 
-	if *Mode == "init" {
+	if *mode == "init" {
 		GenerateConfig()
 		return
 	}
@@ -27,8 +28,7 @@ func Fj() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// set flag value
-
+	// set cmdArgs
 	if *cmdArgs != "" {
 		cnf.Cmd = cnf.Cmd + " " + *cmdArgs
 	}
@@ -37,8 +37,12 @@ func Fj() {
 	for i := *start; i < *end; i++ {
 		seeds = append(seeds, i)
 	}
+	// set jobs
+	if *jobs > 0 {
+		cnf.Jobs = *jobs
+	}
 	// mode select
-	switch *Mode {
+	switch *mode {
 	case "run":
 		// １つのseedを実行
 		if len(seeds) == 0 {
@@ -56,20 +60,17 @@ func Fj() {
 	case "gcloud":
 		// TODO
 		gcloud()
+	default:
+		flag.Usage()
 	}
 
+	// oj mode
 	args := os.Args
 	if len(args) > 1 {
 		if args[1] == "t" {
 			for i := 0; i < 10; i++ {
 				RunVis(cnf, i)
 			}
-			return
-		} else if args[1] == "init" {
-			GenerateConfig()
-			return
-		} else if args[1] == "run" {
-			RunParallel(cnf, []int{1})
 			return
 		}
 	}

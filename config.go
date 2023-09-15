@@ -4,41 +4,49 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime"
 
-	"github.com/pelletier/go-toml"
+	"github.com/pelletier/go-toml/v2"
 )
 
-var ErrConfigNotFound = fmt.Errorf("config.toml not found, please run `fj init`")
+const (
+	configFileName = "fj-config.toml"
+)
+
+var ErrConfigNotFound = fmt.Errorf("%s not found, please run `fj -mode init`", configFileName)
 
 type config struct {
 	Cmd         string `toml:"Cmd"`
 	Reactive    bool   `toml:"Reactive"`
-	ToolsPAHT   string `toml:"ToolsPAHT"`
-	visPath     string `toml:"visPath"`
-	infilePath  string `toml:"infilePath"`
-	outfilePath string `toml:"outfilePath"`
+	TesterPath  string `toml:"TesterPath"`
+	VisPath     string `toml:"VisPath"`
+	InfilePath  string `toml:"InfilePath"`
+	OutfilePath string `toml:"OutfilePath"`
 	Jobs        int    `toml:"Jobs"`
 }
 
 func GenerateConfig() {
-	if _, err := os.Stat("config.toml"); err == nil {
-		fmt.Println("config.toml already exists")
+	if _, err := os.Stat(configFileName); err == nil {
+		fmt.Printf("%s already exists\n", configFileName)
 		return
 	}
+	numCPUs := runtime.NumCPU() - 1
 	conf := &config{
-		visPath:     "./tools/target/release/vis",
-		infilePath:  "./tools/in/",
-		outfilePath: "./tmp/",
+		TesterPath:  "tools/target/release/tester",
+		VisPath:     "tools/target/release/vis",
+		InfilePath:  "tools/in/",
+		OutfilePath: "tmp/",
+		Jobs:        numCPUs,
 	}
 	if err := generateConfig(conf); err != nil {
 		fmt.Println("Error: ", err)
 		return
 	}
-	fmt.Println("config.toml is generated")
+	fmt.Printf("%s is generated\n", configFileName)
 }
 
 func generateConfig(conf *config) error {
-	file, err := os.Create("config.toml")
+	file, err := os.Create(configFileName)
 	if err != nil {
 		return err
 	}
@@ -53,12 +61,12 @@ func generateConfig(conf *config) error {
 }
 
 func LoadConfigFile() (*config, error) {
-	if _, err := os.Stat("config.toml"); err != nil {
-		log.Println("config.toml not found, please run `fj init`")
+	if _, err := os.Stat(configFileName); err != nil {
+		log.Printf("%s not found, please run `fj -mode init`\n", configFileName)
 		return &config{}, err
 	}
 	conf := &config{}
-	file, err := os.Open("config.toml")
+	file, err := os.Open(configFileName)
 	if err != nil {
 		return conf, err
 	}
@@ -68,5 +76,12 @@ func LoadConfigFile() (*config, error) {
 	if err != nil {
 		return conf, err
 	}
-	return conf, nil
+	return conf, checkConfigFile(conf)
+}
+
+func checkConfigFile(cnf *config) error {
+	if cnf.Cmd == "" {
+		return fmt.Errorf("cmd is empty. please set cmd in %s", configFileName)
+	}
+	return nil
 }
