@@ -11,11 +11,13 @@ import (
 var ErrConfigNotFound = fmt.Errorf("config.toml not found, please run `fj init`")
 
 type config struct {
-	Language  string `toml:"Language"`
-	Cmd       string `toml:"Cmd"`
-	Reactive  bool   `toml:"Reactive"`
-	ToolsPAHT string `toml:"ToolsPAHT"`
-	Jobs      int    `toml:"Jobs"`
+	Cmd         string `toml:"Cmd"`
+	Reactive    bool   `toml:"Reactive"`
+	ToolsPAHT   string `toml:"ToolsPAHT"`
+	visPath     string `toml:"visPath"`
+	infilePath  string `toml:"infilePath"`
+	outfilePath string `toml:"outfilePath"`
+	Jobs        int    `toml:"Jobs"`
 }
 
 func GenerateConfig() {
@@ -24,10 +26,9 @@ func GenerateConfig() {
 		return
 	}
 	conf := &config{
-		Language:  "",
-		Cmd:       "",
-		Reactive:  false,
-		ToolsPAHT: "",
+		visPath:     "./tools/target/release/vis",
+		infilePath:  "./tools/in/",
+		outfilePath: "./tmp/",
 	}
 	if err := generateConfig(conf); err != nil {
 		fmt.Println("Error: ", err)

@@ -10,27 +10,25 @@ func init() {
 	log.SetFlags(log.Lshortfile)
 }
 
-var TESTER = "./tools/target/release/tester"
-var VIS = "./tools/target/release/vis"
-var OUTFILE = "out.txt"
-var INFILE_FOLDER = "tools/in/"
-var OUTFILE_FOLDER = "tmp/"
-
 func Fj() {
-
 	Mode := flag.String("mode", "run", "select mode (init, run, gcloud)")
-	//reactive := flag.Bool("reactive", false, "reactive")
 	seed := flag.Int("seed", 0, "seed for testcase")
 	start := flag.Int("start", 0, "seed for start")
 	end := flag.Int("end", 0, "seed for end")
 	cmdArgs := flag.String("cmdArgs", "", "cmdArgs")
 	flag.Parse()
 
+	if *Mode == "init" {
+		GenerateConfig()
+		return
+	}
 	// load config.toml
 	cnf, err := LoadConfigFile()
 	if err != nil {
 		log.Fatal(err)
 	}
+	// set flag value
+
 	if *cmdArgs != "" {
 		cnf.Cmd = cnf.Cmd + " " + *cmdArgs
 	}
@@ -42,17 +40,21 @@ func Fj() {
 	// mode select
 	switch *Mode {
 	case "run":
+		// １つのseedを実行
 		if len(seeds) == 0 {
 			err := RunVis(cnf, *seed)
 			if err != nil {
 				log.Fatal(err)
 			}
 		} else {
+			// 複数のseedを並列実行
 			RunParallel(cnf, seeds)
 		}
 	case "init":
+		// 設定ファイルの生成
 		GenerateConfig()
 	case "gcloud":
+		// TODO
 		gcloud()
 	}
 

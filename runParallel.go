@@ -12,7 +12,10 @@ import (
 )
 
 func RunParallel(cnf *config, seeds []int) {
-	numCPUs := runtime.NumCPU()
+	numCPUs := runtime.NumCPU() - 1
+	if cnf.Jobs > 0 {
+		numCPUs = cnf.Jobs
+	}
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, numCPUs)
 	datas := make([]map[string]float64, 0, len(seeds))

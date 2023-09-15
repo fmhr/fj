@@ -19,9 +19,9 @@ func runVis(cnf *config, seed int) (map[string]float64, error) {
 		return pair, err
 	}
 	// vis
-	infile := INFILE_FOLDER + fmt.Sprintf("%04d.txt", seed)
-	outfile := OUTFILE_FOLDER + fmt.Sprintf("%04d.out", seed)
-	outVis := vis(infile, outfile)
+	infile := cnf.infilePath + fmt.Sprintf("%04d.txt", seed)
+	outfile := cnf.outfilePath + fmt.Sprintf("%04d.out", seed)
+	outVis := vis(cnf, infile, outfile)
 	// score
 	sc, err := extractScore(string(string(outVis)))
 	if err != nil {
@@ -59,8 +59,8 @@ func mapString(data map[string]float64) string {
 	return str
 }
 
-func vis(infile, outfile string) []byte {
-	cmdStr := fmt.Sprintf(VIS+" %s %s", infile, outfile)
+func vis(cnf *config, infile, outfile string) []byte {
+	cmdStr := fmt.Sprintf(cnf.visPath+" %s %s", infile, outfile)
 	cmd := exec.Command("sh", "-c", cmdStr)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
