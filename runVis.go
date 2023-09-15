@@ -37,7 +37,8 @@ func RunVis(cnf *config, seed int) error {
 	if err != nil {
 		return err
 	}
-	log.Println(mapString(rtn))
+	fmt.Fprintln(os.Stderr, mapString(rtn))
+	fmt.Println(rtn["TesterScore"]) // ここだけ標準出力
 	return nil
 }
 
@@ -80,5 +81,6 @@ func RunVis10(cnf *config) error {
 		sumScore += int(r["TesterScore"])
 	}
 	fmt.Fprintln(os.Stderr, "sumScore=", sumScore)
+	fmt.Println(sumScore) // ここだけ標準出力
 	return nil
 }
