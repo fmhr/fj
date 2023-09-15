@@ -12,9 +12,9 @@ import (
 )
 
 func RunParallel(cnf *config, seeds []int) {
-	CPUs := runtime.NumCPU()
+	numCPUs := runtime.NumCPU()
 	var wg sync.WaitGroup
-	sem := make(chan struct{}, CPUs)
+	sem := make(chan struct{}, numCPUs)
 	datas := make([]map[string]float64, 0, len(seeds))
 	errorChan := make(chan string, len(seeds))
 
@@ -22,18 +22,13 @@ func RunParallel(cnf *config, seeds []int) {
 	totalTask := len(seeds)
 
 	// Ctrl+Cで中断したときに、現在実行中のseedを表示する
-	var currentlyRunnningSeeds []int
+	currentlyRunnningSeeds := make([]int, 0, len(seeds))
 	var seedMutex sync.Mutex
 	var datasMutex sync.Mutex
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
-	go func() {
-		<-sigCh
-		seedMutex.Lock()
-		log.Printf("\nCurrently running seeds: %v\n", currentlyRunnningSeeds)
-		os.Exit(1)
-	}()
-	// -----
+
+	go handleSignals(sigCh, &wg, &currentlyRunnningSeeds)
 
 	for _, seed := range seeds {
 		wg.Add(1)
@@ -44,7 +39,6 @@ func RunParallel(cnf *config, seeds []int) {
 			seedMutex.Unlock()
 
 			defer func() {
-				//
 				seedMutex.Lock()
 				for i, s := range currentlyRunnningSeeds {
 					if s == seed {
@@ -53,7 +47,6 @@ func RunParallel(cnf *config, seeds []int) {
 					}
 				}
 				seedMutex.Unlock()
-				//
 				<-sem
 				wg.Done()
 				atomic.AddInt32(&taskCompleted, 1)
@@ -61,12 +54,13 @@ func RunParallel(cnf *config, seeds []int) {
 			}()
 			out, err := Run(cnf, seed)
 			if err != nil {
-				errorChan <- fmt.Sprintf("seed=%d %v\n", seed, err)
+				errorChan <- fmt.Sprintf("Run error: seed=%d %v\n", seed, err)
 				return
 			}
+			// 処理結果を格納
 			data, err := ExtractKeyValuePairs(string(out))
 			if err != nil {
-				errorChan <- fmt.Sprintf("seed=%d %v\n", seed, err)
+				errorChan <- fmt.Sprintf("ExtractKeyBaluePairs error: seed=%d %v\n", seed, err)
 				return
 			}
 			data["seed"] = float64(seed)
@@ -78,7 +72,7 @@ func RunParallel(cnf *config, seeds []int) {
 	wg.Wait()
 	close(errorChan)
 
-	fmt.Fprintf(os.Stderr, "\n") // プログレスバーを改行
+	fmt.Fprintf(os.Stderr, "\n") // Newline after progress bar
 
 	for err := range errorChan {
 		log.Println(err)
@@ -89,7 +83,7 @@ func RunParallel(cnf *config, seeds []int) {
 		fmt.Println(datas[i])
 		sumScore += datas[i]["score"]
 	}
-	fmt.Printf("sumScore=%.2f\n", sumScore)
+	fmt.Fprintf(os.Stderr, "sumScore=%.2f\n", sumScore)
 	fmt.Printf("%.2f\n", sumScore)
 }
 
@@ -107,4 +101,17 @@ func printProgress(current, total int) {
 		}
 	}
 	fmt.Fprintf(os.Stderr, "\r[%d/%d] [%s] %.2f%%", current, total, string(progressBar), percentage*100)
+}
+
+func handleSignals(sigCh <-chan os.Signal, wg *sync.WaitGroup, curent *[]int) {
+	for {
+		sig := <-sigCh
+		switch sig {
+		case syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT:
+			fmt.Println("\nReceived signal:", sig)
+			fmt.Println("Currently running seeds:", *curent)
+			os.Exit(1)
+		}
+	}
+
 }
