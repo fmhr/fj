@@ -83,7 +83,5 @@ func Fj() {
 		RunParallel(cnf, seeds)
 	case "gcloud":
 		gcloud()
-	case "seedSearch":
-		seedSorting()
 	}
 }
