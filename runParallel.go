@@ -5,15 +5,16 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"runtime"
 	"sync"
 	"sync/atomic"
 	"syscall"
 )
 
 func RunParallel(cnf *config, seeds []int) {
-	CORE := 4
+	CPUs := runtime.NumCPU()
 	var wg sync.WaitGroup
-	sem := make(chan struct{}, CORE)
+	sem := make(chan struct{}, CPUs)
 	datas := make([]map[string]float64, 0, len(seeds))
 	errorChan := make(chan string, len(seeds))
 

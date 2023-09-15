@@ -5,6 +5,9 @@ fj コマンドはAtCoder Heuristic Contestの問題を解くことを助ける�
 ## In progress
 - リアクティブ問題に対応する
 # How to install
+最新のGoをインストール
+
+[https://go.dev/doc/install](https://go.dev/install/)
 ```
 go intall github.con/fmhr/fj
 ```
