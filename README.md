@@ -4,7 +4,6 @@ fj コマンドはAtCoder Heuristic Contestの問題を解くことを助ける�
 # Features
 - テストの実行
 ## In progress
-- リアクティブ問題に対応する
 # How to install
 最新のGoをインストール
 

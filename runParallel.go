@@ -56,18 +56,19 @@ func RunParallel(cnf *config, seeds []int) {
 				atomic.AddInt32(&taskCompleted, 1)
 				printProgress(int(taskCompleted), totalTask)
 			}()
-			out, err := Run(cnf, seed)
+			var data map[string]float64
+			var err error
+			if cnf.Reactive {
+				data, err = reactiveRun(cnf, seed)
+			} else {
+				data, err = runVis(cnf, seed)
+			}
+
 			if err != nil {
 				errorChan <- fmt.Sprintf("Run error: seed=%d %v\n", seed, err)
 				return
 			}
 			// 処理結果を格納
-			data, err := ExtractKeyValuePairs(string(out))
-			if err != nil {
-				errorChan <- fmt.Sprintf("ExtractKeyBaluePairs error: seed=%d %v\n", seed, err)
-				return
-			}
-			data["seed"] = float64(seed)
 			datasMutex.Lock()
 			datas = append(datas, data)
 			datasMutex.Unlock()
@@ -85,7 +86,7 @@ func RunParallel(cnf *config, seeds []int) {
 	sumScore := 0.0
 	for i := 0; i < len(datas); i++ {
 		fmt.Println(datas[i])
-		sumScore += datas[i]["score"]
+		sumScore += datas[i]["TesterScore"]
 	}
 	fmt.Fprintf(os.Stderr, "sumScore=%.2f\n", sumScore)
 	fmt.Printf("%.2f\n", sumScore)

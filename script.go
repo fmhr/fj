@@ -46,13 +46,22 @@ func Fj() {
 	case "run":
 		// １つのseedを実行
 		if len(seeds) == 0 {
-			err := RunVis(cnf, *seed)
+			var err error
+			if cnf.Reactive {
+				err = ReactiveRun(cnf, *seed)
+			} else {
+				err = RunVis(cnf, *seed)
+			}
 			if err != nil {
 				log.Fatal(err)
 			}
 		} else {
 			// 複数のseedを並列実行
+			//if cnf.Reactive {
+			//ReactiveRunParallel(cnf, seeds)
+			//} else {
 			RunParallel(cnf, seeds)
+			//}
 		}
 	case "init":
 		// 設定ファイルの生成
