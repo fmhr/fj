@@ -1,3 +1,4 @@
+# *プロトタイプ
 # fj
 fj コマンドはAtCoder Heuristic Contestの問題を解くことを助けるツールです。 このコマンドは、テストの実行を自動化します。
 # Features
@@ -12,7 +13,8 @@ fj コマンドはAtCoder Heuristic Contestの問題を解くことを助ける�
 go intall github.con/fmhr/fj
 ```
 # How to use
-設定ファイル(config.toml)を生成
+設定ファイル(fj_config.toml)を生成
+コンテスト用のフォルダに移動して.以下のコマンドを実行する。
 ```
 fj -mode inti
 ```

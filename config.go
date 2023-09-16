@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	configFileName = "fj-config.toml"
+	configFileName = "fj_config.toml"
 )
 
 var ErrConfigNotFound = fmt.Errorf("%s not found, please run `fj -mode init`", configFileName)
