@@ -12,13 +12,19 @@ fj コマンドはAtCoder Heuristic Contestの問題を解くことを助ける�
 go intall github.con/fmhr/fj
 ```
 # How to use
-設定ファイル(config.toml)を作成してw設定を書き込む
+設定ファイル(config.toml)を生成
 ```
-fj inti
+fj -mode inti
 ```
-テストケース、（シード０〜１０）を実行
+設定ファイルのCmdに実行コマンドを入れる
+
+テストケース、1を実行
 ```
-fj t
+fj -mode run
+```
+テストケース、３〜99を実行
+```
+fj -mode run -start 3 -end 100
 ```
 
 # Example
