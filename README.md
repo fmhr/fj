@@ -13,18 +13,20 @@ fj コマンドはAtCoder Heuristic Contestの問題を解くことを助ける�
 go intall github.con/fmhr/fj
 ```
 # How to use
-設定ファイル(fj_config.toml)を生成
+- AtCoder公式からローカルテスターをダウンロードして、コンテスト用のフォルダに。解凍する。
+- READMEを参照してテストケースを生成して、必要に応じてtester,visをコンパイルする。
+## 設定ファイル(fj_config.toml)を生成
 コンテスト用のフォルダに移動して.以下のコマンドを実行する。
 ```
 fj -mode inti
 ```
-設定ファイルのCmdに実行コマンドを入れる
+設定ファイルfj_config.tomlのCmdに実行コマンドを入れる
 
-テストケース、1を実行
+テストケース、seed=1を実行
 ```
 fj -mode run
 ```
-テストケース、３〜99を実行
+テストケース、seed=３〜99を実行
 ```
 fj -mode run -start 3 -end 100
 ```
