@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 // ExtractKeyValuePairs はコマンドから出力を、キーと値のマップで返します。
@@ -25,11 +26,20 @@ func ExtractKeyValuePairs(msg string) (map[string]float64, error) {
 }
 
 // extractScore 公式toolのvisコマンドの出力からスコアを抽出します。
-func extractScore(s string) (int, error) {
-	re := regexp.MustCompile((`Score\s*=\s*(\d+)`))
-	matches := re.FindStringSubmatch(s)
-	if len(matches) < 2 {
-		return 0, fmt.Errorf("no score found in string: %s", s)
+func extractData(src string) (map[string]float64, error) {
+	re := regexp.MustCompile(`([\w\s]+) = ([\d.]+)`)
+	matches := re.FindAllStringSubmatch(src, -1)
+	data := make(map[string]float64)
+	for _, match := range matches {
+		key := strings.TrimSpace(match[1])
+		value, err := strconv.ParseFloat(match[2], 64)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert %s to number: %s", match[2], err)
+		}
+		data[key] = value
 	}
-	return strconv.Atoi(matches[1])
+	if len(data) == 0 {
+		return nil, fmt.Errorf("failed to convert %s to number: %s", src, "no data")
+	}
+	return data, nil
 }

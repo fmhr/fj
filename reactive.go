@@ -12,7 +12,7 @@ func ReactiveRun(ctf *config, seed int) error {
 		return err
 	}
 	fmt.Fprintln(os.Stderr, mapString(rtn))
-	fmt.Println(rtn["TesterScore"]) // ここだけ標準出力
+	fmt.Println(rtn["Score"]) // ここだけ標準出力
 	return nil
 }
 
@@ -25,11 +25,13 @@ func reactiveRun(ctf *config, seed int) (map[string]float64, error) {
 	if err != nil {
 		return pair, fmt.Errorf("failed to extract key-value pairs: %v, source: %s", err, string(out))
 	}
-	sc, err := extractScore((string(out)))
+	testerDate, err := extractData((string(out)))
 	if err != nil {
-		return pair, fmt.Errorf("failed to extract score: %v, source: %s", err, string(out))
+		return nil, err
 	}
-	pair["TesterScore"] = float64(sc)
+	for k, v := range testerDate {
+		pair[k] = v
+	}
 	pair["seed"] = float64(seed)
 	return pair, nil
 }

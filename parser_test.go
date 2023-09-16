@@ -1,6 +1,7 @@
 package fj
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -39,37 +40,43 @@ func TestExtractKeyValuePairs(t *testing.T) {
 		}
 	}
 }
-
-func TestExtractScore(t *testing.T) {
+func TestExtractData(t *testing.T) {
 	tests := []struct {
 		input  string
-		output int
+		expect map[string]float64
 		err    bool
 	}{
 		{
-			input:  "Score = 100",
-			output: 100,
-			err:    false,
+			input: `
+Score = 122.441
+Number of wrong answers = 0
+Placement cost = 805758.046
+Measurement cost = 10863.00
+Measurement count = 9585
+`,
+			expect: map[string]float64{
+				"Score":                   122.441,
+				"Number of wrong answers": 0,
+				"Placement cost":          805758.046,
+				"Measurement cost":        10863.00,
+				"Measurement count":       9585,
+			},
+			err: false,
 		},
 		{
-			input:  "Some other string",
-			output: 0,
+			input:  `InvalidData = abc`,
+			expect: nil,
 			err:    true,
-		},
-		{
-			input:  "Score=50",
-			output: 50,
-			err:    false,
 		},
 	}
 
 	for _, test := range tests {
-		result, err := extractScore(test.input)
+		result, err := extractData(test.input)
 		if (err != nil) != test.err {
-			t.Errorf("Expected error %v, but got %v", test.err, err)
+			t.Errorf("For input %q, expected error? %v but got: %v\n", test.input, test.err, err)
 		}
-		if result != test.output {
-			t.Errorf("Expected score %d, but got %d", test.output, result)
+		if !reflect.DeepEqual(result, test.expect) {
+			t.Errorf("For input %q, expected %v but got %v\n", test.input, test.expect, result)
 		}
 	}
 }

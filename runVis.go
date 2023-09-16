@@ -22,12 +22,14 @@ func runVis(cnf *config, seed int) (map[string]float64, error) {
 	infile := cnf.InfilePath + fmt.Sprintf("%04d.txt", seed)
 	outfile := cnf.OutfilePath + fmt.Sprintf("%04d.out", seed)
 	outVis := vis(cnf, infile, outfile)
-	// score
-	sc, err := extractScore(string(string(outVis)))
+	// visの結果をpairに追加
+	sc, err := extractData(string(outVis))
 	if err != nil {
 		log.Fatal(err)
 	}
-	pair["TesterScore"] = float64(sc)
+	for k, v := range sc {
+		pair[k] = v
+	}
 	pair["seed"] = float64(seed)
 	return pair, nil
 }
@@ -38,17 +40,17 @@ func RunVis(cnf *config, seed int) error {
 		return err
 	}
 	fmt.Fprintln(os.Stderr, mapString(rtn))
-	fmt.Println(rtn["TesterScore"]) // ここだけ標準出力
+	fmt.Println(rtn["Score"]) // ここだけ標準出力
 	return nil
 }
 
 func mapString(data map[string]float64) string {
 	var str string
 	str += fmt.Sprintf("seed=%d ", int(data["seed"]))
-	str += fmt.Sprintf("Score=%.2f ", data["TesterScore"])
+	str += fmt.Sprintf("Score=%.2f ", data["Score"])
 	orderKey := make([]string, 0)
 	for k := range data {
-		if k != "seed" && k != "TesterScore" {
+		if k != "seed" && k != "Score" {
 			orderKey = append(orderKey, k)
 		}
 	}
@@ -78,7 +80,7 @@ func RunVis10(cnf *config) error {
 		}
 		// fmt.Fprintln(os.Stderr, mapString(r))
 		fmt.Fprintln(os.Stderr, mapString(r))
-		sumScore += int(r["TesterScore"])
+		sumScore += int(r["Score"])
 	}
 	fmt.Fprintln(os.Stderr, "sumScore=", sumScore)
 	fmt.Println(sumScore) // ここだけ標準出力
