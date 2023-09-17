@@ -27,7 +27,7 @@ func ExtractKeyValuePairs(msg string) (map[string]float64, error) {
 
 // extractScore 公式toolのvisコマンドの出力からスコアを抽出します。
 func extractData(src string) (map[string]float64, error) {
-	re := regexp.MustCompile(`([\w\s]+) = ([\d.]+)`)
+	re := regexp.MustCompile(`([^\n]+) = ([\d.]+)`)
 	matches := re.FindAllStringSubmatch(src, -1)
 	data := make(map[string]float64)
 	for _, match := range matches {

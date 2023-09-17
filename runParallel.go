@@ -85,9 +85,10 @@ func RunParallel(cnf *config, seeds []int) {
 
 	sumScore := 0.0
 	for i := 0; i < len(datas); i++ {
-		fmt.Println(datas[i])
+		//fmt.Println(datas[i])
 		sumScore += datas[i]["Score"]
 	}
+	DisplayTabel(datas)
 	fmt.Fprintf(os.Stderr, "sumScore=%.2f\n", sumScore)
 	fmt.Printf("%.2f\n", sumScore)
 }

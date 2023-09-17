@@ -45,6 +45,5 @@ func reactiveRunCmd(ctf *config, seed int) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("command [%q] failed with: %v out: %v", cmd, err, out)
 	}
-	//log.Println(string(out))
 	return out, nil
 }
