@@ -2,6 +2,7 @@ package fj
 
 import (
 	"os"
+	"slices"
 	"sort"
 	"strconv"
 
@@ -17,6 +18,11 @@ func DisplayTabel(data []map[string]float64) {
 		for key := range data[0] {
 			headers = append(headers, key)
 		}
+		seedIndex := slices.Index(headers, "seed")
+		if seedIndex != 0 {
+			headers[0], headers[seedIndex] = headers[seedIndex], headers[0]
+		}
+		sort.Strings(headers[1:])
 		table.SetHeader(headers)
 	}
 
