@@ -11,7 +11,7 @@ func init() {
 }
 
 func Fj() {
-	mode := flag.String("mode", "help", "Chose mode [init(generage fj_config.toml), run(execute cmd), gcloud(TODO))")
+	mode := flag.String("mode", "help", "Chose mode [init(generage fj_config.toml), run(execute cmd), gen(need -seed option) gcloud(TODO))")
 	seed := flag.Int("seed", 0, "Seed for testcase seed. If unset, the default is 0 (0000.txt)run 0 seeds(0000.txt). If -end is set, thid value is ignored.")
 	start := flag.Int("start", 0, "Specifies the starting seed number. Default is 0.")
 	end := flag.Int("end", 0, "If set, run for seeds in the range: [start, end).")
@@ -66,6 +66,8 @@ func Fj() {
 	case "init":
 		// 設定ファイルの生成
 		GenerateConfig()
+	case "gen":
+		Gen(cnf, *seed)
 	case "gcloud":
 		// TODO
 		gcloud()

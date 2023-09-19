@@ -1,4 +1,3 @@
-# *プロトタイプ
 # fj
 fj コマンドはAtCoder Heuristic Contestの問題を解くことを助けるツールです。 このコマンドは、テストの実行を自動化します。
 # Features
