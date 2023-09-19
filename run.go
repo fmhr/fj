@@ -6,7 +6,7 @@ import (
 	"os/exec"
 )
 
-// Run runs the program with the given seed
+// Run は指定された設定とシードに基づいてコマンドを実行する
 func Run(cnf *config, seed int) ([]byte, error) {
 	inputfile := fmt.Sprintf("%s%04d.txt", cnf.InfilePath, seed)
 	if _, err := os.Stat(inputfile); err != nil {

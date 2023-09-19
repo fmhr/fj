@@ -8,7 +8,18 @@ import (
 	"sort"
 )
 
-// RunVis runs the program with the given seed and visualize the result
+func RunVis(cnf *config, seed int) error {
+	rtn, err := runVis(cnf, seed)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintln(os.Stderr, mapString(rtn))
+	fmt.Println(rtn["Score"]) // ここだけ標準出力
+	return nil
+}
+
+// runVis は指定された設定とシードに基づいてコマンドを実行して、
+// その結果をvisに渡して、両方の結果を返す
 func runVis(cnf *config, seed int) (map[string]float64, error) {
 	out, err := Run(cnf, seed)
 	if err != nil {
@@ -32,16 +43,6 @@ func runVis(cnf *config, seed int) (map[string]float64, error) {
 	}
 	pair["seed"] = float64(seed)
 	return pair, nil
-}
-
-func RunVis(cnf *config, seed int) error {
-	rtn, err := runVis(cnf, seed)
-	if err != nil {
-		return err
-	}
-	fmt.Fprintln(os.Stderr, mapString(rtn))
-	fmt.Println(rtn["Score"]) // ここだけ標準出力
-	return nil
 }
 
 func mapString(data map[string]float64) string {

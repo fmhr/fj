@@ -33,8 +33,11 @@ func GenerateConfig() {
 	}
 	numCPUs := runtime.NumCPU() - 1
 	conf := &config{
+		Cmd:         "",
+		Reactive:    false,
 		TesterPath:  "tools/target/release/tester",
 		VisPath:     "tools/target/release/vis",
+		GenPath:     "tools/target/release/gen",
 		InfilePath:  "tools/in/",
 		OutfilePath: "tmp/",
 		Jobs:        numCPUs,
