@@ -6,7 +6,7 @@ import (
 	"os/exec"
 )
 
-func ReactiveRun(ctf *config, seed int) error {
+func ReactiveRun(ctf *Config, seed int) error {
 	rtn, err := reactiveRun(ctf, seed)
 	if err != nil {
 		return err
@@ -16,7 +16,7 @@ func ReactiveRun(ctf *config, seed int) error {
 	return nil
 }
 
-func reactiveRun(ctf *config, seed int) (map[string]float64, error) {
+func reactiveRun(ctf *Config, seed int) (map[string]float64, error) {
 	out, err := reactiveRunCmd(ctf, seed)
 	if err != nil {
 		return nil, err
@@ -36,7 +36,7 @@ func reactiveRun(ctf *config, seed int) (map[string]float64, error) {
 	return pair, nil
 }
 
-func reactiveRunCmd(ctf *config, seed int) ([]byte, error) {
+func reactiveRunCmd(ctf *Config, seed int) ([]byte, error) {
 	infile := ctf.InfilePath + fmt.Sprintf("%04d.txt", seed)
 	outfile := ctf.OutfilePath + fmt.Sprintf("%04d.out", seed)
 	cmdStr := fmt.Sprintf("%s %s < %s > %s", ctf.TesterPath, ctf.Cmd, infile, outfile)

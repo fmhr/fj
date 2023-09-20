@@ -7,7 +7,7 @@ import (
 func TestCheckConfigFile(t *testing.T) {
 	// 1. Cmdが空の場合
 	t.Run("empty cmd", func(t *testing.T) {
-		cnf := &config{Cmd: ""}
+		cnf := &Config{Cmd: ""}
 		err := checkConfigFile(cnf)
 		if err == nil {
 			t.Errorf("expected error but got nil")
@@ -16,7 +16,7 @@ func TestCheckConfigFile(t *testing.T) {
 
 	// 2. Cmdに値が設定されている場合
 	t.Run("valid cmd", func(t *testing.T) {
-		cnf := &config{Cmd: "sample command"}
+		cnf := &Config{Cmd: "sample command"}
 		err := checkConfigFile(cnf)
 		if err != nil {
 			t.Errorf("expected nil but got error: %v", err)

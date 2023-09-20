@@ -15,7 +15,7 @@ const (
 
 var ErrConfigNotFound = fmt.Errorf("%s not found, please run `fj -mode init`", configFileName)
 
-type config struct {
+type Config struct {
 	Cmd         string `toml:"Cmd"`
 	Reactive    bool   `toml:"Reactive"`
 	TesterPath  string `toml:"TesterPath"`
@@ -32,7 +32,7 @@ func GenerateConfig() {
 		return
 	}
 	numCPUs := runtime.NumCPU() - 1
-	conf := &config{
+	conf := &Config{
 		Cmd:         "",
 		Reactive:    false,
 		TesterPath:  "tools/target/release/tester",
@@ -49,7 +49,7 @@ func GenerateConfig() {
 	fmt.Printf("%s is generated\n", configFileName)
 }
 
-func generateConfig(conf *config) error {
+func generateConfig(conf *Config) error {
 	file, err := os.Create(configFileName)
 	if err != nil {
 		return err
@@ -64,12 +64,12 @@ func generateConfig(conf *config) error {
 	return nil
 }
 
-func LoadConfigFile() (*config, error) {
+func LoadConfigFile() (*Config, error) {
 	if _, err := os.Stat(configFileName); err != nil {
 		log.Printf("%s not found, please run `fj -mode init`\n", configFileName)
-		return &config{}, err
+		return &Config{}, err
 	}
-	conf := &config{}
+	conf := &Config{}
 	file, err := os.Open(configFileName)
 	if err != nil {
 		return conf, err
@@ -83,7 +83,7 @@ func LoadConfigFile() (*config, error) {
 	return conf, checkConfigFile(conf)
 }
 
-func checkConfigFile(cnf *config) error {
+func checkConfigFile(cnf *Config) error {
 	if cnf.Cmd == "" {
 		return fmt.Errorf("cmd is empty. please set cmd in %s", configFileName)
 	}

@@ -8,7 +8,7 @@ import (
 	"sort"
 )
 
-func RunVis(cnf *config, seed int) error {
+func RunVis(cnf *Config, seed int) error {
 	rtn, err := runVis(cnf, seed)
 	if err != nil {
 		return err
@@ -20,7 +20,7 @@ func RunVis(cnf *config, seed int) error {
 
 // runVis は指定された設定とシードに基づいてコマンドを実行して、
 // その結果をvisに渡して、両方の結果を返す
-func runVis(cnf *config, seed int) (map[string]float64, error) {
+func runVis(cnf *Config, seed int) (map[string]float64, error) {
 	out, err := Run(cnf, seed)
 	if err != nil {
 		return nil, err
@@ -62,7 +62,7 @@ func mapString(data map[string]float64) string {
 	return str
 }
 
-func vis(cnf *config, infile, outfile string) []byte {
+func vis(cnf *Config, infile, outfile string) []byte {
 	cmdStr := fmt.Sprintf(cnf.VisPath+" %s %s", infile, outfile)
 	cmd := exec.Command("sh", "-c", cmdStr)
 	out, err := cmd.CombinedOutput()
@@ -72,7 +72,7 @@ func vis(cnf *config, infile, outfile string) []byte {
 	return out
 }
 
-func RunVis10(cnf *config) error {
+func RunVis10(cnf *Config) error {
 	var sumScore int
 	for seed := 0; seed < 10; seed++ {
 		r, err := runVis(cnf, seed)

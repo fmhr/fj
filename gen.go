@@ -8,7 +8,7 @@ import (
 	"sync"
 )
 
-func Gen(cnf *config, seed int) {
+func Gen(cnf *Config, seed int) {
 	if cnf.GenPath == "" {
 		log.Fatal("GenPath is not set. please set GenPath: {} in fj_config.toml")
 	}
@@ -21,7 +21,7 @@ func Gen(cnf *config, seed int) {
 var genMutex sync.Mutex
 
 // seedを書き込んだd.txtをgenにすとin/0000.txtが生成される
-func gen(cnf *config, seed int) error {
+func gen(cnf *Config, seed int) error {
 	genMutex.Lock()
 	defer genMutex.Unlock()
 	_, err := os.Stat(cnf.GenPath)

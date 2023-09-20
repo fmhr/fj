@@ -13,7 +13,7 @@ func TestRun(t *testing.T) {
 		}
 	}
 	// テストの設定
-	cnf := &config{
+	cnf := &Config{
 		Cmd:         "cat",
 		InfilePath:  "testdata/input",
 		OutfilePath: "testdata/output",
