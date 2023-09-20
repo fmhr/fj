@@ -6,14 +6,14 @@ import (
 	"os/exec"
 )
 
-func ReactiveRun(ctf *Config, seed int) error {
+func ReactiveRun(ctf *Config, seed int) (map[string]float64, error) {
 	rtn, err := reactiveRun(ctf, seed)
 	if err != nil {
-		return err
+		return rtn, err
 	}
 	fmt.Fprintln(os.Stderr, mapString(rtn))
 	fmt.Println(rtn["Score"]) // ここだけ標準出力
-	return nil
+	return nil, nil
 }
 
 func reactiveRun(ctf *Config, seed int) (map[string]float64, error) {

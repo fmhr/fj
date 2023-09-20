@@ -48,9 +48,9 @@ func Fj() {
 		if len(seeds) == 0 {
 			var err error
 			if cnf.Reactive {
-				err = ReactiveRun(cnf, *seed)
+				_, err = ReactiveRun(cnf, *seed)
 			} else {
-				err = RunVis(cnf, *seed)
+				_, err = RunVis(cnf, *seed)
 			}
 			if err != nil {
 				log.Fatal(err)

@@ -8,14 +8,14 @@ import (
 	"sort"
 )
 
-func RunVis(cnf *Config, seed int) error {
+func RunVis(cnf *Config, seed int) (map[string]float64, error) {
 	rtn, err := runVis(cnf, seed)
 	if err != nil {
-		return err
+		return rtn, err
 	}
 	fmt.Fprintln(os.Stderr, mapString(rtn))
 	fmt.Println(rtn["Score"]) // ここだけ標準出力
-	return nil
+	return rtn, nil
 }
 
 // runVis は指定された設定とシードに基づいてコマンドを実行して、
