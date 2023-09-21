@@ -9,13 +9,7 @@ import (
 )
 
 func RunVis(cnf *Config, seed int) (map[string]float64, error) {
-	rtn, err := runVis(cnf, seed)
-	if err != nil {
-		return rtn, err
-	}
-	fmt.Fprintln(os.Stderr, mapString(rtn))
-	fmt.Println(rtn["Score"]) // ここだけ標準出力
-	return rtn, nil
+	return runVis(cnf, seed)
 }
 
 // runVis は指定された設定とシードに基づいてコマンドを実行して、
@@ -32,7 +26,10 @@ func runVis(cnf *Config, seed int) (map[string]float64, error) {
 	// vis
 	infile := cnf.InfilePath + fmt.Sprintf("%04d.txt", seed)
 	outfile := cnf.OutfilePath + fmt.Sprintf("%04d.out", seed)
-	outVis := vis(cnf, infile, outfile)
+	outVis, err := vis(cnf, infile, outfile)
+	if err != nil {
+		return nil, fmt.Errorf("vis failed: %v", err)
+	}
 	// visの結果をpairに追加
 	sc, err := extractData(string(outVis))
 	if err != nil {
@@ -62,14 +59,14 @@ func mapString(data map[string]float64) string {
 	return str
 }
 
-func vis(cnf *Config, infile, outfile string) []byte {
+func vis(cnf *Config, infile, outfile string) ([]byte, error) {
 	cmdStr := fmt.Sprintf(cnf.VisPath+" %s %s", infile, outfile)
 	cmd := exec.Command("sh", "-c", cmdStr)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Fatal(fmt.Errorf("cmd.Run() for command %q failed with: %v", cmdStr, err))
+		return nil, fmt.Errorf("cmd.Run() for command %q failed with: %v", cmdStr, err)
 	}
-	return out
+	return out, nil
 }
 
 func RunVis10(cnf *Config) error {

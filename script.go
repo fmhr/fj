@@ -2,6 +2,7 @@ package fj
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 )
@@ -47,14 +48,17 @@ func Fj() {
 		// １つのseedを実行
 		if len(seeds) == 0 {
 			var err error
+			var rtn map[string]float64
 			if cnf.Reactive {
-				_, err = ReactiveRun(cnf, *seed)
+				rtn, err = ReactiveRun(cnf, *seed)
 			} else {
-				_, err = RunVis(cnf, *seed)
+				rtn, err = RunVis(cnf, *seed)
 			}
 			if err != nil {
 				log.Fatal(err)
 			}
+			fmt.Fprintln(os.Stderr, mapString(rtn))
+			fmt.Println(rtn["Score"]) // ここだけ標準出力
 		} else {
 			// 複数のseedを並列実行
 			//if cnf.Reactive {
@@ -68,9 +72,13 @@ func Fj() {
 		GenerateConfig()
 	case "gen":
 		Gen(cnf, *seed)
-	case "gcloud":
-		// TODO
-		gcloud()
+	case "cloud":
+		log.Println("cloud mode")
+		rtn, err := CloudRun(cnf, *seed)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Println(rtn)
 	default:
 		flag.Usage()
 	}
