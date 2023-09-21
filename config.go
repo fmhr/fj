@@ -24,6 +24,7 @@ type Config struct {
 	InfilePath  string `toml:"InfilePath"`
 	OutfilePath string `toml:"OutfilePath"`
 	Jobs        int    `toml:"Jobs"`
+	CloudURL    string `toml:"http://localhost:8080"`
 }
 
 func GenerateConfig() {
