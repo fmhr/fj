@@ -5,6 +5,10 @@ BINARIES=$(BUILD_DIR)/$(BINARY_NAME)
 CMD_DIR=./cmd/fj
 GO_FILES:= $(shell find . -name '*.go' -type f)
 
+# server
+SERVER_BINARY=fj-server
+SERVER_DIR=./cmd/server
+
 all: build
 
 # ビルドタスク
@@ -16,17 +20,18 @@ $(BINARIES): $(GO_FILES)
 
 # 実行ファイルのクリーンアップ
 clean:
-	@echo "Cleaning up..."
 	rm -rf $(BUILD_DIR)
 
 # 依存関係のダウンロード
 deps:
-	@echo "Downloading dependencies..."
 	go mod download
 
 # テストタスク
 test:
-	@echo "Running tests..."
 	go test -v ./...
 
 
+server: $(SERVER_BINARY)
+
+$(SERVER_BINARY): $(GO_FILES)
+	go build -o $(BUILD_DIR)/$(SERVER_BINARY) $(SERVER_DIR)
