@@ -40,6 +40,6 @@ func TestRun(t *testing.T) {
 	}
 
 	// 後始末
-	os.Remove("testdata/input0001.txt")
-	os.Remove("testdata/output0001.out")
+	defer os.Remove("testdata/input0001.txt")
+	defer os.Remove("testdata/output0001.out")
 }

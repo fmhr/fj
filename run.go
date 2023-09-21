@@ -8,7 +8,7 @@ import (
 
 // Run は指定された設定とシードに基づいてコマンドを実行する
 func Run(cnf *Config, seed int) ([]byte, error) {
-	inputfile := fmt.Sprintf("%04d.txt", seed)
+	inputfile := fmt.Sprintf("%s%04d.txt", cnf.InfilePath, seed)
 	if _, err := os.Stat(inputfile); err != nil {
 		return []byte{}, fmt.Errorf("input file [%s] does not exist", inputfile)
 	}

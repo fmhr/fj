@@ -48,7 +48,7 @@ func gen(cnf *Config, seed int) error {
 		return fmt.Errorf("failed to rename file: %s", err)
 	}
 	// cnf.InfilePathを更新
-	cnf.InfilePath = "in/" + fmt.Sprintf("%04d.txt", seed)
+	cnf.InfilePath = "in/"
 	return nil
 }
 
