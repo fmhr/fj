@@ -15,14 +15,14 @@ func TestRun(t *testing.T) {
 	// テストの設定
 	cnf := &Config{
 		Cmd:         "cat",
-		InfilePath:  "testdata/input",
-		OutfilePath: "testdata/output",
+		InfilePath:  "testdata/input/",
+		OutfilePath: "testdata/output/",
 	}
 	seed := 1
 
 	// 入力ファイルの作成
 	inputConten := "Hello, World!\n"
-	err := os.WriteFile("testdata/input0001.txt", []byte(inputConten), 0644)
+	err := os.WriteFile("testdata/input/0001.txt", []byte(inputConten), 0644)
 	if err != nil {
 		t.Fatalf("failed to write input file: %v", err)
 	}
@@ -34,12 +34,12 @@ func TestRun(t *testing.T) {
 	}
 
 	// 出力ファイルの確認
-	outputContent, err := os.ReadFile("testdata/output0001.out")
+	outputContent, err := os.ReadFile("testdata/output/0001.out")
 	if err != nil || string(outputContent) != inputConten {
 		t.Fatalf("Unexpected output. Expected: %s, Actual: %s", inputConten, string(outputContent))
 	}
 
 	// 後始末
-	defer os.Remove("testdata/input0001.txt")
-	defer os.Remove("testdata/output0001.out")
+	defer os.Remove("testdata/input/0001.txt")
+	defer os.Remove("testdata/output/0001.out")
 }

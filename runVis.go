@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"sort"
 )
 
@@ -17,25 +18,28 @@ func RunVis(cnf *Config, seed int) (map[string]float64, error) {
 func runVis(cnf *Config, seed int) (map[string]float64, error) {
 	out, err := Run(cnf, seed)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed running with seed%d: %v", seed, err)
 	}
 	log.Println("run:", string(out))
+
 	pair, err := ExtractKeyValuePairs(string(out))
 	if err != nil {
-		return pair, err
+		return pair, fmt.Errorf("ExtractKeyValuePairs failed: %v", err)
 	}
 	// vis
-	infile := cnf.InfilePath + fmt.Sprintf("%04d.txt", seed)
-	outfile := cnf.OutfilePath + fmt.Sprintf("%04d.out", seed)
+	infile := filepath.Join(cnf.InfilePath, fmt.Sprintf("%04d.txt", seed))
+	outfile := filepath.Join(cnf.OutfilePath, fmt.Sprintf("%04d.out", seed))
+
 	outVis, err := vis(cnf, infile, outfile)
 	if err != nil {
 		return nil, fmt.Errorf("vis failed: %v", err)
 	}
-	// visの結果をpairに追加
+
 	sc, err := extractData(string(outVis))
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("extractData failed: %v", err)
 	}
+
 	for k, v := range sc {
 		pair[k] = v
 	}
