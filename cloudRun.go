@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 )
 
@@ -15,6 +16,7 @@ func googleCloudRun(cnf *Config, seed int) (map[string]float64, error) {
 	url := fmt.Sprintf("%s?seed=%d", cnf.CloudURL, seed)
 
 	resp, err := http.Get(url)
+	log.Println(resp)
 	if err != nil {
 		return nil, fmt.Errorf("error making GET request to %s: %v", url, err)
 	}
