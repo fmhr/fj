@@ -19,6 +19,7 @@ func runVis(cnf *Config, seed int) (map[string]float64, error) {
 	if err != nil {
 		return nil, err
 	}
+	log.Println(string(out))
 	pair, err := ExtractKeyValuePairs(string(out))
 	if err != nil {
 		return pair, err
