@@ -2,12 +2,14 @@ package main
 
 import (
 	"encoding/json"
+	"io"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 
 	"github.com/fmhr/fj"
+	"github.com/pelletier/go-toml/v2"
 )
 
 func main() {
@@ -39,6 +41,23 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	log.Println("seed:", seed)
 
 	var config fj.Config
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Println("read body error:", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	err = toml.Unmarshal(body, &config)
+	if err != nil {
+		log.Println("toml unmarshal error:", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	config.GenPath = "gen"
 	config.VisPath = "vis"
 	config.TesterPath = "tester"

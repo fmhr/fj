@@ -10,7 +10,9 @@ import (
 
 // Run は指定された設定とシードに基づいてコマンドを実行する
 func Run(cnf *Config, seed int) ([]byte, error) {
-
+	if cnf.Cmd == "" {
+		return []byte{}, fmt.Errorf("config.Cmd is empty")
+	}
 	//inputfile := fmt.Sprintf("%s%04d.txt", cnf.InfilePath, seed)
 	inputfile := filepath.Join(cnf.InfilePath, fmt.Sprintf("%04d.txt", seed))
 	if _, err := os.Stat(inputfile); err != nil {

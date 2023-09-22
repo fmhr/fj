@@ -1,6 +1,7 @@
 package fj
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,6 +9,8 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+
+	"github.com/pelletier/go-toml/v2"
 )
 
 func CloudRun(cnf *Config, seed int) (map[string]float64, error) {
@@ -21,14 +24,18 @@ func cloudRun(cnf *Config, seed int) (map[string]float64, error) {
 	}
 	params := url.Values{}
 	params.Add("seed", strconv.Itoa(seed))
-
 	baseURL.RawQuery = params.Encode()
 	finalURL := baseURL.String()
-
 	log.Println("finalURL:", finalURL)
-	resp, err := http.Get(finalURL)
+
+	conData, err := toml.Marshal(cnf)
 	if err != nil {
-		return nil, fmt.Errorf("error making GET request to %s: %v", finalURL, err)
+		return nil, fmt.Errorf("error marshaling config: %v", err)
+	}
+
+	resp, err := http.Post(finalURL, "application/toml", bytes.NewReader(conData))
+	if err != nil {
+		return nil, fmt.Errorf("error making POST request to %s: %v", finalURL, err)
 	}
 	defer resp.Body.Close()
 
