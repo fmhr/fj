@@ -2,16 +2,13 @@ package fj
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"runtime"
 
 	"github.com/pelletier/go-toml/v2"
 )
 
-const (
-	configFileName = "fj_config.toml"
-)
+const configFileName = "fj_config.toml"
 
 var ErrConfigNotFound = fmt.Errorf("%s not found, please run `fj -mode init`", configFileName)
 
@@ -24,7 +21,7 @@ type Config struct {
 	InfilePath  string `toml:"InfilePath"`
 	OutfilePath string `toml:"OutfilePath"`
 	Jobs        int    `toml:"Jobs"`
-	CloudURL    string `toml:"http://localhost:8888"`
+	CloudURL    string `toml:"CloudURL"`
 }
 
 func GenerateConfig() {
@@ -32,7 +29,7 @@ func GenerateConfig() {
 		fmt.Printf("%s already exists\n", configFileName)
 		return
 	}
-	numCPUs := runtime.NumCPU() - 1
+	numCPUs := maxInt(1, runtime.NumCPU()-1)
 	conf := &Config{
 		Cmd:         "",
 		Reactive:    false,
@@ -59,18 +56,14 @@ func generateConfig(conf *Config) error {
 	defer file.Close()
 
 	encoder := toml.NewEncoder(file)
-	err = encoder.Encode(conf)
-	if err != nil {
-		return err
-	}
-	return nil
+	return encoder.Encode(conf)
 }
 
 func LoadConfigFile() (*Config, error) {
-	if _, err := os.Stat(configFileName); err != nil {
-		log.Printf("%s not found, please run `fj -mode init`\n", configFileName)
-		return &Config{}, err
+	if !configExists() {
+		return &Config{}, ErrConfigNotFound
 	}
+
 	conf := &Config{}
 	file, err := os.Open(configFileName)
 	if err != nil {
@@ -90,4 +83,16 @@ func checkConfigFile(cnf *Config) error {
 		return fmt.Errorf("cmd is empty. please set cmd in %s", configFileName)
 	}
 	return nil
+}
+
+func configExists() bool {
+	_, err := os.Stat(configFileName)
+	return err == nil
+}
+
+func maxInt(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }
