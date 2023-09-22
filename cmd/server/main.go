@@ -57,6 +57,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	log.Println("rtn:", rtn)
 	jsonData, err := json.Marshal(rtn)
 	if err != nil {
 		log.Println("json marshal error:", err)
