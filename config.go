@@ -42,6 +42,7 @@ func GenerateConfig() {
 		InfilePath:  "tools/in/",
 		OutfilePath: "tmp/",
 		Jobs:        numCPUs,
+		CloudURL:    "http://localhost:8888",
 	}
 	if err := generateConfig(conf); err != nil {
 		fmt.Println("Error: ", err)

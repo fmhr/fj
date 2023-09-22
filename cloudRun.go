@@ -25,6 +25,7 @@ func cloudRun(cnf *Config, seed int) (map[string]float64, error) {
 	baseURL.RawQuery = params.Encode()
 	finalURL := baseURL.String()
 
+	log.Println("finalURL:", finalURL)
 	resp, err := http.Get(finalURL)
 	if err != nil {
 		return nil, fmt.Errorf("error making GET request to %s: %v", finalURL, err)
