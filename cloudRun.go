@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -26,7 +25,6 @@ func cloudRun(cnf *Config, seed int) (map[string]float64, error) {
 	params.Add("seed", strconv.Itoa(seed))
 	baseURL.RawQuery = params.Encode()
 	finalURL := baseURL.String()
-	log.Println("finalURL:", finalURL)
 
 	conData, err := toml.Marshal(cnf)
 	if err != nil {
@@ -39,7 +37,6 @@ func cloudRun(cnf *Config, seed int) (map[string]float64, error) {
 	}
 	defer resp.Body.Close()
 
-	log.Println(resp)
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("error making GET request to %s: %s", finalURL, resp.Status)
 	}
@@ -53,6 +50,7 @@ func cloudRun(cnf *Config, seed int) (map[string]float64, error) {
 	if err := json.Unmarshal(body, &data); err != nil {
 		return nil, fmt.Errorf("error parsing response body: %v", err)
 	}
+	fmt.Println(mapString(data))
 
 	return data, nil
 }

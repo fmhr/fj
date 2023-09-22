@@ -28,7 +28,7 @@ func TestRun(t *testing.T) {
 	}
 
 	// テストの実行
-	_, err = Run(cnf, seed)
+	_, err = normalRun(cnf, seed)
 	if err != nil {
 		t.Fatalf("failed to run: %v", err)
 	}

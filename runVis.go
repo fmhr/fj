@@ -15,7 +15,7 @@ func RunVis(cnf *Config, seed int) (map[string]float64, error) {
 // runVis は指定された設定とシードに基づいてコマンドを実行して、
 // その結果をvisに渡して、両方の結果を返す
 func runVis(cnf *Config, seed int) (map[string]float64, error) {
-	out, err := Run(cnf, seed)
+	out, err := normalRun(cnf, seed)
 	if err != nil {
 		return nil, fmt.Errorf("failed running with seed%d: %v", seed, err)
 	}

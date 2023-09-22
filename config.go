@@ -22,6 +22,7 @@ type Config struct {
 	InfilePath  string   `toml:"InfilePath"`
 	OutfilePath string   `toml:"OutfilePath"`
 	Jobs        int      `toml:"Jobs"`
+	Cloud       bool     `toml:"Cloud"`
 	CloudURL    string   `toml:"CloudURL"`
 }
 
@@ -41,6 +42,7 @@ func GenerateConfig() {
 		InfilePath:  "tools/in/",
 		OutfilePath: "out/",
 		Jobs:        numCPUs,
+		Cloud:       false,
 		CloudURL:    "http://localhost:8888",
 	}
 	if err := generateConfig(conf); err != nil {

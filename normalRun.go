@@ -8,8 +8,9 @@ import (
 	"path/filepath"
 )
 
-// Run は指定された設定とシードに基づいてコマンドを実行する
-func Run(cnf *Config, seed int) ([]byte, error) {
+// normalRun は指定された設定とシードに基づいてコマンドを実行する
+// normal モード用
+func normalRun(cnf *Config, seed int) ([]byte, error) {
 	if cnf.Cmd == "" {
 		return []byte{}, fmt.Errorf("config.Cmd is empty")
 	}
