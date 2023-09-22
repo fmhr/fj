@@ -13,15 +13,16 @@ const configFileName = "fj_config.toml"
 var ErrConfigNotFound = fmt.Errorf("%s not found, please run `fj -mode init`", configFileName)
 
 type Config struct {
-	Cmd         string `toml:"Cmd"`
-	Reactive    bool   `toml:"Reactive"`
-	TesterPath  string `toml:"TesterPath"`
-	VisPath     string `toml:"VisPath"`
-	GenPath     string `toml:"GenPath"`
-	InfilePath  string `toml:"InfilePath"`
-	OutfilePath string `toml:"OutfilePath"`
-	Jobs        int    `toml:"Jobs"`
-	CloudURL    string `toml:"CloudURL"`
+	Cmd         string   `toml:"Cmd"`
+	Args        []string `toml:"Args"`
+	Reactive    bool     `toml:"Reactive"`
+	TesterPath  string   `toml:"TesterPath"`
+	VisPath     string   `toml:"VisPath"`
+	GenPath     string   `toml:"GenPath"`
+	InfilePath  string   `toml:"InfilePath"`
+	OutfilePath string   `toml:"OutfilePath"`
+	Jobs        int      `toml:"Jobs"`
+	CloudURL    string   `toml:"CloudURL"`
 }
 
 func GenerateConfig() {
@@ -32,12 +33,13 @@ func GenerateConfig() {
 	numCPUs := maxInt(1, runtime.NumCPU()-1)
 	conf := &Config{
 		Cmd:         "",
+		Args:        []string{},
 		Reactive:    false,
 		TesterPath:  "tools/target/release/tester",
 		VisPath:     "tools/target/release/vis",
 		GenPath:     "tools/target/release/gen",
 		InfilePath:  "tools/in/",
-		OutfilePath: "tmp/",
+		OutfilePath: "out/",
 		Jobs:        numCPUs,
 		CloudURL:    "http://localhost:8888",
 	}

@@ -2,7 +2,6 @@ package fj
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -20,7 +19,7 @@ func runVis(cnf *Config, seed int) (map[string]float64, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed running with seed%d: %v", seed, err)
 	}
-	log.Println("run:", string(out))
+	//log.Println("run:", string(out))
 
 	pair, err := ExtractKeyValuePairs(string(out))
 	if err != nil {
