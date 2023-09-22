@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -57,7 +58,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
+	config.Cmd = readCmd()
 	config.GenPath = "gen"
 	config.VisPath = "vis"
 	config.TesterPath = "tester"
@@ -94,4 +95,12 @@ func run(cfg *fj.Config, seed int) (map[string]float64, error) {
 	}
 	log.Println("normal mode")
 	return fj.RunVis(cfg, seed)
+}
+
+func readCmd() string {
+	cmd, err := ioutil.ReadFile("cmd.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(cmd)
 }
