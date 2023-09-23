@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 )
 
@@ -26,7 +25,7 @@ func normalRun(cnf *Config, seed int) ([]byte, error) {
 	}
 
 	cmdStr := cnf.Cmd + " < " + inputfile + " > " + outputfile
-	cmd := exec.Command("sh", "-c", cmdStr)
+	cmd := createComand(cmdStr)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return []byte{}, fmt.Errorf("cmd.Run() for command [%q] failed with: %v", cmd, err)
