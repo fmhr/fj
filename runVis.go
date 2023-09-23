@@ -3,7 +3,6 @@ package fj
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"sort"
 )
@@ -65,7 +64,7 @@ func mapString(data map[string]float64) string {
 
 func vis(cnf *Config, infile, outfile string) ([]byte, error) {
 	cmdStr := fmt.Sprintf(cnf.VisPath+" %s %s", infile, outfile)
-	cmd := exec.Command("sh", "-c", cmdStr)
+	cmd := createComand(cmdStr)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return nil, fmt.Errorf("cmd.Run() for command %q failed with: %v", cmdStr, err)

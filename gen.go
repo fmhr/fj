@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 	"sync"
 )
 
@@ -37,8 +36,9 @@ func gen(cnf *Config, seed int) error {
 		return fmt.Errorf("failed to write seed to file: %s", err)
 	}
 	// genを実行
-	cmd := fmt.Sprintf("%s %s", cnf.GenPath, filename)
-	err = exec.Command("sh", "-c", cmd).Run()
+	cmdStr := fmt.Sprintf("%s %s", cnf.GenPath, filename)
+	cmd := createComand(cmdStr)
+	err = cmd.Run()
 	if err != nil {
 		return fmt.Errorf("failed to run gen: %s", err)
 	}
