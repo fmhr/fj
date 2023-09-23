@@ -2,7 +2,6 @@ package fj
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"os"
 )
@@ -18,16 +17,21 @@ func Fj() {
 	end := flag.Int("end", 0, "If set, run for seeds in the range: [start, end).")
 	cmdArgs := flag.String("cmdArgs", "", "If provides, , will run `Cmd [cmdArgs]`")
 	jobs := flag.Int("jobs", -1, "Set the limit for concurrently executed jobs. if Above the number of CPU cores may decrease performance.")
+	cloud := flag.Bool("cloud", false, "If set, run on cloud mode.")
 	flag.Parse()
-
 	if *mode == "init" {
 		GenerateConfig()
 		return
 	}
+
 	// load config.toml
 	cnf, err := LoadConfigFile()
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	if cloud != nil && *cloud {
+		cnf.Cloud = true
 	}
 	// set cmdArgs
 	if *cmdArgs != "" {
@@ -38,6 +42,9 @@ func Fj() {
 	for i := *start; i < *end; i++ {
 		seeds = append(seeds, i)
 	}
+	if len(seeds) == 0 {
+		seeds = append(seeds, *seed)
+	}
 	// set jobs
 	if *jobs > 0 {
 		cnf.Jobs = *jobs
@@ -45,32 +52,12 @@ func Fj() {
 	// mode select
 	switch *mode {
 	case "run":
-		// １つのseedを実行
-		if len(seeds) == 0 {
-			var err error
-			var rtn map[string]float64
-			if cnf.Reactive {
-				rtn, err = ReactiveRun(cnf, *seed)
-			} else {
-				rtn, err = RunVis(cnf, *seed)
-			}
-			if err != nil {
-				log.Fatal(err)
-			}
-			fmt.Fprintln(os.Stderr, mapString(rtn))
-			fmt.Println(rtn["Score"]) // ここだけ標準出力
-		} else {
-			// 複数のseedを並列実行
-			//if cnf.Reactive {
-			//ReactiveRunParallel(cnf, seeds)
-			//} else {
-			RunParallel(cnf, seeds)
-			//}
-		}
+		RunParallel(cnf, seeds)
 	case "init":
 		// 設定ファイルの生成
 		GenerateConfig()
 	case "gen":
+		// テストケースの生成
 		Gen(cnf, *seed)
 	case "cloud":
 		log.Println("cloud mode")

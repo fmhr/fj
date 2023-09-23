@@ -34,4 +34,4 @@ test:
 server: $(SERVER_BINARY)
 
 $(SERVER_BINARY): $(GO_FILES)
-	go build -o $(BUILD_DIR)/$(SERVER_BINARY) $(SERVER_DIR)
+	CGO_ENABLED=0 go build -o $(BUILD_DIR)/$(SERVER_BINARY) $(SERVER_DIR)
