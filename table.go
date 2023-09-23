@@ -9,22 +9,19 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-func DisplayTabel(data []map[string]float64) {
+// DisplayTable はデータをテーブル形式で表示する
+func DisplayTable(data []map[string]float64) {
+	if len(data) == 0 {
+		return
+	}
+
 	sortBySeed(&data)
+
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetAutoFormatHeaders(false)
-	headers := make([]string, 0, len(data[0]))
-	if len(data) > 0 {
-		for key := range data[0] {
-			headers = append(headers, key)
-		}
-		seedIndex := slices.Index(headers, "seed")
-		if seedIndex != 0 {
-			headers[0], headers[seedIndex] = headers[seedIndex], headers[0]
-		}
-		sort.Strings(headers[1:])
-		table.SetHeader(headers)
-	}
+
+	headers := extractHeaders(data)
+	table.SetHeader(headers)
 
 	for _, rowMap := range data {
 		row := make([]string, 0, len(rowMap))
@@ -42,7 +39,24 @@ func sortBySeed(data *[]map[string]float64) {
 	})
 }
 
-// 小数点以下が０のときintとして表示させる
+// extractHeaders はデータからヘッダーを抽出する
+func extractHeaders(data []map[string]float64) []string {
+	headers := make([]string, 0, len(data[0]))
+	for key := range data[0] {
+		headers = append(headers, key)
+	}
+
+	// seedを先頭に移動
+	seedIndex := slices.Index(headers, "seed")
+	headers = append(headers[:seedIndex], headers[seedIndex+1:]...)
+	headers = append([]string{"seed"}, headers...)
+	// seed以外をソート
+	//sort.Strings(headers[1:])
+
+	return headers
+}
+
+// formatFloat は小数点以下がh0の場合は整数に変換する
 func formatFloat(value float64) string {
 	if value == float64(int(value)) {
 		return strconv.Itoa(int(value))
