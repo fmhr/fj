@@ -18,7 +18,7 @@ go intall github.con/fmhr/fj
 ```
 fj -mode inti
 ```
-設定ファイルfj_config.tomlのCmdに実行コマンドを入れる
+設定ファイル(fj_config.toml)の設定例
 ```
 Cmd = './bin/main'  実行時のコマンド
 Args = []           必要に応じて設定
