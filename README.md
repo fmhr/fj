@@ -19,11 +19,30 @@ go intall github.con/fmhr/fj
 fj -mode inti
 ```
 設定ファイルfj_config.tomlのCmdに実行コマンドを入れる
+```
+Cmd = './bin/main'  実行時のコマンド
+Args = []           必要に応じて設定
+Reactive = false    リアクティブ問題のときはtrue
+TesterPath = 'tools/target/release/tester'   
+VisPath = 'tools/target/release/vis'
+GenPath = 'tools/target/release/gen'
+InfilePath = 'tools/in/'
+OutfilePath = 'out/'
+Jobs = 7             並列実行数 CPUコア数以下がいい
+Cloud = false        準備中
+CloudURL = 'http://localhost:8888' 準備中
+TimeLimitMS = 0      準備中
+```
 
-テストケース、seed=1を実行
+テストケース、seed=0を実行
 ```
-fj -mode run
+fj -mode test
 ```
+seed=777を実行
+```
+fj -mode test -seed 777
+```
+
 テストケース、seed=３〜99を実行
 ```
 fj -mode run -start 3 -end 100
