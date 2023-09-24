@@ -45,7 +45,7 @@ fj -mode test -seed 777
 
 テストケース、seed=３〜99を実行
 ```
-fj -mode run -start 3 -end 100
+fj -mode test -start 3 -end 100
 ```
 
 # Example
