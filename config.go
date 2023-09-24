@@ -24,6 +24,7 @@ type Config struct {
 	Jobs        int      `toml:"Jobs"`
 	Cloud       bool     `toml:"Cloud"`
 	CloudURL    string   `toml:"CloudURL"`
+	TimeLimitMS uint64   `toml:"TimeLimitMS"`
 }
 
 func GenerateConfig() {
@@ -44,6 +45,7 @@ func GenerateConfig() {
 		Jobs:        numCPUs,
 		Cloud:       false,
 		CloudURL:    "http://localhost:8888",
+		TimeLimitMS: 0,
 	}
 	if err := generateConfig(conf); err != nil {
 		fmt.Println("Error: ", err)
