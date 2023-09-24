@@ -14,7 +14,7 @@ fj コマンドはAtCoder Heuristic Contestの問題を解くことを助ける�
 
 [https://go.dev/doc/install](https://go.dev/install/)
 ```
-go intall github.con/fmhr/fj
+go intall github.con/fmhr/fj/cmd/fj
 ```
 # How to use
 - AtCoder公式からローカルテスターをダウンロードして、コンテスト用のフォルダに。解凍する。
