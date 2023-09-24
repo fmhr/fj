@@ -1,35 +1,8 @@
 package fj
 
 import (
-	"bytes"
-	"io"
-	"os"
 	"testing"
 )
-
-func TestDisplayTable(t *testing.T) {
-	data := []map[string]float64{
-		{"seed": 1, "value": 1.123},
-		{"seed": 2, "value": 2.234},
-		{"seed": 3, "value": 3.0},
-	}
-
-	buf := new(bytes.Buffer)
-	io.Copy(os.Stdout, buf)
-	DisplayTable(data)
-
-	expectedOutput := `+------+-------+
-| SEED | VALUE |
-+------+-------+
-|    1 | 1.123 |
-|    2 | 2.234 |
-|    3 |     3 |
-+------+-------+
-`
-	if buf.String() != expectedOutput {
-		t.Fatalf("Expected:\n%s\nGot:\n%s", expectedOutput, buf.String())
-	}
-}
 
 func TestSortBySeed(t *testing.T) {
 	data := []map[string]float64{

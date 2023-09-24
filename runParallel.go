@@ -72,6 +72,7 @@ func RunParallel(cnf *Config, seeds []int) {
 			datasMutex.Lock()
 			datas = append(datas, data)
 			datasMutex.Unlock()
+			//fmt.Fprintf(os.Stderr, "%v\n", data)
 		}(seed)
 	}
 	wg.Wait()

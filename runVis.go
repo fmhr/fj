@@ -2,7 +2,6 @@ package fj
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"sort"
 )
@@ -70,20 +69,4 @@ func vis(cnf *Config, infile, outfile string) ([]byte, error) {
 		return nil, fmt.Errorf("cmd.Run() for command %q failed with: %v", cmdStr, err)
 	}
 	return out, nil
-}
-
-func RunVis10(cnf *Config) error {
-	var sumScore int
-	for seed := 0; seed < 10; seed++ {
-		r, err := runVis(cnf, seed)
-		if err != nil {
-			return err
-		}
-		// fmt.Fprintln(os.Stderr, mapString(r))
-		fmt.Fprintln(os.Stderr, mapString(r))
-		sumScore += int(r["Score"])
-	}
-	fmt.Fprintln(os.Stderr, "sumScore=", sumScore)
-	fmt.Println(sumScore) // ここだけ標準出力
-	return nil
 }
