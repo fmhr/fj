@@ -1,13 +1,28 @@
-.vscode/
-.DS_Store
-tools/*
+# Tooling and build directories
+tools/
+build/
+sample/
 bin/*
-build/*
+.vscode/
+
+# Output files and directories
 out/*
-sample/*
 out.txt
+
+# Binary and execution files (assuming these are executables)
+main
+
+# Temporary and system files
+.DS_Store
+*.prof
+
+# Specific files
+vis.html
+vis.png
+seed.txt
+
+# File extensions to ignore
 *.svg
 *.in
 *.out
-vis.html
-vis.png
+*.gif
