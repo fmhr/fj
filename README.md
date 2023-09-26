@@ -22,7 +22,7 @@ go intall github.con/fmhr/fj/cmd/fj
 ## 設定ファイル(fj_config.toml)を生成
 コンテスト用のフォルダに移動して.以下のコマンドを実行する。
 ```
-fj -mode inti
+fj inti
 ```
 設定ファイル(fj_config.toml)の設定例
 ```
@@ -39,22 +39,9 @@ Cloud = false        準備中
 CloudURL = 'http://localhost:8888' 準備中
 TimeLimitMS = 0      準備中
 ```
-
-テストケース、seed=0を実行
 ```
-fj -mode test
+fj test
 ```
-seed=777を実行
-```
-fj -mode test -seed 777
-```
-
-テストケース、seed=３〜99を実行
-```
-fj -mode test -start 3 -end 100
-```
-
-// wip fix-subcommand 
 
 # usage
 ```
@@ -66,4 +53,20 @@ fj tests -start [start seed] -end [end seed] -cmdArg [Args...] -jobs [Number of 
 default: start=0, end=10, jobs=(read from fj_config.toml)
 ```
 # Example
+
+テストケース、seed=0を実行
+```
+fj test
+```
+seed=777を実行
+```
+fj test 777
+```
+
+テストケース、seed=３〜99を実行
+```
+fj tests -start 3 -end 100
+```
+
+
 # FAQ
