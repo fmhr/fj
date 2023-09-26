@@ -45,7 +45,7 @@ func GenerateConfig() {
 		Jobs:        numCPUs,
 		Cloud:       false,
 		CloudURL:    "http://localhost:8888",
-		TimeLimitMS: 0,
+		TimeLimitMS: 10000,
 	}
 	if err := generateConfig(conf); err != nil {
 		fmt.Println("Error: ", err)
