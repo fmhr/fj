@@ -39,9 +39,6 @@ Cloud = false        準備中
 CloudURL = 'http://localhost:8888' 準備中
 TimeLimitMS = 0      準備中
 ```
-```
-fj test
-```
 
 # usage
 ```
@@ -49,8 +46,8 @@ fj init
 設定ファイルを生成する
 fj test -seed [seed] -cmdArg [Args...]
 [seed]をテストする
-fj tests -start [start seed] -end [end seed] -cmdArg [Args...] -jobs [Number of jobs]
-default: start=0, end=10, jobs=(read from fj_config.toml)
+fj tests -start [start seed] -end [end seed] -cmdArg [Args...] -jobs [Number of jobs]:w
+
 ```
 # Example
 
@@ -58,15 +55,17 @@ default: start=0, end=10, jobs=(read from fj_config.toml)
 ```
 fj test
 ```
-seed=777を実行
+seed=777をテスト
 ```
 fj test 777
 ```
-
-テストケース、seed=３〜99を実行
+seed(3~99)をテスト
 ```
 fj tests -start 3 -end 100
 ```
-
+seed(0~99)をテスト
+```
+fj tests -e 100
+```
 
 # FAQ

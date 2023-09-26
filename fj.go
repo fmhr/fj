@@ -24,8 +24,8 @@ var (
 
 	tests = fj.Command("tests", "Run test cases.")
 	args2 = tests.Flag("args", "Command line arguments.").Strings()
-	start = tests.Flag("start", "Start seed value.").Default("0").Int()
-	end   = tests.Flag("end", "End seed value.").Default("10").Int()
+	start = tests.Flag("start", "Start seed value.").Default("0").Short('s').Int()
+	end   = tests.Flag("end", "End seed value.").Default("10").Short('e').Int()
 	jobs  = tests.Flag("jobs", "Number of parallel jobs.").Default("1").Int()
 	cloud = tests.Flag("cloud", "Enable cloud mode.").Default("false").Bool()
 )
