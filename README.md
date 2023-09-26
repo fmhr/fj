@@ -12,6 +12,7 @@ fj コマンドはAtCoder Heuristic Contestの問題を解くことを助ける�
 最新のGoをインストール
 
 [https://go.dev/doc/install](https://go.dev/install/)
+fj　をインストール
 ```
 go intall github.con/fmhr/fj/cmd/fj
 ```
