@@ -54,5 +54,16 @@ fj -mode test -seed 777
 fj -mode test -start 3 -end 100
 ```
 
+// wip fix-subcommand 
+
+# usage
+```
+fj init
+設定ファイルを生成する
+fj test -seed [seed] -cmdArg [Args...]
+[seed]をテストする
+fj tests -start [start seed] -end [end seed] -cmdArg [Args...] -jobs [Number of jobs]
+default: start=0, end=10, jobs=(read from fj_config.toml)
+```
 # Example
 # FAQ
