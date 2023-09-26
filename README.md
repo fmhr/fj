@@ -8,7 +8,6 @@ fj コマンドはAtCoder Heuristic Contestの問題を解くことを助ける�
 ## In progress
 - Google Cloud による並列実行
 - 実行時間制限
-- 
 # How to install
 最新のGoをインストール
 
@@ -18,7 +17,7 @@ go intall github.con/fmhr/fj/cmd/fj
 ```
 # How to use
 - AtCoder公式からローカルテスターをダウンロードして、コンテスト用のフォルダに。解凍する。
-- READMEを参照してテストケースを生成して、必要に応じてtester,visをコンパイルする。
+- 公式ツールのREADMEを参照してテストケースの生成。リアクティブ問題の場合はtester,そうでないときはvisを一度実行しておく。
 ## 設定ファイル(fj_config.toml)を生成
 コンテスト用のフォルダに移動して.以下のコマンドを実行する。
 ```
@@ -46,7 +45,6 @@ fj init
 設定ファイルを生成する
 fj test -seed [seed] -cmdArg [Args...]
 [seed]をテストする
-fj tests -start [start seed] -end [end seed] -cmdArg [Args...] -jobs [Number of jobs]:w
 
 ```
 # Example
