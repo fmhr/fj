@@ -3,14 +3,13 @@ package fj
 import (
 	"fmt"
 	"os"
-	"runtime"
 
 	"github.com/pelletier/go-toml/v2"
 )
 
 const configFileName = "fj_config.toml"
 
-var ErrConfigNotFound = fmt.Errorf("%s not found, please run `fj -mode init`", configFileName)
+var ErrConfigNotFound = fmt.Errorf("%s not found, please run `fj init`", configFileName)
 
 type Config struct {
 	Cmd         string   `toml:"Cmd"`
@@ -29,10 +28,19 @@ type Config struct {
 
 func GenerateConfig() {
 	if _, err := os.Stat(configFileName); err == nil {
-		fmt.Printf("%s already exists\n", configFileName)
-		return
+		if *force {
+			// if force flag is set, remove config file
+			err := os.Remove(configFileName)
+			if err != nil {
+				fmt.Println("Failed to remove config file: ", err)
+				return
+			}
+		} else {
+			fmt.Printf("%s already exists\n", configFileName)
+			return
+		}
 	}
-	numCPUs := maxInt(1, runtime.NumCPU()-1)
+	//numCPUs := maxInt(1, runtime.NumCPU()-1)
 	conf := &Config{
 		Cmd:         "",
 		Args:        []string{},
@@ -42,10 +50,10 @@ func GenerateConfig() {
 		GenPath:     "tools/target/release/gen",
 		InfilePath:  "tools/in/",
 		OutfilePath: "out/",
-		Jobs:        numCPUs,
+		Jobs:        1,
 		Cloud:       false,
 		CloudURL:    "http://localhost:8888",
-		TimeLimitMS: 10000,
+		TimeLimitMS: 20000,
 	}
 	if err := generateConfig(conf); err != nil {
 		fmt.Println("Error: ", err)
@@ -94,11 +102,4 @@ func checkConfigFile(cnf *Config) error {
 func configExists() bool {
 	_, err := os.Stat(configFileName)
 	return err == nil
-}
-
-func maxInt(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
 }
