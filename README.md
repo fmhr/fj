@@ -37,7 +37,7 @@ OutfilePath = 'out/'
 Jobs = 7             並列実行数 CPUコア数以下がいい
 Cloud = false        準備中
 CloudURL = 'http://localhost:8888' 準備中
-TimeLimitMS = 0      準備中
+TimeLimitMS = 20000     タイムアウト時間。コンテストのTLEではなく無限ループなどで終了しない時用
 ```
 
 # usage
