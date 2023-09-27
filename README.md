@@ -7,7 +7,6 @@ fj コマンドはAtCoder Heuristic Contestの問題を解くことを助ける�
 - 実行時に"N=3"のような標準エラー出力をすると、自動で収集してテストケースごとに表示する
 ## In progress
 - Google Cloud による並列実行
-- 実行時間制限
 # How to install
 最新のGoをインストール
 
