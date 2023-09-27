@@ -17,6 +17,9 @@ func RunParallel(cnf *Config, seeds []int) {
 	if cnf.Jobs > 0 {
 		numCPUs = cnf.Jobs
 	}
+	if cnf.Cloud || *cloud {
+		numCPUs = 100
+	}
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, numCPUs)
 	datas := make([]map[string]float64, 0, len(seeds))
@@ -56,14 +59,7 @@ func RunParallel(cnf *Config, seeds []int) {
 				atomic.AddInt32(&taskCompleted, 1)
 				printProgress(int(taskCompleted), totalTask)
 			}()
-			var data map[string]float64
-			var err error
-			if cnf.Reactive {
-				data, err = reactiveRun(cnf, seed)
-			} else {
-				data, err = runVis(cnf, seed)
-			}
-
+			data, err := Run(cnf, seed)
 			if err != nil {
 				errorChan <- fmt.Sprintf("Run error: seed=%d %v\n", seed, err)
 				return
