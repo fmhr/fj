@@ -17,6 +17,7 @@ func TestRun(t *testing.T) {
 		Cmd:         "cat",
 		InfilePath:  "testdata/",
 		OutfilePath: "testdata/",
+		TimeLimitMS: 1000,
 	}
 	seed := 1
 
