@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -98,7 +97,7 @@ func run(cfg *fj.Config, seed int) (map[string]float64, error) {
 }
 
 func readCmd() string {
-	cmd, err := ioutil.ReadFile("cmd.txt")
+	cmd, err := os.ReadFile("cmd.txt")
 	if err != nil {
 		log.Fatal(err)
 	}

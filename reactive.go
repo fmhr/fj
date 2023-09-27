@@ -40,7 +40,7 @@ func reactiveRunCmd(ctf *Config, seed int) ([]byte, error) {
 	outfile := ctf.OutfilePath + fmt.Sprintf("%04d.out", seed)
 	cmdStr := fmt.Sprintf("%s %s < %s > %s", ctf.TesterPath, ctf.Cmd, infile, outfile)
 	cmd := createComand(cmdStr)
-	out, err := cmd.CombinedOutput()
+	out, err := runCommandWithTimeout(cmd, ctf)
 	if err != nil {
 		return nil, fmt.Errorf("command [%q] failed with: %v out: %v", cmd, err, out)
 	}

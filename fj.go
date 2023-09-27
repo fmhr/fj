@@ -17,6 +17,7 @@ var (
 	debug = fj.Flag("debug", "Enable debug mode.").Default("false").Bool()
 
 	setup = fj.Command("init", "Generate config file.")
+	force = setup.Flag("force", "Force generate config file.").Default("false").Bool()
 
 	test  = fj.Command("test", "Run test case.")
 	seed  = test.Arg("seed", "Seed value.").Default("0").Int()
