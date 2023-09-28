@@ -18,8 +18,9 @@ func RunParallel(cnf *Config, seeds []int) {
 		numCPUs = cnf.Jobs
 	}
 	if cnf.Cloud || *cloud {
-		numCPUs = 100
+		numCPUs = 1000
 	}
+	log.Printf("Jobs: %d\n", numCPUs)
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, numCPUs)
 	datas := make([]map[string]float64, 0, len(seeds))
