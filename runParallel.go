@@ -13,12 +13,16 @@ import (
 
 func RunParallel(cnf *Config, seeds []int) {
 	// 並列実行数の設定
-	numCPUs := runtime.NumCPU() - 1
+	concurrentNum := runtime.NumCPU() - 1
 	if cnf.Jobs > 0 {
-		numCPUs = cnf.Jobs
+		concurrentNum = cnf.Jobs
 	}
+	if cnf.Cloud {
+		concurrentNum = cnf.ConcurrentRequests
+	}
+	log.Printf("Jobs: %d\n", concurrentNum)
 	var wg sync.WaitGroup
-	sem := make(chan struct{}, numCPUs)
+	sem := make(chan struct{}, concurrentNum)
 	datas := make([]map[string]float64, 0, len(seeds))
 	errorChan := make(chan string, len(seeds))
 
@@ -56,14 +60,7 @@ func RunParallel(cnf *Config, seeds []int) {
 				atomic.AddInt32(&taskCompleted, 1)
 				printProgress(int(taskCompleted), totalTask)
 			}()
-			var data map[string]float64
-			var err error
-			if cnf.Reactive {
-				data, err = reactiveRun(cnf, seed)
-			} else {
-				data, err = runVis(cnf, seed)
-			}
-
+			data, err := Run(cnf, seed)
 			if err != nil {
 				errorChan <- fmt.Sprintf("Run error: seed=%d %v\n", seed, err)
 				return

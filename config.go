@@ -12,18 +12,19 @@ const configFileName = "fj_config.toml"
 var ErrConfigNotFound = fmt.Errorf("%s not found, please run `fj init`", configFileName)
 
 type Config struct {
-	Cmd         string   `toml:"Cmd"`
-	Args        []string `toml:"Args"`
-	Reactive    bool     `toml:"Reactive"`
-	TesterPath  string   `toml:"TesterPath"`
-	VisPath     string   `toml:"VisPath"`
-	GenPath     string   `toml:"GenPath"`
-	InfilePath  string   `toml:"InfilePath"`
-	OutfilePath string   `toml:"OutfilePath"`
-	Jobs        int      `toml:"Jobs"`
-	Cloud       bool     `toml:"Cloud"`
-	CloudURL    string   `toml:"CloudURL"`
-	TimeLimitMS uint64   `toml:"TimeLimitMS"`
+	Cmd                string   `toml:"Cmd"`
+	Args               []string `toml:"Args"`
+	Reactive           bool     `toml:"Reactive"`
+	TesterPath         string   `toml:"TesterPath"`
+	VisPath            string   `toml:"VisPath"`
+	GenPath            string   `toml:"GenPath"`
+	InfilePath         string   `toml:"InfilePath"`
+	OutfilePath        string   `toml:"OutfilePath"`
+	Jobs               int      `toml:"Jobs"`
+	Cloud              bool     `toml:"Cloud"`
+	CloudURL           string   `toml:"CloudURL"`
+	ConcurrentRequests int      `toml:"ConcurrentRequests"`
+	TimeLimitMS        uint64   `toml:"TimeLimitMS"`
 }
 
 func GenerateConfig() {
@@ -42,18 +43,19 @@ func GenerateConfig() {
 	}
 	//numCPUs := maxInt(1, runtime.NumCPU()-1)
 	conf := &Config{
-		Cmd:         "",
-		Args:        []string{},
-		Reactive:    false,
-		TesterPath:  "tools/target/release/tester",
-		VisPath:     "tools/target/release/vis",
-		GenPath:     "tools/target/release/gen",
-		InfilePath:  "tools/in/",
-		OutfilePath: "out/",
-		Jobs:        1,
-		Cloud:       false,
-		CloudURL:    "http://localhost:8888",
-		TimeLimitMS: 20000,
+		Cmd:                "",
+		Args:               []string{},
+		Reactive:           false,
+		TesterPath:         "tools/target/release/tester",
+		VisPath:            "tools/target/release/vis",
+		GenPath:            "tools/target/release/gen",
+		InfilePath:         "tools/in/",
+		OutfilePath:        "out/",
+		Jobs:               1,
+		Cloud:              false,
+		CloudURL:           "http://localhost:8888",
+		ConcurrentRequests: 1000,
+		TimeLimitMS:        20000,
 	}
 	if err := generateConfig(conf); err != nil {
 		fmt.Println("Error: ", err)

@@ -50,7 +50,7 @@ func cloudRun(cnf *Config, seed int) (map[string]float64, error) {
 	if err := json.Unmarshal(body, &data); err != nil {
 		return nil, fmt.Errorf("error parsing response body: %v", err)
 	}
-	fmt.Println(mapString(data))
+	//fmt.Println(mapString(data))
 
 	return data, nil
 }

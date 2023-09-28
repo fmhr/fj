@@ -15,6 +15,7 @@ func init() {
 var (
 	fj    = kingpin.New("fj", "fj is a command line tool for competitive programming.")
 	debug = fj.Flag("debug", "Enable debug mode.").Default("false").Bool()
+	cloud = fj.Flag("cloud", "Enable cloud mode.").Default("false").Bool()
 
 	setup = fj.Command("init", "Generate config file.")
 	force = setup.Flag("force", "Force generate config file.").Default("false").Bool()
@@ -27,8 +28,8 @@ var (
 	args2 = tests.Flag("args", "Command line arguments.").Strings()
 	start = tests.Flag("start", "Start seed value.").Default("0").Short('s').Int()
 	end   = tests.Flag("end", "End seed value.").Default("10").Short('e').Int()
-	jobs  = tests.Flag("jobs", "Number of parallel jobs.").Default("1").Int()
-	cloud = tests.Flag("cloud", "Enable cloud mode.").Default("false").Bool()
+	jobs  = tests.Flag("jobs", "Number of parallel jobs.").Int()
+	//cloud = tests.Flag("cloud", "Enable cloud mode.").Default("false").Bool()
 )
 
 func Fj() {
