@@ -13,16 +13,16 @@ import (
 
 func RunParallel(cnf *Config, seeds []int) {
 	// 並列実行数の設定
-	numCPUs := runtime.NumCPU() - 1
+	concurrentNum := runtime.NumCPU() - 1
 	if cnf.Jobs > 0 {
-		numCPUs = cnf.Jobs
+		concurrentNum = cnf.Jobs
 	}
-	if cnf.Cloud || *cloud {
-		numCPUs = 1000
+	if cnf.Cloud {
+		concurrentNum = cnf.ConcurrentRequests
 	}
-	log.Printf("Jobs: %d\n", numCPUs)
+	log.Printf("Jobs: %d\n", concurrentNum)
 	var wg sync.WaitGroup
-	sem := make(chan struct{}, numCPUs)
+	sem := make(chan struct{}, concurrentNum)
 	datas := make([]map[string]float64, 0, len(seeds))
 	errorChan := make(chan string, len(seeds))
 
