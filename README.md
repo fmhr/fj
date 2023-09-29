@@ -4,7 +4,7 @@
 ## インストール
 最新のGo(1.21)が導入されている環境であれば、次のコマンドだけでインストールできます。
 ```
-go intall github.con/fmhr/fj/cmd/fj
+go install github.com/fmhr/fj/cmd/fj@latest
 ```
 OSにはLinux(Windows Subsystem for Linux)かmacOSを推奨しますが、Windows上でも動作します。
 詳細な手順については(準備中)を読んでください。
