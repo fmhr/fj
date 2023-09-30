@@ -58,9 +58,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	config.Cmd = os.Getenv("EXECUTE_COMMAND")
-	config.GenPath = "tools/target/gen"
-	config.VisPath = "tools/target/vis"
-	config.TesterPath = "tools/target/tester"
+	config.GenPath = "tools/target/release/gen"
+	config.VisPath = "tools/target/release/vis"
+	config.TesterPath = "tools/target/release/tester"
 	reactiveString := r.URL.Query().Get("reactive")
 	if reactiveString == "" || reactiveString == "false" {
 		config.Reactive = false
