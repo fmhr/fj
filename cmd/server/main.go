@@ -68,7 +68,12 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		config.Reactive = true
 	}
 	// GEN
-	fj.Gen(&config, seed)
+	err = fj.Gen(&config, seed)
+	if err != nil {
+		log.Println("gen error:", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	// RUN
 	rtn, err := run(&config, seed)
 	if err != nil {

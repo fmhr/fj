@@ -7,14 +7,12 @@ import (
 	"sync"
 )
 
-func Gen(cnf *Config, seed int) {
+func Gen(cnf *Config, seed int) error {
 	if cnf.GenPath == "" {
 		log.Fatal("GenPath is not set. please set GenPath: {} in fj_config.toml")
 	}
 	err := gen(cnf, seed)
-	if err != nil {
-		log.Println(err)
-	}
+	return err
 }
 
 var genMutex sync.Mutex
