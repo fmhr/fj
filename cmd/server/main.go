@@ -94,9 +94,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 func run(cfg *fj.Config, seed int) (map[string]float64, error) {
 	if cfg.Reactive {
-		log.Println("reactive mode")
+		//log.Println("reactive mode")
 		return fj.ReactiveRun(cfg, seed)
 	}
-	log.Println("normal mode")
+	//log.Println("normal mode")
 	return fj.RunVis(cfg, seed)
 }

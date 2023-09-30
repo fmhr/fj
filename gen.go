@@ -49,11 +49,9 @@ func gen(cnf *Config, seed int) error {
 		return fmt.Errorf("failed to run gen: %s", err)
 	}
 	// in/0000.txtをin/{seed}.txtにリネーム
-	if seed != 0 {
-		err = os.Rename("in/0000.txt", fmt.Sprintf("in2/%04d.txt", seed))
-		if err != nil {
-			return fmt.Errorf("failed to rename file: %s", err)
-		}
+	err = os.Rename("in/0000.txt", fmt.Sprintf("in2/%04d.txt", seed))
+	if err != nil {
+		return fmt.Errorf("failed to rename file: %s", err)
 	}
 	// cnf.InfilePathを更新
 	cnf.InfilePath = "in2/"
