@@ -19,19 +19,27 @@ func Gen(cnf *Config, seed int) {
 
 var genMutex sync.Mutex
 
-// seedを書き込んだd.txtをgenにすとin/0000.txtが生成される
+// seedを書き込んだd.txtをgenにわたすとin/0000.txtが生成される
+// これをin/{seed}.txtにリネームする
 func gen(cnf *Config, seed int) error {
 	genMutex.Lock()
 	defer genMutex.Unlock()
+	path := "in2"
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		err := os.Mkdir(path, 0755)
+		if err != nil {
+			return fmt.Errorf("failed to create directory: %s", err)
+		}
+	} else if err != nil {
+		log.Fatalf("error checking if directory exists: %s", err)
+	}
 	_, err := os.Stat(cnf.GenPath)
 	if err != nil {
 		return fmt.Errorf("gen not found: %s", cnf.GenPath)
 	}
-	// seedを書き込んだd.txtをgenによませるとin/0000.txtが生成される
+	// seedを書き込んだ{seed}.txtをgenによませるとin/0000.txtが生成される
 	filename := fmt.Sprintf("%d.txt", seed)
 	err = writeIntToFile(seed, filename)
-	// d.txtを削除
-	defer os.Remove(filename)
 	if err != nil {
 		return fmt.Errorf("failed to write seed to file: %s", err)
 	}
@@ -43,12 +51,19 @@ func gen(cnf *Config, seed int) error {
 		return fmt.Errorf("failed to run gen: %s", err)
 	}
 	// in/0000.txtをin/{seed}.txtにリネーム
-	err = os.Rename("in/0000.txt", fmt.Sprintf("in/%04d.txt", seed))
-	if err != nil {
-		return fmt.Errorf("failed to rename file: %s", err)
+	if seed != 0 {
+		err = os.Rename("in/0000.txt", fmt.Sprintf("in2/%04d.txt", seed))
+		if err != nil {
+			return fmt.Errorf("failed to rename file: %s", err)
+		}
 	}
 	// cnf.InfilePathを更新
-	cnf.InfilePath = "in/"
+	cnf.InfilePath = "in2/"
+	// {seed}.txtを削除
+	err = os.Remove(filename)
+	if err != nil {
+		return fmt.Errorf("failed to remove file: %s", err)
+	}
 	return nil
 }
 
