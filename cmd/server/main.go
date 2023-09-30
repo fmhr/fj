@@ -57,10 +57,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	config.Cmd = readCmd()
-	config.GenPath = "gen"
-	config.VisPath = "vis"
-	config.TesterPath = "tester"
+	config.Cmd = os.Getenv("EXECUTE_COMMAND")
+	config.GenPath = "tools/target/gen"
+	config.VisPath = "tools/target/vis"
+	config.TesterPath = "tools/target/tester"
 	reactiveString := r.URL.Query().Get("reactive")
 	if reactiveString == "" || reactiveString == "false" {
 		config.Reactive = false
@@ -94,12 +94,4 @@ func run(cfg *fj.Config, seed int) (map[string]float64, error) {
 	}
 	log.Println("normal mode")
 	return fj.RunVis(cfg, seed)
-}
-
-func readCmd() string {
-	cmd, err := os.ReadFile("cmd.txt")
-	if err != nil {
-		log.Fatal(err)
-	}
-	return string(cmd)
 }
