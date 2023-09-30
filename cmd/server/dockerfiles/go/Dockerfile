@@ -3,6 +3,7 @@
 #  docker run -p 8888:8080 --rm fj-server
 #  docker exec -it container_name sh
 
+
 FROM rust:buster as rust-builder
 WORKDIR /work
 COPY /tools .
@@ -25,11 +26,9 @@ FROM golang:latest as golang-builder
 RUN git clone -b severBuild https://github.com/fmhr/fj.git /go/src/github.com/fmhr/fj
 WORKDIR /go/src/github.com/fmhr/fj/cmd/server
 RUN CGO_ENABLED=0 go build -o fj-server
-#COPY /Users/fumihiro/Desktop/fj /go/src/github.com/fmhr/fj
-#WORKDIR /go/src/github.com/fmhr/fj/cmd/server
-#RUN CGO_ENABLED=0 go build -o fj-server
 
-# gここは提出言語によって変える
+
+# go
 FROM golang:1.20 as golang-builder2
 WORKDIR /work
 COPY src/ .
