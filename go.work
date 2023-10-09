@@ -1,3 +1,6 @@
 go 1.21.1
 
-use ./cmd/compile-server
+use (
+	.
+	./cmd/compile-server
+)
