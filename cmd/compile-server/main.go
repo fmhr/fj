@@ -55,6 +55,7 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to write the uploaded file to disk", http.StatusInternalServerError)
 		return
 	}
+
 	if language == "go" {
 		log.Println("go file")
 	}
