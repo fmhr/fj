@@ -16,14 +16,25 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// ソースコードの読み込み
-	src, err := io.ReadAll(r.Body)
+	// マルチパートリーダー
+	err := r.ParseMultipartForm(10 << 20) //10MB limit
 	if err != nil {
-		log.Println(err)
-		http.Error(w, "Failed to read request body", http.StatusInternalServerError)
+		http.Error(w, "Failed to parse form", http.StatusBadRequest)
 		return
 	}
-	defer r.Body.Close()
+
+	file, _, err := r.FormFile("file")
+	if err != nil {
+		http.Error(w, "Failed to get the file", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	language := r.FormValue("language")
+	if language == "" {
+		http.Error(w, "Language not specified", http.StatusBadRequest)
+		return
+	}
 
 	// 一時ディレクトリ作成
 	tmpDir, err := os.MkdirTemp("", "go-compiler-")
@@ -32,15 +43,20 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to create temp dir", http.StatusInternalServerError)
 		return
 	}
-	defer os.RemoveAll(tmpDir)
-
-	// ソースコードを一時ファイルに保存
+	// defer os.RemoveAll(tmpDir)
 	srcFile := filepath.Join(tmpDir, "main.go")
-	err = os.WriteFile(srcFile, src, 0644)
+	srcBytes, err := io.ReadAll(file)
 	if err != nil {
-		log.Println(err)
-		http.Error(w, "Failed to write source to file", http.StatusInternalServerError)
+		http.Error(w, "Failed to read the uploaded file", http.StatusInternalServerError)
 		return
+	}
+	err = os.WriteFile(srcFile, srcBytes, 0644)
+	if err != nil {
+		http.Error(w, "Failed to write the uploaded file to disk", http.StatusInternalServerError)
+		return
+	}
+	if language == "go" {
+		log.Println("go file")
 	}
 
 	// Goでコンパイル
