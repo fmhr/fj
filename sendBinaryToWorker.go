@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 )
 
-func sendBinaryToWorker(workerURL, binaryPath, language string) (string, error) {
+func sendBinaryToWorker(workerURL, binaryPath, language string, seed int) (string, error) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
@@ -33,6 +33,9 @@ func sendBinaryToWorker(workerURL, binaryPath, language string) (string, error) 
 
 	// language
 	writer.WriteField("langiage", language)
+	// seed
+	writer.WriteField("seed", fmt.Sprintf("%d", seed))
+
 	writer.Close()
 
 	// リクエストの送信

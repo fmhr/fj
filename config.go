@@ -12,6 +12,8 @@ const configFileName = "fj_config.toml"
 var ErrConfigNotFound = fmt.Errorf("%s not found, please run `fj init`", configFileName)
 
 type Config struct {
+	Language           string   `toml:"Language"`
+	SourcePath         string   `toml:"SourcePath"`
 	Cmd                string   `toml:"Cmd"`
 	Args               []string `toml:"Args"`
 	Reactive           bool     `toml:"Reactive"`
@@ -23,6 +25,8 @@ type Config struct {
 	Jobs               int      `toml:"Jobs"`
 	Cloud              bool     `toml:"Cloud"`
 	CloudURL           string   `toml:"CloudURL"`
+	CompilerURL        string   `toml:"CompilerURL"`
+	WorkerURL          string   `toml:"WorkerURL"`
 	ConcurrentRequests int      `toml:"ConcurrentRequests"`
 	TimeLimitMS        uint64   `toml:"TimeLimitMS"`
 }
@@ -43,6 +47,8 @@ func GenerateConfig() {
 	}
 	//numCPUs := maxInt(1, runtime.NumCPU()-1)
 	conf := &Config{
+		Language:           "",
+		SourcePath:         "",
 		Cmd:                "",
 		Args:               []string{},
 		Reactive:           false,
@@ -54,6 +60,8 @@ func GenerateConfig() {
 		Jobs:               1,
 		Cloud:              false,
 		CloudURL:           "http://localhost:8888",
+		CompilerURL:        "",
+		WorkerURL:          "",
 		ConcurrentRequests: 1000,
 		TimeLimitMS:        20000,
 	}
