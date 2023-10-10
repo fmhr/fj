@@ -54,7 +54,7 @@ func Fj() {
 		if config.Cloud {
 			config.BinaryPath, err = CloudCompile(config)
 			if err != nil {
-				log.Fatal("Cloud mode Compile Error:", err)
+				log.Fatal("Cloud mode Compile error:", err)
 			}
 		}
 		// select run

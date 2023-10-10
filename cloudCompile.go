@@ -10,6 +10,22 @@ import (
 	"path/filepath"
 )
 
+func checkConfigCloudCompile(config *Config) error {
+	if config.SourcePath == "" {
+		return fmt.Errorf("error: [SourcePath] must not be empty")
+	}
+	if config.BinaryPath == "" {
+		return fmt.Errorf("error: [BinaryPath] must not be empty")
+	}
+	if config.CompileCmd == "" {
+		return fmt.Errorf("error: [CompileCmd] must not be empty")
+	}
+	if config.CompilerURL == "" {
+		return TraceError("error: [CompilerURL] must not be empty")
+	}
+	return nil
+}
+
 // コンパイルに必要なもの
 //  1. ソースファイル受け取る
 //  2. ソースファイルの名前
@@ -17,6 +33,9 @@ import (
 //  4. file=ソースファイル, compileCmd=コンパイルコマンド,
 //     srcFile=ソースファイル名, binaryFile=バイナリファイル名
 func CloudCompile(config *Config) (string, error) {
+	if err := checkConfigCloudCompile(config); err != nil {
+		return "", fmt.Errorf("invalid config: %w", err)
+	}
 	// ソースファイルを開く
 	file, err := os.Open(config.SourcePath)
 	if err != nil {
@@ -36,9 +55,9 @@ func CloudCompile(config *Config) (string, error) {
 	}
 	// filename
 	binaryName := filepath.Base(config.BinaryPath)
-	writer.CreateFormFile("srcFile", file.Name())
-	writer.CreateFormFile("compileCmd", config.CompileCmd)
-	writer.CreateFormFile("binaryFile", binaryName)
+	writer.WriteField("srcFile", file.Name())
+	writer.WriteField("compileCmd", config.CompileCmd)
+	writer.WriteField("binaryFile", binaryName)
 
 	writer.Close()
 
@@ -46,17 +65,22 @@ func CloudCompile(config *Config) (string, error) {
 	req, err := http.NewRequest("POST", config.CompilerURL, body)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	if err != nil {
-		return "", fmt.Errorf("error making new requets: %w", err)
+		return "", TraceErrorf("error making new requets: %w", err)
 	}
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("error making request: %w", err)
+		return "", TraceErrorf("error making request: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("server returned an error: %s", resp.Status)
+		bodyBytes, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return "", TraceErrorf("error reading response body: %w", err)
+		}
+		fmt.Print("server response:", string(bodyBytes))
+		return "", TraceError(fmt.Sprintf("error response status code: %d", resp.StatusCode))
 	}
 
 	// 受信後

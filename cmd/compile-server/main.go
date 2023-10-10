@@ -51,12 +51,14 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 
 	srcBytes, err := io.ReadAll(file)
 	if err != nil {
-		http.Error(w, "Failed to read the uploaded file", http.StatusInternalServerError)
+		msg := fmt.Sprintf("Failed to read the uploaded file: %v", err)
+		http.Error(w, msg, http.StatusInternalServerError)
 		return
 	}
 	err = os.WriteFile(srcFileName, srcBytes, 0644)
 	if err != nil {
-		http.Error(w, "Failed to write the uploaded file to disk", http.StatusInternalServerError)
+		msg := fmt.Sprintf("Failed to write the uploaded file to disk: %v", err)
+		http.Error(w, msg, http.StatusInternalServerError)
 		return
 	}
 
