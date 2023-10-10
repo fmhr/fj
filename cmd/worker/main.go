@@ -1,9 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
@@ -39,9 +42,27 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Language not specified", http.StatusBadRequest)
 		return
 	}
-	// TODO:ここに処理
-
-	w.Write([]byte("Successfully uploaded and processed"))
+	// seed
+	seedString := r.FormValue("seed")
+	seedInt, err := strconv.Atoi(seedString)
+	if err != nil {
+		log.Printf("seed not specified %s", seedString)
+		http.Error(w, "Seed not specified", http.StatusBadRequest)
+		return
+	}
+	out, err := exexute(tmpFile.Name(), language, seedInt)
+	if err != nil {
+		http.Error(w, "Failed to execute", http.StatusInternalServerError)
+		return
+	}
+	// json
+	jsonData, err := json.Marshal(out)
+	if err != nil {
+		http.Error(w, "Failed to marshal", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonData)
 }
 
 func main() {

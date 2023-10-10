@@ -30,6 +30,7 @@ var (
 	end   = tests.Flag("end", "End seed value.").Default("10").Short('e').Int()
 	jobs  = tests.Flag("jobs", "Number of parallel jobs.").Int()
 	//cloud = tests.Flag("cloud", "Enable cloud mode.").Default("false").Bool()
+
 )
 
 func Fj() {
@@ -47,10 +48,19 @@ func Fj() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		// config を読み込む
 		updateConfig(config)
+		// cloud mode ならソースコードをアップロードしてバイナリを受け取る
+		if config.Cloud {
+			config.BinaryPath, err = CloudCompile(config)
+			if err != nil {
+				log.Fatal("Cloud mode Compile Error:", err)
+			}
+		}
+		// select run
 		switch kingpin.MustParse(fj.Parse(os.Args[1:])) {
 		case test.FullCommand():
-			rtn, err := Run(config, *seed)
+			rtn, err := RunSelctor(config, *seed)
 			if err != nil {
 				log.Fatal("Error: ", err)
 			}

@@ -60,7 +60,7 @@ func RunParallel(cnf *Config, seeds []int) {
 				atomic.AddInt32(&taskCompleted, 1)
 				printProgress(int(taskCompleted), totalTask)
 			}()
-			data, err := Run(cnf, seed)
+			data, err := RunSelctor(cnf, seed)
 			if err != nil {
 				errorChan <- fmt.Sprintf("Run error: seed=%d %v\n", seed, err)
 				return

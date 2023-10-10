@@ -3,26 +3,30 @@ package main
 import (
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"os/exec"
-	"path/filepath"
+	"strings"
 )
 
+// コンパイルに必要なもの
+//  1. ソースファイル受け取る
+//  2. ソースファイルの名前
+//  3. コンパイルコマンド
+//  4. file=ソースファイル, compileCmd=コンパイルコマンド,
+//     srcFile=ソースファイル名, binaryFile=バイナリファイル名
 func compileHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Only POST method is allowed", http.StatusMethodNotAllowed)
 		return
 	}
-
 	// マルチパートリーダー
 	err := r.ParseMultipartForm(10 << 20) //10MB limit
 	if err != nil {
 		http.Error(w, "Failed to parse form", http.StatusBadRequest)
 		return
 	}
-
+	// ソースファイル
 	file, _, err := r.FormFile("file")
 	if err != nil {
 		http.Error(w, "Failed to get the file", http.StatusBadRequest)
@@ -30,39 +34,35 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	language := r.FormValue("language")
-	if language == "" {
+	// コンパイルコマンド
+	compileCmd := r.FormValue("compileCmd")
+	if compileCmd == "" {
 		http.Error(w, "Language not specified", http.StatusBadRequest)
 		return
 	}
-
-	// 一時ディレクトリ作成
-	tmpDir, err := os.MkdirTemp("", "go-compiler-")
-	if err != nil {
-		log.Println(err)
-		http.Error(w, "Failed to create temp dir", http.StatusInternalServerError)
+	// ソースファイル名
+	srcFileName := r.FormValue("srcFile")
+	if srcFileName == "" {
+		http.Error(w, "Source file not specified", http.StatusBadRequest)
 		return
 	}
-	// defer os.RemoveAll(tmpDir)
-	srcFile := filepath.Join(tmpDir, "main.go")
+	// バイナリファイル名
+	binaryFileName := r.FormValue("binaryFile")
+
 	srcBytes, err := io.ReadAll(file)
 	if err != nil {
 		http.Error(w, "Failed to read the uploaded file", http.StatusInternalServerError)
 		return
 	}
-	err = os.WriteFile(srcFile, srcBytes, 0644)
+	err = os.WriteFile(srcFileName, srcBytes, 0644)
 	if err != nil {
 		http.Error(w, "Failed to write the uploaded file to disk", http.StatusInternalServerError)
 		return
 	}
 
-	if language == "go" {
-		log.Println("go file")
-	}
+	cmds := strings.Fields(compileCmd)
 
-	// Goでコンパイル
-	outFile := filepath.Join(tmpDir, "a.out")
-	cmd := exec.Command("go", "build", "-o", outFile, srcFile)
+	cmd := exec.Command(cmds[0], cmds[1:]...)
 	err = cmd.Run()
 	if err != nil {
 		http.Error(w, "Compiration failed", http.StatusBadRequest)
@@ -70,11 +70,14 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// バイナリの読み込み
-	binary, err := os.ReadFile(outFile)
+	binary, err := os.ReadFile(binaryFileName)
 	if err != nil {
 		http.Error(w, "Failed to read compiled binary", http.StatusInternalServerError)
 		return
 	}
+	// ソースファイルとバイナリファイルを削除
+	defer os.Remove(srcFileName)
+	defer os.Remove(binaryFileName)
 
 	// バイナリをレスポンスとして返す
 	w.Header().Set("Content-Type", "application/octet-stream")

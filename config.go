@@ -14,6 +14,8 @@ var ErrConfigNotFound = fmt.Errorf("%s not found, please run `fj init`", configF
 type Config struct {
 	Language           string   `toml:"Language"`
 	SourcePath         string   `toml:"SourcePath"`
+	BinaryPath         string   `toml:"BinaryPath"`
+	CompileCmd         string   `toml:"CompileCmd"`
 	Cmd                string   `toml:"Cmd"`
 	Args               []string `toml:"Args"`
 	Reactive           bool     `toml:"Reactive"`

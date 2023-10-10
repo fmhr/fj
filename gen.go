@@ -18,7 +18,8 @@ func Gen(cnf *Config, seed int) error {
 var genMutex sync.Mutex
 
 // seedを書き込んだd.txtをgenにわたすとin/0000.txtが生成される
-// これをin/{seed}.txtにリネームする
+// これをin2/{seed}.txtにリネームする
+// config.InfilePathをin2/に変更する
 func gen(cnf *Config, seed int) error {
 	genMutex.Lock()
 	defer genMutex.Unlock()

@@ -1,6 +1,6 @@
 package fj
 
-func Run(config *Config, seed int) (map[string]float64, error) {
+func RunSelctor(config *Config, seed int) (map[string]float64, error) {
 	if config.Cloud || *cloud {
 		return CloudRun(config, seed)
 	} else {
