@@ -47,7 +47,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to create a temp file", http.StatusInternalServerError)
 		return
 	}
-	tmpFile.Close()
+	defer tmpFile.Close()
 
 	_, err = io.Copy(tmpFile, file)
 	if err != nil {
