@@ -5,8 +5,24 @@ RUN git clone -b make-builds  https://github.com/fmhr/fj.git \
     && CGO_ENABLED=0 go build -o /work/worker
 
 
+# 2. 公式ツールのビルド
+FROM rust:buster as toolsbuilder
+WORKDIR /work
+
+# IMPORTANT: 問題によってテスターは異なるので、適宜URLを変更すること
+# ------------------------------------------------------------------
+RUN wget -q https://img.atcoder.jp/ahc024/AU5KcDyn.zip -O tools.zip 
+# ------------------------------------------------------------------
+RUN unzip tools.zip 
+
+RUN (cd tools && cargo build --release --quiet)
+
+
+# 3. ビルド用のイメージ
 FROM debian:buster
-WORKDIR /app
-COPY --from=workerbuild /work/worker /app/worker
+WORKDIR /work
+COPY --from=workerbuild /work/worker /work/worker
+COPY --from=toolsbuilder /work/tools/target/release/* /work/tools/target/release/
+
 EXPOSE 8080
 CMD ["/app/worker"]
