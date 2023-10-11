@@ -64,7 +64,11 @@ func sendBinaryToWorker(config *Config, seed int) (rtn map[string]float64, err e
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("worker returned an unexpected status: %v", resp.Status)
+		bodyBytes, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, TraceErrorf("error reading response body: %w", err)
+		}
+		return nil, TraceError(fmt.Sprintf("error response status code:%d resp:%s", resp.StatusCode, string(bodyBytes)))
 	}
 
 	// レスポンスボディから文字列を取り出す

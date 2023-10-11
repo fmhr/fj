@@ -50,7 +50,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	_, err = io.Copy(tmpFile, file)
 	if err != nil {
-		http.Error(w, "Failed to save the binary", http.StatusInternalServerError)
+		errmsg := "Failed to copy the binary to the temp file"
+		http.Error(w, errmsg, http.StatusInternalServerError)
 		return
 	}
 

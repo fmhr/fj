@@ -2,13 +2,13 @@ package fj
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"runtime"
 )
 
 func DebugModeEnabled() bool {
-	return os.Getenv("DEBUG") == "true"
+	return true
+	// return os.Getenv("DEBUG") == "true"
 }
 
 func TraceErrorf(format string, err error) error {
