@@ -56,12 +56,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// language
-	language := r.FormValue("language")
-	if language == "" {
-		http.Error(w, "Language not specified", http.StatusBadRequest)
-		return
-	}
 	// seed
 	seedString := r.FormValue("seed")
 	seedInt, err := strconv.Atoi(seedString)
