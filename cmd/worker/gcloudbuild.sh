@@ -4,4 +4,5 @@ set -x #実行したコマンドを表示する
 gcloud builds submit --tag gcr.io/fj-test-399812/worker-image:latest .
 gcloud run deploy worker\
     --image gcr.io/fj-test-399812/worker-image:latest \
-    --platform managed --allow-unauthenticated
+    --platform managed --allow-unauthenticated \
+    --concurrency 1

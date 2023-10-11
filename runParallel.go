@@ -18,7 +18,7 @@ func RunParallel(cnf *Config, seeds []int) {
 		concurrentNum = cnf.Jobs
 	}
 	if cnf.Cloud {
-		concurrentNum = cnf.ConcurrentRequests
+		concurrentNum = maxInt(1, maxInt(concurrentNum, cnf.ConcurrentRequests))
 	}
 	log.Printf("Jobs: %d\n", concurrentNum)
 	var wg sync.WaitGroup
