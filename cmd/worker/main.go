@@ -7,11 +7,29 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+
+	"github.com/fmhr/fj"
 )
 
-func uploadHandler(w http.ResponseWriter, r *http.Request) {
+func handler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Only POST is allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// マルチパートリーダー
+	err := r.ParseMultipartForm(32 << 20) // 32MB
+	if err != nil {
+		http.Error(w, "Failed to parse multipart form", http.StatusBadRequest)
+		return
+	}
+
+	// Configの受け取り
+	configPart := r.FormValue("config")
+	var config fj.Config
+	err = json.Unmarshal([]byte(configPart), &config)
+	if err != nil {
+		http.Error(w, "Failed to unmarshal config", http.StatusBadRequest)
 		return
 	}
 
@@ -50,7 +68,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Seed not specified", http.StatusBadRequest)
 		return
 	}
-	out, err := exexute(tmpFile.Name(), language, seedInt)
+	out, err := exexute(&config, seedInt)
 	if err != nil {
 		http.Error(w, "Failed to execute", http.StatusInternalServerError)
 		return
@@ -66,6 +84,6 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/upload", uploadHandler)
+	http.HandleFunc("/upload", handler)
 	http.ListenAndServe(":8080", nil)
 }

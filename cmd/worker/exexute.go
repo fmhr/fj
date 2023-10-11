@@ -1,50 +1,27 @@
 package main
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/fmhr/fj"
 )
 
-func exexute(binaryPath string, language string, seed int) (rtn map[string]float64, err error) {
-	var config fj.Config
-	config.Cmd = "./" + binaryPath
-	config.GenPath = "tools/tarrget/release/gen"
-	config.VisPath = "tools/target/release/vis"
-	config.TesterPath = "tools/target/release/tester"
-	config.InfilePath = "in2/"
-	_, err = os.Stat(config.TesterPath)
+func exexute(config *fj.Config, seed int) (rtn map[string]float64, err error) {
+	// GEN
+	err = fj.Gen(config, seed)
 	if err != nil {
-		config.Reactive = false
-	} else {
-		config.Reactive = true
+		return nil, fj.TraceErrorf("failed to gen: %v", err)
 	}
-	// generate inputfile
-	_, err = os.Stat(config.GenPath)
+	// RUN
+	rtn, err = run(config, seed)
 	if err != nil {
-		return rtn, fmt.Errorf("gen file not found")
+		return nil, fj.TraceErrorf("failed to run: %v", err)
 	}
-	err = fj.Gen(&config, seed)
-	if err != nil {
-		return rtn, fmt.Errorf("failed to generate inputfile: %v", err)
-	}
-	// run
-	if config.Reactive {
-		return fj.ReactiveRun(&config, seed)
-	} else {
-		return fj.RunVis(&config, seed)
-	}
+	return rtn, nil
 }
 
-func checkFileStat(config fj.Config) error {
-	if _, err := os.Stat(config.GenPath); err != nil {
-		return fmt.Errorf("gen file not found")
+func run(config *fj.Config, seed int) (map[string]float64, error) {
+	if config.Reactive {
+		return fj.ReactiveRun(config, seed)
+	} else {
+		return fj.RunVis(config, seed)
 	}
-	if _, err := os.Stat(config.TesterPath); err != nil {
-		if _, err := os.Stat(config.VisPath); err != nil {
-			return fmt.Errorf("tester file and vis file not found")
-		}
-	}
-	return nil
 }

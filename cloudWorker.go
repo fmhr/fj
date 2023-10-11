@@ -8,20 +8,33 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
-	"path/filepath"
 )
 
-func sendBinaryToWorker(workerURL, binaryPath, language string, seed int) (rtn map[string]float64, err error) {
+// sendBinaryToWorker はバイナリをワーカーに送信する
+func sendBinaryToWorker(config *Config, seed int) (rtn map[string]float64, err error) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
-	// バイナリの追加
-	file, err := os.Open(binaryPath)
+	// configをJSONに変換
+	configData, err := json.Marshal(config)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open binary file %s: %v", binaryPath, err)
+		return nil, TraceErrorf("failed to marshal config: %v", err)
+	}
+	// JSON configを追加
+	configPart, err := writer.CreateFormField("config")
+	if err != nil {
+		return nil, TraceErrorf("failed to create form field for config: %v", err)
+	}
+	configPart.Write(configData)
+
+	// バイナリの追加
+	file, err := os.Open(config.BinaryPath)
+	if err != nil {
+		return nil, TraceError(fmt.Sprintf("failed to open binary file %s: %v", config.BinaryPath, err))
 	}
 	defer file.Close()
-	part, err := writer.CreateFormFile("binary", filepath.Base(binaryPath))
+
+	part, err := writer.CreateFormFile("binary", config.BinaryPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create form file for binary: %v", err)
 	}
@@ -30,17 +43,14 @@ func sendBinaryToWorker(workerURL, binaryPath, language string, seed int) (rtn m
 	if err != nil {
 		return nil, fmt.Errorf("failed to write binary to form file: %v", err)
 	}
-	// filename
-	writer.CreateFormFile("filename", file.Name())
-	// language
-	writer.WriteField("langiage", language)
+
 	// seed
 	writer.WriteField("seed", fmt.Sprintf("%d", seed))
 
 	writer.Close()
 
 	// リクエストの送信
-	req, err := http.NewRequest("POST", workerURL, body)
+	req, err := http.NewRequest("POST", config.WorkerURL, body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create HTTP request: %v", err)
 	}
@@ -65,6 +75,15 @@ func sendBinaryToWorker(workerURL, binaryPath, language string, seed int) (rtn m
 	if err := json.Unmarshal(bodyBytes, &rtn); err != nil {
 		return nil, fmt.Errorf("failed to parse response body: %v", err)
 	}
-
 	return rtn, nil
+}
+
+func SendBinaryToWorker(config *Config, seed int) (rtn map[string]float64, err error) {
+	if config.WorkerURL == "" {
+		return nil, TraceError("worker URL is not specified")
+	}
+	if config.BinaryPath == "" {
+		return nil, TraceError("binary path is not specified")
+	}
+	return sendBinaryToWorker(config, seed)
 }

@@ -1,8 +1,8 @@
 FROM golang:1.21 as workerbuild
 WORKDIR /work
 RUN git clone -b make-builds  https://github.com/fmhr/fj.git \
-    cd fj/cmd/worker \
-    && CGO_ENABLED go build -o /work/worker
+    && cd fj/cmd/worker \
+    && CGO_ENABLED=0 go build -o /work/worker
 
 
 FROM debian:buster

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -54,8 +55,9 @@ func CloudCompile(config *Config) (string, error) {
 		return "", fmt.Errorf("error writing to form file: %w", err)
 	}
 	// filename
+	fileName := filepath.Base(config.SourcePath)
 	binaryName := filepath.Base(config.BinaryPath)
-	writer.WriteField("srcFile", file.Name())
+	writer.WriteField("srcFile", fileName)
 	writer.WriteField("compileCmd", config.CompileCmd)
 	writer.WriteField("binaryFile", binaryName)
 
@@ -84,17 +86,18 @@ func CloudCompile(config *Config) (string, error) {
 	}
 
 	// 受信後
+	// バイナリを保存 保存場所はOSの一時フォルダ
 	out, err := os.CreateTemp("", "binary-*")
 	if err != nil {
 		return "", fmt.Errorf("error createing output file: %w", err)
 	}
 	defer out.Close()
 
-	// バイナリを保存
 	_, err = io.Copy(out, resp.Body)
 	if err != nil {
 		return "", fmt.Errorf("error saving binary: %w", err)
 	}
-
+	log.Println("binary saved to", out.Name())
+	config.BinaryPath = out.Name()
 	return out.Name(), nil
 }
