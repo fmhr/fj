@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -50,7 +51,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	_, err = io.Copy(tmpFile, file)
 	if err != nil {
-		errmsg := "Failed to copy the binary to the temp file"
+		errmsg := fmt.Sprint("Failed to copy the binary to the temp file", err.Error())
 		http.Error(w, errmsg, http.StatusInternalServerError)
 		return
 	}
