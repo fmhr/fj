@@ -3,7 +3,6 @@ package fj
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -14,24 +13,25 @@ import (
 // normal モード用
 func normalRun(cnf *Config, seed int) ([]byte, error) {
 	if cnf.Cmd == "" {
-		return []byte{}, fmt.Errorf("config.Cmd is empty")
+		return nil, fmt.Errorf("config.Cmd is empty")
 	}
 	inputfile := filepath.Join(cnf.InfilePath, fmt.Sprintf("%04d.txt", seed))
+	outputfile := filepath.Join(cnf.OutfilePath, fmt.Sprintf("%04d.out", seed))
+
 	if _, err := os.Stat(inputfile); err != nil {
 		return []byte{}, fmt.Errorf("input file [%s] does not exist", inputfile)
 	}
-	outputfile := filepath.Join(cnf.OutfilePath, fmt.Sprintf("%04d.out", seed))
 
-	err := checkOutputFolder(cnf.OutfilePath)
-	if err != nil {
-		log.Fatal(err)
+	if err := checkOutputFolder(cnf.OutfilePath); err != nil {
+		return nil, err
 	}
 	if !isExist(inputfile) {
 		return nil, fmt.Errorf("input file [%s] does not exist", inputfile)
 	}
 
-	cmdStr := cnf.Cmd + " < " + inputfile + " > " + outputfile
-	cmd := createComand(cmdStr)
+	cmdArgs := []string{"-c", cnf.Cmd, "<", inputfile, ">", outputfile}
+	cmd := exec.Command("/bin/sh", cmdArgs...)
+
 	out, err := runCommandWithTimeout(cmd, cnf)
 	if err != nil {
 		return []byte{}, fmt.Errorf("cmd.Run() for command [%q] failed with: %v", cmd, err)
@@ -65,7 +65,7 @@ func runCommandWithTimeout(cmd *exec.Cmd, cnf *Config) ([]byte, error) {
 		}
 	case err := <-done:
 		if err != nil {
-			return out.Bytes(), fmt.Errorf("cmd.Wait() failed with: %v", err)
+			return out.Bytes(), fmt.Errorf("cmd.Wait() failed with: %v stderr:%v", err, out.String())
 		}
 	}
 

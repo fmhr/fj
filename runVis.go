@@ -15,7 +15,7 @@ func RunVis(cnf *Config, seed int) (map[string]float64, error) {
 func runVis(cnf *Config, seed int) (map[string]float64, error) {
 	out, err := normalRun(cnf, seed)
 	if err != nil {
-		return nil, fmt.Errorf("failed running with seed%d: %v", seed, err)
+		return nil, TraceError(fmt.Sprintf("failed running with seed%d: %v", seed, err))
 	}
 	//log.Println("run:", string(out))
 
