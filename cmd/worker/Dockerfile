@@ -13,9 +13,8 @@ WORKDIR /work
 # ------------------------------------------------------------------
 RUN wget -q https://img.atcoder.jp/ahc024/AU5KcDyn.zip -O tools.zip 
 # ------------------------------------------------------------------
-RUN unzip tools.zip 
-
-RUN (cd tools && cargo build --release --quiet)
+RUN unzip tools.zip \
+    && (cd tools && cargo build --release --quiet)
 
 
 # 3. ビルド用のイメージ
@@ -24,5 +23,5 @@ WORKDIR /work
 COPY --from=workerbuild /work/worker /work/worker
 COPY --from=toolsbuilder /work/tools/target/release/* /work/tools/target/release/
 
-EXPOSE 8080
-CMD ["/app/worker"]
+EXPOSE $PORT
+CMD ["/work/worker"]
