@@ -26,6 +26,9 @@ func normalRun(cnf *Config, seed int) ([]byte, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	if !isExist(inputfile) {
+		return nil, fmt.Errorf("input file [%s] does not exist", inputfile)
+	}
 
 	cmdStr := cnf.Cmd + " < " + inputfile + " > " + outputfile
 	cmd := createComand(cmdStr)
@@ -77,4 +80,9 @@ func checkOutputFolder(dir string) error {
 		}
 	}
 	return nil
+}
+
+func isExist(file string) bool {
+	_, err := os.Stat(file)
+	return err == nil
 }

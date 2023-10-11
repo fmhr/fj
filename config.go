@@ -15,6 +15,7 @@ type Config struct {
 	Language           string   `toml:"Language"`
 	SourcePath         string   `toml:"SourcePath"`
 	BinaryPath         string   `toml:"BinaryPath"`
+	BinaryName         string   `toml:"BinaryName"`
 	CompileCmd         string   `toml:"CompileCmd"`
 	Cmd                string   `toml:"Cmd"`
 	Args               []string `toml:"Args"`

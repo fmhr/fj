@@ -44,15 +44,22 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	tmpFile, err := os.CreateTemp("", "uploaded-binary-*")
+	//	tmpFile, err := os.CreateTemp("", "uploaded-binary-*")
+	//if err != nil {
+	//errmsg := fmt.Sprint("Failed to create a temp file", err.Error())
+	//http.Error(w, errmsg, http.StatusInternalServerError)
+	//return
+	//}
+	//defer tmpFile.Close()
+
+	binaryPath, err := os.Create(config.BinaryName)
 	if err != nil {
-		errmsg := fmt.Sprint("Failed to create a temp file", err.Error())
+		errmsg := fmt.Sprint("Failed to create a binary file", err.Error())
 		http.Error(w, errmsg, http.StatusInternalServerError)
 		return
 	}
-	defer tmpFile.Close()
 
-	_, err = io.Copy(tmpFile, file)
+	_, err = io.Copy(binaryPath, file)
 	if err != nil {
 		errmsg := fmt.Sprint("Failed to copy the binary to the temp file", err.Error())
 		http.Error(w, errmsg, http.StatusInternalServerError)
