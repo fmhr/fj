@@ -40,7 +40,6 @@ func normalRun(cnf *Config, seed int) ([]byte, error) {
 }
 
 func runCommandWithTimeout(cmd *exec.Cmd, cnf *Config) ([]byte, error) {
-	timeout := time.Duration(cnf.TimeLimitMS) * time.Millisecond
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &out
@@ -55,7 +54,7 @@ func runCommandWithTimeout(cmd *exec.Cmd, cnf *Config) ([]byte, error) {
 	}()
 
 	select {
-	case <-time.After(timeout):
+	case <-time.After(time.Duration(cnf.TimeLimitMS) * time.Millisecond):
 		if cmd.Process != nil {
 			err := cmd.Process.Kill()
 			if err != nil {
