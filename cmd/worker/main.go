@@ -70,6 +70,13 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, errmsg, http.StatusInternalServerError)
 		return
 	}
+	// 実行権限を与える
+	err = os.Chmod(binaryPath.Name(), 0755)
+	if err != nil {
+		errmsg := fmt.Sprint("Failed to chmod", err.Error())
+		http.Error(w, errmsg, http.StatusInternalServerError)
+		return
+	}
 
 	// seed
 	seedString := r.FormValue("seed")
