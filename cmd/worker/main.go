@@ -51,6 +51,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	//return
 	//}
 	//defer tmpFile.Close()
+	if config.BinaryName == "" {
+		errmsg := fmt.Sprint("BinaryName is empty")
+		http.Error(w, errmsg, http.StatusInternalServerError)
+		return
+	}
 
 	binaryPath, err := os.Create(config.BinaryName)
 	if err != nil {
