@@ -29,8 +29,8 @@ func normalRun(cnf *Config, seed int) ([]byte, error) {
 		return nil, fmt.Errorf("input file [%s] does not exist", inputfile)
 	}
 
-	cmdArgs := []string{"-c", cnf.Cmd, "<", inputfile, ">", outputfile}
-	cmd := exec.Command("/bin/sh", cmdArgs...)
+	cmdStr := fmt.Sprintf("%s < %s > %s", cnf.Cmd, inputfile, outputfile)
+	cmd := exec.Command("/bin/sh", "-c", cmdStr)
 
 	out, err := runCommandWithTimeout(cmd, cnf)
 	if err != nil {
