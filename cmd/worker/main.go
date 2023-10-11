@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -21,7 +20,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	// マルチパートリーダー
 	err := r.ParseMultipartForm(32 << 20) // 32MB
 	if err != nil {
-		http.Error(w, "Failed to parse multipart form", http.StatusBadRequest)
+		errmsg := fmt.Sprint("Failed to parse multipart form:", err.Error())
+		http.Error(w, errmsg, http.StatusBadRequest)
 		return
 	}
 
@@ -30,21 +30,24 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	var config fj.Config
 	err = json.Unmarshal([]byte(configPart), &config)
 	if err != nil {
-		http.Error(w, "Failed to unmarshal config", http.StatusBadRequest)
+		errmsg := fmt.Sprint("Failed to unmarshal config:", err.Error())
+		http.Error(w, errmsg, http.StatusBadRequest)
 		return
 	}
 
 	// バイナリの受け取り
 	file, _, err := r.FormFile("binary")
 	if err != nil {
-		http.Error(w, "Failed to get the binary", http.StatusBadRequest)
+		errmsg := fmt.Sprint("Failed to get the binary:", err.Error())
+		http.Error(w, errmsg, http.StatusBadRequest)
 		return
 	}
 	defer file.Close()
 
 	tmpFile, err := os.CreateTemp("", "uploaded-binary-*")
 	if err != nil {
-		http.Error(w, "Failed to create a temp file", http.StatusInternalServerError)
+		errmsg := fmt.Sprint("Failed to create a temp file", err.Error())
+		http.Error(w, errmsg, http.StatusInternalServerError)
 		return
 	}
 	defer tmpFile.Close()
@@ -60,19 +63,21 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	seedString := r.FormValue("seed")
 	seedInt, err := strconv.Atoi(seedString)
 	if err != nil {
-		log.Printf("seed not specified %s", seedString)
-		http.Error(w, "Seed not specified", http.StatusBadRequest)
+		errmsg := fmt.Sprint("Failed to convert seed to int", err.Error())
+		http.Error(w, errmsg, http.StatusBadRequest)
 		return
 	}
 	out, err := exexute(&config, seedInt)
 	if err != nil {
-		http.Error(w, "Failed to execute", http.StatusInternalServerError)
+		errmsg := fmt.Sprint("Failed to execute", err.Error())
+		http.Error(w, errmsg, http.StatusInternalServerError)
 		return
 	}
 	// json
 	jsonData, err := json.Marshal(out)
 	if err != nil {
-		http.Error(w, "Failed to marshal", http.StatusInternalServerError)
+		errmsg := fmt.Sprint("Failed to marshal", err.Error())
+		http.Error(w, errmsg, http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
