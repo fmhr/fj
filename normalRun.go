@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"time"
 )
 
@@ -29,8 +30,14 @@ func normalRun(cnf *Config, seed int) ([]byte, error) {
 		return nil, fmt.Errorf("input file [%s] does not exist", inputfile)
 	}
 
-	cmdStr := fmt.Sprintf("%s < %s > %s", cnf.Cmd, inputfile, outputfile)
-	cmd := exec.Command("/bin/sh", "-c", cmdStr)
+	var cmd *exec.Cmd
+	if runtime.GOOS == "windows" {
+		cmdStr := fmt.Sprintf("%s < %s > %s", cnf.Cmd, inputfile, outputfile)
+		cmd = exec.Command("cmd", "/C", cmdStr)
+	} else {
+		cmdStr := fmt.Sprintf("%s < %s > %s", cnf.Cmd, inputfile, outputfile)
+		cmd = exec.Command("/bin/sh", "-c", cmdStr)
+	}
 
 	out, err := runCommandWithTimeout(cmd, cnf)
 	if err != nil {
