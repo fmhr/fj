@@ -55,12 +55,9 @@ func CloudCompile(config *Config) (string, error) {
 	if err != nil {
 		return "", ErrorTrace("error writing to form file: %w", err)
 	}
-	// filename
-	fileName := filepath.Base(config.Source)
-	binaryName := filepath.Base(config.Binary)
-	writer.WriteField("srcFile", fileName)
+	writer.WriteField("sourcePath", config.Source)
 	writer.WriteField("compileCmd", config.CompileCmd)
-	writer.WriteField("binaryFile", binaryName)
+	writer.WriteField("binaryPath", config.Binary)
 
 	writer.Close()
 

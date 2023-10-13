@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
@@ -41,21 +42,31 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// ソースファイル名
-	srcFileName := r.FormValue("srcFile")
-	if srcFileName == "" {
+	source := r.FormValue("sourcePath")
+	if source == "" {
 		http.Error(w, "Source file not specified", http.StatusBadRequest)
 		return
 	}
-	// バイナリファイル名
-	binaryFileName := r.FormValue("binaryFile")
+	err = createFileWithDirs(source, nil)
+	if err != nil {
+		http.Error(w, "Failed to create source file", http.StatusInternalServerError)
+		return
+	}
 
+	// バイナリファイル名
+	binaryFileName := r.FormValue("binaryPath")
+	err = createFileWithDirs(binaryFileName, nil)
+	if err != nil {
+		http.Error(w, "Failed to create binary file", http.StatusInternalServerError)
+		return
+	}
 	srcBytes, err := io.ReadAll(file)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to read the uploaded file: %v", err)
 		http.Error(w, msg, http.StatusInternalServerError)
 		return
 	}
-	err = os.WriteFile(srcFileName, srcBytes, 0644)
+	err = os.WriteFile(source, srcBytes, 0644)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to write the uploaded file to disk: %v", err)
 		http.Error(w, msg, http.StatusInternalServerError)
@@ -79,7 +90,7 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// ソースファイルとバイナリファイルを削除
-	defer os.Remove(srcFileName)
+	defer os.Remove(source)
 	defer os.Remove(binaryFileName)
 
 	// バイナリをレスポンスとして返す
@@ -96,4 +107,21 @@ func main() {
 	}
 	fmt.Println("Server started on :8080")
 	http.ListenAndServe(":"+port, nil)
+}
+
+func createFileWithDirs(path string, data []byte) error {
+	dir := filepath.Dir(path)
+
+	// ディレクトリが存在しない場合は作成
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		if err := os.MkdirAll(dir, 0777); err != nil {
+			return fmt.Errorf("failed to create directory: %v", err)
+		}
+	}
+
+	// ファイルを作成
+	if err := os.WriteFile(path, data, 0644); err != nil {
+		return fmt.Errorf("failed to create file: %v", err)
+	}
+	return nil
 }
