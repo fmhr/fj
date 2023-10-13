@@ -60,7 +60,7 @@ func Fj() {
 		// select run
 		switch kingpin.MustParse(fj.Parse(os.Args[1:])) {
 		case test.FullCommand():
-			rtn, err := RunSelctor(config, *seed)
+			rtn, err := RunSelector(config, *seed)
 			if err != nil {
 				log.Fatal("Error: ", err)
 			}

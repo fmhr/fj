@@ -44,7 +44,7 @@ func gen(cnf *Config, seed int) error {
 	}
 	// genを実行
 	cmdStr := fmt.Sprintf("%s %s", cnf.GenPath, filename)
-	cmd := createComand(cmdStr)
+	cmd := createCommand(cmdStr)
 	err = cmd.Run()
 	if err != nil {
 		return fmt.Errorf("failed to run gen: %s", err)

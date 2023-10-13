@@ -8,12 +8,12 @@ func exexute(config *fj.Config, seed int) (rtn map[string]float64, err error) {
 	// GEN
 	err = fj.Gen(config, seed)
 	if err != nil {
-		return nil, fj.TraceErrorf("failed to gen: %v", err)
+		return nil, fj.ErrorTrace("failed to gen: %v", err)
 	}
 	// RUN
 	rtn, err = run(config, seed)
 	if err != nil {
-		return nil, fj.TraceErrorf("failed to run: %v", err)
+		return nil, fj.ErrorTrace("failed to run: %v", err)
 	}
 	return rtn, nil
 }

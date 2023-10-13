@@ -18,19 +18,19 @@ func sendBinaryToWorker(config *Config, seed int) (rtn map[string]float64, err e
 	// configをJSONに変換
 	configData, err := json.Marshal(config)
 	if err != nil {
-		return nil, TraceErrorf("failed to marshal config: %v", err)
+		return nil, ErrorTrace("failed to marshal config: %v", err)
 	}
 	// JSON configを追加
 	configPart, err := writer.CreateFormField("config")
 	if err != nil {
-		return nil, TraceErrorf("failed to create form field for config: %v", err)
+		return nil, ErrorTrace("failed to create form field for config: %v", err)
 	}
 	configPart.Write(configData)
 
 	// バイナリの追加
 	file, err := os.Open(config.BinaryPath)
 	if err != nil {
-		return nil, TraceError(fmt.Sprintf("failed to open binary file %s: %v", config.BinaryPath, err))
+		return nil, ErrorTrace(fmt.Sprintf("failed to open binary file %s:", config.BinaryPath), err)
 	}
 	defer file.Close()
 
@@ -66,9 +66,9 @@ func sendBinaryToWorker(config *Config, seed int) (rtn map[string]float64, err e
 	if resp.StatusCode != http.StatusOK {
 		bodyBytes, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return nil, TraceErrorf("error reading response body: %w", err)
+			return nil, ErrorTrace("error reading response body: %w", err)
 		}
-		return nil, TraceError(fmt.Sprintf("error response status code:%d resp:%s", resp.StatusCode, string(bodyBytes)))
+		return nil, ErrorTrace(fmt.Sprintf("error response status code:%d resp:%s", resp.StatusCode, string(bodyBytes)), err)
 	}
 
 	// レスポンスボディから文字列を取り出す
@@ -84,10 +84,10 @@ func sendBinaryToWorker(config *Config, seed int) (rtn map[string]float64, err e
 
 func SendBinaryToWorker(config *Config, seed int) (rtn map[string]float64, err error) {
 	if config.WorkerURL == "" {
-		return nil, TraceError("worker URL is not specified")
+		return nil, ErrorTrace("", fmt.Errorf("worker URL is not specified"))
 	}
 	if config.BinaryPath == "" {
-		return nil, TraceError("binary path is not specified")
+		return nil, ErrorTrace("", fmt.Errorf("binary path is not specified"))
 	}
 	return sendBinaryToWorker(config, seed)
 }
