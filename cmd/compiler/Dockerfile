@@ -1,7 +1,7 @@
 FROM golang:1.21 as serverbuild
 WORKDIR /app
 RUN git clone -b make-builds https://github.com/fmhr/fj.git /app/fj \
-    && cd fj/cmd/compile-server \
+    && cd fj/cmd/compiler \
     && go build -o /app/server 
 
 # ここからターゲットのコンパイル環境をつくる

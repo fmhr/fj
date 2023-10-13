@@ -67,7 +67,8 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 	cmd := exec.Command(cmds[0], cmds[1:]...)
 	err = cmd.Run()
 	if err != nil {
-		http.Error(w, "Compiration failed", http.StatusBadRequest)
+		msg := fmt.Sprintf("Failed to compile: [%s]%v", cmd.String(), err)
+		http.Error(w, msg, http.StatusBadRequest)
 		return
 	}
 
