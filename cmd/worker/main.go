@@ -61,16 +61,17 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to create binary file", http.StatusInternalServerError)
 		return
 	}
-	binaryPath, err := os.Open(config.Binary)
+	binaryPath, err := os.OpenFile(config.Binary, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0755)
 	if err != nil {
 		errmsg := fmt.Sprint("Failed to open the binary file", err.Error())
 		http.Error(w, errmsg, http.StatusInternalServerError)
 		return
 	}
+	defer binaryPath.Close()
 
 	_, err = io.Copy(binaryPath, file)
 	if err != nil {
-		errmsg := fmt.Sprint("Failed to copy the binary to the temp file", err.Error())
+		errmsg := fmt.Sprint("Failed to copy the binary to the temp file:", err.Error())
 		http.Error(w, errmsg, http.StatusInternalServerError)
 		return
 	}
