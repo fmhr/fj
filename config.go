@@ -10,17 +10,13 @@ import (
 
 const (
 	configFileName = "config.toml"
-	directory      = "fj"
+	directory      = "fj/"
 )
 
 var ErrConfigNotFound = fmt.Errorf("%s not found, please run `fj init`", configFileName)
 
 type Config struct {
 	Language           string   `toml:"Language"`
-	SourcePath         string   `toml:"SourcePath"`
-	BinaryPath         string   `toml:"BinaryPath"`
-	BinaryName         string   `toml:"BinaryName"`
-	CompileCmd         string   `toml:"CompileCmd"`
 	Cmd                string   `toml:"Cmd"`
 	Args               []string `toml:"Args"`
 	Reactive           bool     `toml:"Reactive"`
@@ -33,6 +29,9 @@ type Config struct {
 	Cloud              bool     `toml:"Cloud"`
 	CloudURL           string   `toml:"CloudURL"`
 	CompilerURL        string   `toml:"CompilerURL"`
+	Source             string   `toml:"Source"`
+	CompileCmd         string   `toml:"CompileCmd"`
+	Binary             string   `toml:"Binary"`
 	WorkerURL          string   `toml:"WorkerURL"`
 	ConcurrentRequests int      `toml:"ConcurrentRequests"`
 	TimeLimitMS        uint64   `toml:"TimeLimitMS"`
@@ -41,10 +40,6 @@ type Config struct {
 func newConfig() *Config {
 	return &Config{
 		Language:           "Go",
-		SourcePath:         "src/",
-		BinaryPath:         "bin/",
-		BinaryName:         "main",
-		CompileCmd:         "go build -o bin/main src/main.go",
 		Cmd:                "./bin/main",
 		Args:               []string{},
 		Reactive:           false,
@@ -57,6 +52,9 @@ func newConfig() *Config {
 		Cloud:              false,
 		CloudURL:           "http://localhost:8888",
 		CompilerURL:        "",
+		CompileCmd:         "go build -o bin/main src/main.go",
+		Source:             "src/main.go",
+		Binary:             "bin/main",
 		WorkerURL:          "",
 		ConcurrentRequests: 1000,
 		TimeLimitMS:        10000,
@@ -64,7 +62,7 @@ func newConfig() *Config {
 }
 
 func GenerateConfig() {
-	if _, err := os.Stat(configFileName); err == nil {
+	if _, err := os.Stat(directory + configFileName); err == nil {
 		if *force {
 			// if force flag is set, remove config file
 			err := os.Remove(configFileName)
@@ -94,7 +92,7 @@ func generateConfig(conf *Config) error {
 		}
 	}
 	// create config file
-	file, err := os.Create(configFileName)
+	file, err := os.Create(directory + configFileName)
 	if err != nil {
 		return err
 	}
@@ -120,7 +118,7 @@ func LoadConfigFile() (*Config, error) {
 	if err != nil {
 		return conf, err
 	}
-	log.Println("config:", conf.BinaryName)
+	log.Println("config:", conf.Binary)
 	return conf, checkConfigFile(conf)
 }
 

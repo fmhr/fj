@@ -28,13 +28,13 @@ func sendBinaryToWorker(config *Config, seed int) (rtn map[string]float64, err e
 	configPart.Write(configData)
 
 	// バイナリの追加
-	file, err := os.Open(config.BinaryPath)
+	file, err := os.Open(config.Binary)
 	if err != nil {
-		return nil, ErrorTrace(fmt.Sprintf("failed to open binary file %s:", config.BinaryPath), err)
+		return nil, ErrorTrace(fmt.Sprintf("failed to open binary file %s:", config.Binary), err)
 	}
 	defer file.Close()
 
-	part, err := writer.CreateFormFile("binary", config.BinaryPath)
+	part, err := writer.CreateFormFile("binary", config.Binary)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create form file for binary: %v", err)
 	}
@@ -86,7 +86,7 @@ func SendBinaryToWorker(config *Config, seed int) (rtn map[string]float64, err e
 	if config.WorkerURL == "" {
 		return nil, ErrorTrace("", fmt.Errorf("worker URL is not specified"))
 	}
-	if config.BinaryPath == "" {
+	if config.Binary == "" {
 		return nil, ErrorTrace("", fmt.Errorf("binary path is not specified"))
 	}
 	return sendBinaryToWorker(config, seed)

@@ -12,10 +12,10 @@ import (
 )
 
 func checkConfigCloudCompile(config *Config) error {
-	if config.SourcePath == "" {
+	if config.Source == "" {
 		return ErrorTrace("error: [SourcePath] must not be empty", nil)
 	}
-	if config.BinaryPath == "" {
+	if config.Binary == "" {
 		return ErrorTrace("error: [BinaryPath] must not be empty", nil)
 	}
 	if config.CompileCmd == "" {
@@ -39,7 +39,7 @@ func CloudCompile(config *Config) (string, error) {
 		return "", ErrorTrace("invalid config: %w", err)
 	}
 	// ソースファイルを開く
-	file, err := os.Open(config.SourcePath)
+	file, err := os.Open(config.Source)
 	if err != nil {
 		return "", ErrorTrace("error opening file: %w", err)
 	}
@@ -47,7 +47,7 @@ func CloudCompile(config *Config) (string, error) {
 	// マルチパートフォームを作成
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
-	part, err := writer.CreateFormFile("file", filepath.Base(config.SourcePath))
+	part, err := writer.CreateFormFile("file", filepath.Base(config.Source))
 	if err != nil {
 		return "", ErrorTrace("error creating form file: %w", err)
 	}
@@ -56,8 +56,8 @@ func CloudCompile(config *Config) (string, error) {
 		return "", ErrorTrace("error writing to form file: %w", err)
 	}
 	// filename
-	fileName := filepath.Base(config.SourcePath)
-	binaryName := filepath.Base(config.BinaryPath)
+	fileName := filepath.Base(config.Source)
+	binaryName := filepath.Base(config.Binary)
 	writer.WriteField("srcFile", fileName)
 	writer.WriteField("compileCmd", config.CompileCmd)
 	writer.WriteField("binaryFile", binaryName)
@@ -99,6 +99,6 @@ func CloudCompile(config *Config) (string, error) {
 		return "", ErrorTrace("error saving binary: %w", err)
 	}
 	log.Println("binary saved to", out.Name())
-	config.BinaryPath = out.Name()
+	config.Binary = out.Name()
 	return out.Name(), nil
 }
