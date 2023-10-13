@@ -12,12 +12,12 @@ func RunVis(cnf *Config, seed int) (map[string]float64, error) {
 
 // runVis は指定された設定とシードに基づいてコマンドを実行して、
 // その結果をvisに渡して、両方の結果を返す
+// 通常の問題（reactive=false)で使う
 func runVis(cnf *Config, seed int) (map[string]float64, error) {
 	out, err := normalRun(cnf, seed)
 	if err != nil {
 		return nil, TraceError(fmt.Sprintf("failed running with seed%d: %v", seed, err))
 	}
-	//log.Println("run:", string(out))
 
 	pair, err := ExtractKeyValuePairs(string(out))
 	if err != nil {
@@ -31,7 +31,6 @@ func runVis(cnf *Config, seed int) (map[string]float64, error) {
 	if err != nil {
 		return nil, fmt.Errorf("vis failed: %v", err)
 	}
-
 	sc, err := extractData(string(outVis))
 	if err != nil {
 		return nil, fmt.Errorf("extractData failed: %v", err)
@@ -61,6 +60,7 @@ func mapString(data map[string]float64) string {
 	return str
 }
 
+// vis is a wrapper for vis command
 func vis(cnf *Config, infile, outfile string) ([]byte, error) {
 	cmdStr := fmt.Sprintf(cnf.VisPath+" %s %s", infile, outfile)
 	cmd := createComand(cmdStr)

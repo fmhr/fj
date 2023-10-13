@@ -5,6 +5,7 @@ import (
 	"os"
 )
 
+// ReactiveRun はreactive=trueのときに使う
 func ReactiveRun(ctf *Config, seed int) (map[string]float64, error) {
 	rtn, err := reactiveRun(ctf, seed)
 	if err != nil {

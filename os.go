@@ -5,6 +5,7 @@ import (
 	"runtime"
 )
 
+// OS別のコマンド実行
 func createComand(cmdStr string) *exec.Cmd {
 	if runtime.GOOS == "windows" {
 		return exec.Command("cmd", "/C", cmdStr)

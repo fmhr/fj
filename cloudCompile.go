@@ -34,6 +34,7 @@ func checkConfigCloudCompile(config *Config) error {
 //  4. file=ソースファイル, compileCmd=コンパイルコマンド,
 //     srcFile=ソースファイル名, binaryFile=バイナリファイル名
 func CloudCompile(config *Config) (string, error) {
+	log.Println("cloud compiling...")
 	if err := checkConfigCloudCompile(config); err != nil {
 		return "", fmt.Errorf("invalid config: %w", err)
 	}

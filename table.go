@@ -33,6 +33,7 @@ func DisplayTable(data []map[string]float64) {
 	table.Render()
 }
 
+// sortBySeed はデータをseedでソートする
 func sortBySeed(data *[]map[string]float64) {
 	sort.Slice(*data, func(i, j int) bool {
 		return (*data)[i]["seed"] < (*data)[j]["seed"]
