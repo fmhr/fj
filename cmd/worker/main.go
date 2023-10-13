@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/fmhr/fj"
@@ -55,10 +56,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "BinaryName is empty", http.StatusInternalServerError)
 		return
 	}
-
-	binaryPath, err := os.Create(config.Binary)
+	err = createFileWithDirs(config.Binary, nil)
 	if err != nil {
-		errmsg := fmt.Sprint("Failed to create a binary file", err.Error())
+		http.Error(w, "Failed to create binary file", http.StatusInternalServerError)
+		return
+	}
+	binaryPath, err := os.Open(config.Binary)
+	if err != nil {
+		errmsg := fmt.Sprint("Failed to open the binary file", err.Error())
 		http.Error(w, errmsg, http.StatusInternalServerError)
 		return
 	}
@@ -105,4 +110,21 @@ func handler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc("/upload", handler)
 	http.ListenAndServe(":8080", nil)
+}
+
+func createFileWithDirs(path string, data []byte) error {
+	dir := filepath.Dir(path)
+
+	// ディレクトリが存在しない場合は作成
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		if err := os.MkdirAll(dir, 0777); err != nil {
+			return fmt.Errorf("failed to create directory: %v", err)
+		}
+	}
+
+	// ファイルを作成
+	if err := os.WriteFile(path, data, 0644); err != nil {
+		return fmt.Errorf("failed to create file: %v", err)
+	}
+	return nil
 }

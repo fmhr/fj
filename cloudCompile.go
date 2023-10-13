@@ -96,6 +96,5 @@ func CloudCompile(config *Config) (string, error) {
 		return "", ErrorTrace("error saving binary: %w", err)
 	}
 	log.Println("binary saved to", out.Name())
-	config.Binary = out.Name()
 	return out.Name(), nil
 }
