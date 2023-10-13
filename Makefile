@@ -1,4 +1,3 @@
-
 # ビルド用の変数
 BINARY_NAME=fj
 BUILD_DIR=bin
