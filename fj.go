@@ -20,6 +20,8 @@ var (
 	setup = fj.Command("init", "Generate config file.")
 	force = setup.Flag("force", "Force generate config file.").Default("false").Bool()
 
+	setupcloud = fj.Command("setupCloud", "Generate Dockerfile and gcloud build files for cloud mode.")
+
 	test  = fj.Command("test", "Run test case.")
 	seed  = test.Arg("seed", "Seed value.").Default("0").Int()
 	args1 = test.Flag("args", "Command line arguments.").Strings()
@@ -42,6 +44,9 @@ func Fj() {
 	// Setup generate config file
 	case setup.FullCommand():
 		GenerateConfig()
+	case setupcloud.FullCommand():
+		mkDirCompilerBase()
+		mkDirWorkerBase()
 	// Test run test case
 	case test.FullCommand(), tests.FullCommand():
 		config, err := LoadConfigFile()
