@@ -14,6 +14,7 @@ OSにはLinux(Windows Subsystem for Linux)かmacOSを推奨しますが、Window
 - リアクティブ問題に対応
 - 並列実行
 - 実行時に"N=3"のような標準エラー出力をすると、自動で収集してテストケースごとに表示する
+- Googole Cloud Runを使った並列テスト
 
 
 ## 使用方法
@@ -43,6 +44,8 @@ Cloud = false        準備中
 CloudURL = 'http://localhost:8888' 準備中
 TimeLimitMS = 5000     タイムアウト時間。コンテストのTLEではなく無限ループなどで終了しない時用
 ```
+
+## Google Cloud Runを使った並列テスト
 
 
 ## サンプル 
