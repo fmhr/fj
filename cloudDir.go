@@ -48,7 +48,7 @@ var workersGcloudbuild string
 var workersLocal string
 
 func mkDirWorkerBase() {
-	targetDir := "./fj/workers/"
+	targetDir := "./fj/worker/"
 
 	if _, err := os.Stat(targetDir); os.IsNotExist(err) {
 		if err := os.MkdirAll(targetDir, 0777); err != nil {
