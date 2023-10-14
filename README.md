@@ -29,24 +29,6 @@ OSにはLinux(Windows Subsystem for Linux)かmacOSを推奨しますが、Window
 ```
 fj inti
 ```
-設定ファイル(fj_config.toml)の設定例
-```
-Cmd = './bin/main'  実行時のコマンド
-Args = []           必要に応じて設定
-Reactive = false    リアクティブ問題のときはtrue
-TesterPath = 'tools/target/release/tester'   
-VisPath = 'tools/target/release/vis'
-GenPath = 'tools/target/release/gen'
-InfilePath = 'tools/in/'
-OutfilePath = 'out/'
-Jobs = 7             並列実行数 CPUコア数以下がいい
-Cloud = false        準備中
-CloudURL = 'http://localhost:8888' 準備中
-TimeLimitMS = 5000     タイムアウト時間。コンテストのTLEではなく無限ループなどで終了しない時用
-```
-
-## Google Cloud Runを使った並列テスト
-
 
 ## サンプル 
 
@@ -66,3 +48,34 @@ seed(0~99)をテスト
 ```
 fj tests -e 100
 ```
+
+
+設定ファイル(fj/config.toml)の設定例
+```
+Cmd = './bin/main'  実行時のコマンド
+Args = []           必要に応じて設定
+Reactive = false    リアクティブ問題のときはtrue
+TesterPath = 'tools/target/release/tester'   
+VisPath = 'tools/target/release/vis'
+GenPath = 'tools/target/release/gen'
+InfilePath = 'tools/in/'
+OutfilePath = 'out/'
+Jobs = 7             並列実行数 CPUコア数以下がいい
+Cloud = false        準備中
+CloudURL = 'http://localhost:8888' 準備中
+TimeLimitMS = 5000     タイムアウト時間。コンテストのTLEではなく無限ループなどで終了しない時用
+```
+
+## Google Cloud Runを使った並列テスト
+
+### ローカルでテストする。
+Gcloudで動かす前に、ローカルでテストすることをおすすめします。
+#### 1. Docker Desktopをインストールする。
+[https://docs.docker.com/engine/install/]を参照してインストールしてください。
+#### 2. fj setupCloudを実行する。
+1. ```fj setupCloud ```を実行して必要なDockerfileを生成します。
+2. ./fj/compiler/Dockerfile を編集してください。
+  自分の使う環境に合わせてDockerfileを編集してください。
+3. ./fj/compiler/に移動して、localbuild.sh を実行してください。
+  実行権限がない場合は、chmod +x ./fj/compiler/localbuild.shを実行してください。
+4. 同様に ./fj/worker/に移動して、localbuild.sh を実行してください。

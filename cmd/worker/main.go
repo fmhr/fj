@@ -109,7 +109,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/upload", handler)
+	http.HandleFunc("/worker", handler)
 	http.ListenAndServe(":8080", nil)
 }
 

@@ -100,7 +100,7 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/compile", compileHandler)
+	http.HandleFunc("/compiler", compileHandler)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
