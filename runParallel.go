@@ -20,7 +20,7 @@ func RunParallel(cnf *Config, seeds []int) {
 	if cnf.Cloud {
 		concurrentNum = maxInt(1, maxInt(concurrentNum, cnf.ConcurrentRequests))
 	}
-	log.Printf("Jobs: %d\n", concurrentNum)
+	//log.Printf("Jobs: %d\n", concurrentNum)
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, concurrentNum)
 	datas := make([]map[string]float64, 0, len(seeds))
@@ -73,10 +73,8 @@ func RunParallel(cnf *Config, seeds []int) {
 		}(seed)
 	}
 	wg.Wait()
-	close(errorChan)
-
 	fmt.Fprintf(os.Stderr, "\n") // Newline after progress bar
-
+	close(errorChan)
 	for err := range errorChan {
 		log.Println(err)
 	}
@@ -86,6 +84,7 @@ func RunParallel(cnf *Config, seeds []int) {
 		//fmt.Println(datas[i])
 		sumScore += datas[i]["Score"]
 	}
+	//	log.Println(datas)
 	DisplayTable(datas)
 	fmt.Fprintf(os.Stderr, "sumScore=%.2f\n", sumScore)
 	fmt.Printf("%.2f\n", sumScore)

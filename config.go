@@ -2,7 +2,6 @@ package fj
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/pelletier/go-toml/v2"
@@ -119,7 +118,7 @@ func LoadConfigFile() (*Config, error) {
 	if err != nil {
 		return conf, err
 	}
-	log.Println("config:", conf.Binary)
+	//log.Println("config:", conf.Binary)
 	return conf, checkConfigFile(conf)
 }
 

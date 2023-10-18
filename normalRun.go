@@ -47,12 +47,12 @@ func normalRun(cnf *Config, seed int) ([]byte, error) {
 }
 
 func runCommandWithTimeout(cmd *exec.Cmd, cnf *Config) ([]byte, error) {
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	cmd.Stderr = &out
+	var stdoutBuf, stderrBuf bytes.Buffer
+	cmd.Stdout = &stdoutBuf
+	cmd.Stderr = &stderrBuf
 
 	if err := cmd.Start(); err != nil {
-		return out.Bytes(), fmt.Errorf("cmd.Start() failed with: %v", err)
+		return nil, fmt.Errorf("cmd.Start() failed with: %v", err)
 	}
 
 	done := make(chan error, 1)
@@ -65,17 +65,19 @@ func runCommandWithTimeout(cmd *exec.Cmd, cnf *Config) ([]byte, error) {
 		if cmd.Process != nil {
 			err := cmd.Process.Kill()
 			if err != nil {
-				return out.Bytes(), fmt.Errorf("failed to kill process: %v", err)
+				return nil, fmt.Errorf("failed to kill process: %v", err)
 			}
-			return out.Bytes(), fmt.Errorf("process killed as timeout reached")
+			return nil, fmt.Errorf("process killed as timeout reached")
 		}
 	case err := <-done:
 		if err != nil {
-			return out.Bytes(), fmt.Errorf("cmd.Wait() failed with: %v \n%v", err, out.String())
+			return stdoutBuf.Bytes(), fmt.Errorf("cmd.Wait() failed with: %v \n%v", err, stderrBuf.String())
 		}
 	}
-
-	return out.Bytes(), nil
+	// エラーがなければ、標準出力を返す
+	rtn := stdoutBuf.Bytes()
+	rtn = append(rtn, stderrBuf.Bytes()...)
+	return rtn, nil
 }
 
 func checkOutputFolder(dir string) error {

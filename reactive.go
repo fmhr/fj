@@ -2,18 +2,20 @@ package fj
 
 import (
 	"fmt"
-	"os"
+	"log"
 )
 
 // ReactiveRun はreactive=trueのときに使う
 func ReactiveRun(ctf *Config, seed int) (map[string]float64, error) {
 	rtn, err := reactiveRun(ctf, seed)
 	if err != nil {
+		log.Println("reactiveRun error", err)
 		return rtn, err
 	}
-	fmt.Fprintln(os.Stderr, mapString(rtn))
-	fmt.Println(rtn["Score"]) // ここだけ標準出力
-	return nil, nil
+	//fmt.Fprintln(os.Stderr, mapString(rtn))
+	//fmt.Println(rtn["Score"]) // ここだけ標準出力
+	log.Println("haaa")
+	return rtn, nil
 }
 
 func reactiveRun(ctf *Config, seed int) (map[string]float64, error) {
@@ -23,7 +25,7 @@ func reactiveRun(ctf *Config, seed int) (map[string]float64, error) {
 	}
 	pair, err := ExtractKeyValuePairs(string(out))
 	if err != nil {
-		return pair, fmt.Errorf("failed to extract key-value pairs: %v, source: %s", err, string(out))
+		return nil, fmt.Errorf("failed to extract key-value pairs: %v, source: %s", err, string(out))
 	}
 	testerDate, err := extractData((string(out)))
 	if err != nil {
