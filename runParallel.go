@@ -1,6 +1,7 @@
 package fj
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"math"
@@ -10,6 +11,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"syscall"
+	"time"
 )
 
 func RunParallel(cnf *Config, seeds []int) {
@@ -89,6 +91,20 @@ func RunParallel(cnf *Config, seeds []int) {
 	DisplayTable(datas)
 	fmt.Fprintf(os.Stderr, "sumScore=%.2f  log=%f\n", sumScore, math.Log(sumScore))
 	fmt.Printf("%.2f\n", sumScore)
+	if jsonOutput != nil && *jsonOutput {
+		fileContent, err := json.MarshalIndent(datas, "", " ")
+		if err != nil {
+			log.Fatal("json marshal error:", err)
+		}
+		now := time.Now()
+		filename := fmt.Sprintf("fj/result_%s.json", fmt.Sprintf("%04d%02d%02d_%02d%02d%02d", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second()))
+		err = os.WriteFile(filename, fileContent, 0644)
+		if err != nil {
+			log.Fatal("json write error:", err)
+		}
+		log.Println("save json file:", filename)
+	}
+
 }
 
 const progressBarWidth = 40

@@ -13,9 +13,10 @@ func init() {
 }
 
 var (
-	fj    = kingpin.New("fj", "fj is a command line tool for competitive programming.")
-	debug = fj.Flag("debug", "Enable debug mode.").Default("false").Bool()
-	cloud = fj.Flag("cloud", "Enable cloud mode.").Default("false").Bool()
+	fj         = kingpin.New("fj", "fj is a command line tool for competitive programming.")
+	debug      = fj.Flag("debug", "Enable debug mode.").Default("false").Bool()
+	cloud      = fj.Flag("cloud", "Enable cloud mode.").Default("false").Bool()
+	jsonOutput = fj.Flag("json", "Output json format.").Default("false").Bool()
 
 	setup = fj.Command("init", "Generate config file.")
 	force = setup.Flag("force", "Force generate config file.").Default("false").Bool()
