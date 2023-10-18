@@ -14,7 +14,6 @@ func ReactiveRun(ctf *Config, seed int) (map[string]float64, error) {
 	}
 	//fmt.Fprintln(os.Stderr, mapString(rtn))
 	//fmt.Println(rtn["Score"]) // ここだけ標準出力
-	log.Println("haaa")
 	return rtn, nil
 }
 

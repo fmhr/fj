@@ -3,6 +3,7 @@ package fj
 import (
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"os/signal"
 	"runtime"
@@ -86,7 +87,7 @@ func RunParallel(cnf *Config, seeds []int) {
 	}
 	//	log.Println(datas)
 	DisplayTable(datas)
-	fmt.Fprintf(os.Stderr, "sumScore=%.2f\n", sumScore)
+	fmt.Fprintf(os.Stderr, "sumScore=%.2f  log=%f\n", sumScore, math.Log(sumScore))
 	fmt.Printf("%.2f\n", sumScore)
 }
 
