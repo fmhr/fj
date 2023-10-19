@@ -23,7 +23,7 @@ func RunParallel(cnf *Config, seeds []int) {
 	if cnf.Cloud {
 		concurrentNum = maxInt(1, maxInt(concurrentNum, cnf.ConcurrentRequests))
 	}
-	//log.Printf("Jobs: %d\n", concurrentNum)
+	log.Printf("Jobs: %d\n", concurrentNum)
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, concurrentNum)
 	datas := make([]map[string]float64, 0, len(seeds))
@@ -89,6 +89,18 @@ func RunParallel(cnf *Config, seeds []int) {
 	}
 	//	log.Println(datas)
 	DisplayTable(datas)
+	// timeがあれば、平均と最大を表示
+	_, exsit := datas[0]["time"]
+	if exsit {
+		sumTime := 0.0
+		maxTime := 0.0
+		for i := 0; i < len(datas); i++ {
+			sumTime += datas[i]["time"]
+			maxTime = math.Max(maxTime, datas[i]["time"])
+		}
+		sumTime /= float64(len(datas))
+		fmt.Fprintf(os.Stderr, "avarageTime=%.2f  maxTime=%.2f\n", sumTime, maxTime)
+	}
 	fmt.Fprintf(os.Stderr, "sumScore=%.2f  log=%f\n", sumScore, math.Log(sumScore))
 	fmt.Printf("%.2f\n", sumScore)
 	if jsonOutput != nil && *jsonOutput {
