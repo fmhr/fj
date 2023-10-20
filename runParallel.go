@@ -101,15 +101,20 @@ func RunParallel(cnf *Config, seeds []int) {
 		sumTime /= float64(len(datas))
 		fmt.Fprintf(os.Stderr, "avarageTime=%.2f  maxTime=%.2f\n", sumTime, maxTime)
 	}
-	fmt.Fprintf(os.Stderr, "sumScore=%.2f  log=%f\n", sumScore, math.Log(sumScore))
+	avarageScore := sumScore / float64(len(datas))
+	fmt.Fprintf(os.Stderr, "(Score)sum=%.2f avarage=%.2f log=%f\n", sumScore, avarageScore, math.Log(sumScore))
 	fmt.Printf("%.2f\n", sumScore)
 	if jsonOutput != nil && *jsonOutput {
 		fileContent, err := json.MarshalIndent(datas, "", " ")
 		if err != nil {
 			log.Fatal("json marshal error:", err)
 		}
+		err = createDirIfNotExist("fj/data/")
+		if err != nil {
+			log.Fatal("create dir error:", err)
+		}
 		now := time.Now()
-		filename := fmt.Sprintf("fj/result_%s.json", fmt.Sprintf("%04d%02d%02d_%02d%02d%02d", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second()))
+		filename := fmt.Sprintf("fj/data/result_%s.json", fmt.Sprintf("%04d%02d%02d_%02d%02d%02d", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second()))
 		err = os.WriteFile(filename, fileContent, 0644)
 		if err != nil {
 			log.Fatal("json write error:", err)
@@ -146,4 +151,13 @@ func handleSignals(sigCh <-chan os.Signal, wg *sync.WaitGroup, curent *[]int) {
 		}
 	}
 
+}
+
+func createDirIfNotExist(dir string) error {
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return fmt.Errorf("failed to create directory: %v", err)
+		}
+	}
+	return nil
 }
