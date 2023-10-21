@@ -17,7 +17,7 @@ func normalRun(cnf *Config, seed int) ([]byte, error) {
 		return nil, fmt.Errorf("config.Cmd is empty")
 	}
 	inputfile := filepath.Join(cnf.InfilePath, fmt.Sprintf("%04d.txt", seed))
-	outputfile := filepath.Join(cnf.OutfilePath, fmt.Sprintf("%04d.out", seed))
+	outputfile := filepath.Join(cnf.OutfilePath, fmt.Sprintf("%04d.txt", seed))
 
 	if _, err := os.Stat(inputfile); err != nil {
 		return []byte{}, fmt.Errorf("input file [%s] does not exist", inputfile)

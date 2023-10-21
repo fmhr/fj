@@ -39,7 +39,7 @@ func reactiveRun(ctf *Config, seed int) (map[string]float64, error) {
 
 func reactiveRunCmd(ctf *Config, seed int) ([]byte, error) {
 	infile := ctf.InfilePath + fmt.Sprintf("%04d.txt", seed)
-	outfile := ctf.OutfilePath + fmt.Sprintf("%04d.out", seed)
+	outfile := ctf.OutfilePath + fmt.Sprintf("%04d.txt", seed)
 	cmdStr := fmt.Sprintf("%s %s < %s > %s", ctf.TesterPath, ctf.Cmd, infile, outfile)
 	cmd := createCommand(cmdStr)
 	out, err := runCommandWithTimeout(cmd, ctf)
