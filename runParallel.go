@@ -28,6 +28,7 @@ func RunParallel(cnf *Config, seeds []int) {
 	sem := make(chan struct{}, concurrentNum)
 	datas := make([]map[string]float64, 0, len(seeds))
 	errorChan := make(chan string, len(seeds))
+	errorSeedChan := make(chan int, len(seeds))
 
 	var taskCompleted int32 = 0
 	totalTask := len(seeds)
@@ -66,6 +67,7 @@ func RunParallel(cnf *Config, seeds []int) {
 			data, err := RunSelector(cnf, seed)
 			if err != nil {
 				errorChan <- fmt.Sprintf("Run error: seed=%d %v\n", seed, err)
+				errorSeedChan <- seed
 				return
 			}
 			// 処理結果を格納
@@ -78,10 +80,14 @@ func RunParallel(cnf *Config, seeds []int) {
 	wg.Wait()
 	fmt.Fprintf(os.Stderr, "\n") // Newline after progress bar
 	close(errorChan)
+	close(errorSeedChan)
 	for err := range errorChan {
 		log.Println(err)
 	}
-
+	errSeeds := make([]int, 0, len(errorSeedChan))
+	for seed := range errorSeedChan {
+		errSeeds = append(errSeeds, seed)
+	}
 	sumScore := 0.0
 	for i := 0; i < len(datas); i++ {
 		//fmt.Println(datas[i])
@@ -89,6 +95,7 @@ func RunParallel(cnf *Config, seeds []int) {
 	}
 	//	log.Println(datas)
 	DisplayTable(datas)
+	fmt.Fprintln(os.Stderr, "Error seeds:", errSeeds)
 	// timeがあれば、平均と最大を表示
 	_, exsit := datas[0]["time"]
 	if exsit {
