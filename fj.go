@@ -28,6 +28,7 @@ var (
 	args1 = test.Flag("args", "Command line arguments.").Strings()
 
 	tests = fj.Command("tests", "Run test cases.")
+	seed2 = tests.Arg("seed", "Seed value.").Int()
 	args2 = tests.Flag("args", "Command line arguments.").Strings()
 	start = tests.Flag("start", "Start seed value.").Default("0").Short('s').Int()
 	end   = tests.Flag("end", "End seed value.").Default("10").Short('e').Int()
@@ -72,6 +73,10 @@ func Fj() {
 			}
 			fmt.Fprintln(os.Stdout, rtn)
 		case tests.FullCommand():
+			if seed2 != nil {
+				*start = 0
+				*end = *seed2
+			}
 			seeds := make([]int, *end-*start)
 			for i := *start; i < *end; i++ {
 				seeds[i-*start] = i
