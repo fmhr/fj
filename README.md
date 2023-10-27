@@ -46,26 +46,33 @@ fj tests -start 3 -end 100
 ```
 seed(0~99)をテスト
 ```
-fj tests -e 100
+fj tests 100
 ```
 
 
 設定ファイル(fj/config.toml)の設定例
 ```
-Cmd = './bin/main'  実行時のコマンド
-Args = []           必要に応じて設定
-Reactive = false    リアクティブ問題のときはtrue
-TesterPath = 'tools/target/release/tester'   
+Language = 'Go'
+Cmd = './bin/a.out'
+Args = []
+Reactive = true
+TesterPath = 'tools/target/release/tester'
 VisPath = 'tools/target/release/vis'
 GenPath = 'tools/target/release/gen'
 InfilePath = 'tools/in/'
 OutfilePath = 'out/'
-Jobs = 7             並列実行数 CPUコア数以下がいい
-Cloud = false        準備中
-CloudURL = 'http://localhost:8888' 準備中
-TimeLimitMS = 5000     タイムアウト時間。コンテストのTLEではなく無限ループなどで終了しない時用
-```
+Jobs = 3
+Cloud = false
+CloudURL = 'http://localhost:8888'
+CompilerURL = 'http://localhost:8080/compiler'
+WorkerURL = 'http://localhost:8081/worker'
+Source = 'src/main.go'
+CompileCmd = 'go build -o bin/main src/main.go'
+Binary = 'bin/main'
+ConcurrentRequests = 1000
+TimeLimitMS = 10000
 
+```
 ## Google Cloud Runを使った並列テスト
 
 ### ローカルでテストする。
