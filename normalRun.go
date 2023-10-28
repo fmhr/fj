@@ -3,9 +3,11 @@ package fj
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"time"
 )
@@ -26,7 +28,10 @@ func normalRun(cnf *Config, seed int) ([]byte, error) {
 	if err := checkOutputFolder(cnf.OutfilePath); err != nil {
 		return nil, err
 	}
-	if !isExist(inputfile) {
+	ok, err := isExist(outputfile)
+	if err != nil {
+		return nil, err
+	} else if !ok {
 		return nil, fmt.Errorf("input file [%s] does not exist", inputfile)
 	}
 
@@ -81,16 +86,43 @@ func runCommandWithTimeout(cmd *exec.Cmd, cnf *Config) ([]byte, error) {
 }
 
 func checkOutputFolder(dir string) error {
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		err = os.MkdirAll(dir, 0777)
-		if err != nil {
+	if filepath.Clean(dir) != dir || filepath.IsAbs(dir) {
+		return fmt.Errorf("invalid output folder: %s", dir)
+	}
+
+	stat, err := os.Stat(dir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			err = os.MkdirAll(dir, 0777)
+			if err != nil {
+				return fmt.Errorf("failed to create output folder: %w", err)
+			}
+		} else {
 			return err
 		}
+	} else if !stat.IsDir() {
+		return fmt.Errorf("path is not directory: %s", dir)
 	}
 	return nil
 }
 
-func isExist(file string) bool {
+var validFilePath = regexp.MustCompile(`^(\./)?([^/]+/)*[^/]+\.txt$`)
+
+func isExist(file string) (bool, error) {
+	if !validFilePath.MatchString(file) {
+		return false, fmt.Errorf("invalid file path: %s", file)
+	}
+	if filepath.Clean(file) != file || filepath.IsAbs(file) {
+		return false, fmt.Errorf("invalid file path: %s", file)
+	}
+
 	_, err := os.Stat(file)
-	return err == nil
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, err
+		}
+		log.Printf("fFailed to check file: %v", err)
+		return false, fmt.Errorf("failed to check file: %w", err)
+	}
+	return true, nil
 }
