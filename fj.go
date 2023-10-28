@@ -81,6 +81,7 @@ func Fj() {
 			for i := *start; i < *end; i++ {
 				seeds[i-*start] = i
 			}
+			log.Println(*start, *end, seeds)
 			RunParallel(config, seeds)
 		}
 	}
