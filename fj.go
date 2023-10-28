@@ -73,7 +73,7 @@ func Fj() {
 			}
 			fmt.Fprintln(os.Stdout, rtn)
 		case tests.FullCommand():
-			if seed2 != nil {
+			if seed2 != nil && *seed2 == 0 {
 				*start = 0
 				*end = *seed2
 			}
@@ -81,7 +81,6 @@ func Fj() {
 			for i := *start; i < *end; i++ {
 				seeds[i-*start] = i
 			}
-			log.Println(*start, *end, seeds)
 			RunParallel(config, seeds)
 		}
 	}
