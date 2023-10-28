@@ -19,7 +19,7 @@ func DisplayTable(data []map[string]float64) {
 
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetAutoFormatHeaders(false)
-
+	//	log.Println(data)
 	headers := extractHeaders(data)
 	table.SetHeader(headers)
 
@@ -33,6 +33,7 @@ func DisplayTable(data []map[string]float64) {
 	table.Render()
 }
 
+// sortBySeed はデータをseedでソートする
 func sortBySeed(data *[]map[string]float64) {
 	sort.Slice(*data, func(i, j int) bool {
 		return (*data)[i]["seed"] < (*data)[j]["seed"]
@@ -45,7 +46,6 @@ func extractHeaders(data []map[string]float64) []string {
 	for key := range data[0] {
 		headers = append(headers, key)
 	}
-
 	// seedを先頭に移動
 	seedIndex := slices.Index(headers, "seed")
 	headers = append(headers[:seedIndex], headers[seedIndex+1:]...)

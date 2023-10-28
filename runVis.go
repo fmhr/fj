@@ -12,16 +12,16 @@ func RunVis(cnf *Config, seed int) (map[string]float64, error) {
 
 // runVis は指定された設定とシードに基づいてコマンドを実行して、
 // その結果をvisに渡して、両方の結果を返す
+// 通常の問題（reactive=false)で使う
 func runVis(cnf *Config, seed int) (map[string]float64, error) {
 	out, err := normalRun(cnf, seed)
 	if err != nil {
-		return nil, fmt.Errorf("failed running with seed%d: %v", seed, err)
+		return nil, ErrorTrace("falied: normalRun", err)
 	}
-	//log.Println("run:", string(out))
 
 	pair, err := ExtractKeyValuePairs(string(out))
 	if err != nil {
-		return pair, fmt.Errorf("ExtractKeyValuePairs failed: %v", err)
+		return pair, ErrorTrace("failed:ExtractKeyValuePairs", err)
 	}
 	// vis
 	infile := filepath.Join(cnf.InfilePath, fmt.Sprintf("%04d.txt", seed))
@@ -29,12 +29,12 @@ func runVis(cnf *Config, seed int) (map[string]float64, error) {
 
 	outVis, err := vis(cnf, infile, outfile)
 	if err != nil {
-		return nil, fmt.Errorf("vis failed: %v", err)
+		//return nil, TraceMsg(fmt.Errorf("failed: %v", err).Error())
+		return nil, ErrorTrace("failed:vis", err)
 	}
-
 	sc, err := extractData(string(outVis))
 	if err != nil {
-		return nil, fmt.Errorf("extractData failed: %v", err)
+		return nil, ErrorTrace("failed:extractData", err)
 	}
 
 	for k, v := range sc {
@@ -46,8 +46,12 @@ func runVis(cnf *Config, seed int) (map[string]float64, error) {
 
 func mapString(data map[string]float64) string {
 	var str string
-	str += fmt.Sprintf("seed=%d ", int(data["seed"]))
-	str += fmt.Sprintf("Score=%.2f ", data["Score"])
+	if seed, exists := data["seed"]; exists {
+		str += fmt.Sprintf("seed=%d ", int(seed))
+	}
+	if score, exists := data["Score"]; exists {
+		str += fmt.Sprintf("Score=%.2f ", score)
+	}
 	orderKey := make([]string, 0)
 	for k := range data {
 		if k != "seed" && k != "Score" {
@@ -61,12 +65,13 @@ func mapString(data map[string]float64) string {
 	return str
 }
 
+// vis is a wrapper for vis command
 func vis(cnf *Config, infile, outfile string) ([]byte, error) {
 	cmdStr := fmt.Sprintf(cnf.VisPath+" %s %s", infile, outfile)
-	cmd := createComand(cmdStr)
+	cmd := createCommand(cmdStr)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return nil, fmt.Errorf("cmd.Run() for command %q failed with: %v", cmdStr, err)
+		return nil, ErrorTrace(fmt.Sprintf("failed: command %s", cmdStr), err)
 	}
 	return out, nil
 }

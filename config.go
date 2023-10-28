@@ -7,11 +7,15 @@ import (
 	"github.com/pelletier/go-toml/v2"
 )
 
-const configFileName = "fj_config.toml"
+const (
+	configFileName = "config.toml"
+	directory      = "fj/"
+)
 
 var ErrConfigNotFound = fmt.Errorf("%s not found, please run `fj init`", configFileName)
 
 type Config struct {
+	Language           string   `toml:"Language"`
 	Cmd                string   `toml:"Cmd"`
 	Args               []string `toml:"Args"`
 	Reactive           bool     `toml:"Reactive"`
@@ -23,12 +27,42 @@ type Config struct {
 	Jobs               int      `toml:"Jobs"`
 	Cloud              bool     `toml:"Cloud"`
 	CloudURL           string   `toml:"CloudURL"`
-	ConcurrentRequests int      `toml:"ConcurrentRequests"`
-	TimeLimitMS        uint64   `toml:"TimeLimitMS"`
+	CompilerURL        string   `toml:"CompilerURL"`
+	Source             string   `toml:"Source"`
+	CompileCmd         string   `toml:"CompileCmd"`
+	Binary             string   `toml:"Binary"`
+	tmpBinary          string
+	WorkerURL          string `toml:"WorkerURL"`
+	ConcurrentRequests int    `toml:"ConcurrentRequests"`
+	TimeLimitMS        uint64 `toml:"TimeLimitMS"`
+}
+
+func newConfig() *Config {
+	return &Config{
+		Language:           "Go",
+		Cmd:                "./bin/main",
+		Args:               []string{},
+		Reactive:           false,
+		TesterPath:         "tools/target/release/tester",
+		VisPath:            "tools/target/release/vis",
+		GenPath:            "tools/target/release/gen",
+		InfilePath:         "tools/in/",
+		OutfilePath:        "out/",
+		Jobs:               1,
+		Cloud:              false,
+		CloudURL:           "http://localhost:8888",
+		CompilerURL:        "",
+		CompileCmd:         "go build -o bin/main src/main.go",
+		Source:             "src/main.go",
+		Binary:             "bin/main",
+		WorkerURL:          "",
+		ConcurrentRequests: 1000,
+		TimeLimitMS:        10000,
+	}
 }
 
 func GenerateConfig() {
-	if _, err := os.Stat(configFileName); err == nil {
+	if _, err := os.Stat(directory + configFileName); err == nil {
 		if *force {
 			// if force flag is set, remove config file
 			err := os.Remove(configFileName)
@@ -41,22 +75,8 @@ func GenerateConfig() {
 			return
 		}
 	}
-	//numCPUs := maxInt(1, runtime.NumCPU()-1)
-	conf := &Config{
-		Cmd:                "",
-		Args:               []string{},
-		Reactive:           false,
-		TesterPath:         "tools/target/release/tester",
-		VisPath:            "tools/target/release/vis",
-		GenPath:            "tools/target/release/gen",
-		InfilePath:         "tools/in/",
-		OutfilePath:        "out/",
-		Jobs:               1,
-		Cloud:              false,
-		CloudURL:           "http://localhost:8888",
-		ConcurrentRequests: 1000,
-		TimeLimitMS:        20000,
-	}
+	conf := newConfig()
+
 	if err := generateConfig(conf); err != nil {
 		fmt.Println("Error: ", err)
 		return
@@ -65,7 +85,14 @@ func GenerateConfig() {
 }
 
 func generateConfig(conf *Config) error {
-	file, err := os.Create(configFileName)
+	// create fj directory
+	if _, err := os.Stat("fj"); err != nil {
+		if err := os.Mkdir("fj", 0777); err != nil {
+			return fmt.Errorf("failed to create fj directory: %v", err)
+		}
+	}
+	// create config file
+	file, err := os.Create(directory + configFileName)
 	if err != nil {
 		return err
 	}
@@ -81,7 +108,7 @@ func LoadConfigFile() (*Config, error) {
 	}
 
 	conf := &Config{}
-	file, err := os.Open(configFileName)
+	file, err := os.Open("fj/" + configFileName)
 	if err != nil {
 		return conf, err
 	}
@@ -91,6 +118,7 @@ func LoadConfigFile() (*Config, error) {
 	if err != nil {
 		return conf, err
 	}
+	//log.Println("config:", conf.Binary)
 	return conf, checkConfigFile(conf)
 }
 
@@ -102,6 +130,6 @@ func checkConfigFile(cnf *Config) error {
 }
 
 func configExists() bool {
-	_, err := os.Stat(configFileName)
+	_, err := os.Stat("fj/" + configFileName)
 	return err == nil
 }

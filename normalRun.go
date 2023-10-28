@@ -3,10 +3,10 @@ package fj
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"time"
 )
 
@@ -14,21 +14,31 @@ import (
 // normal モード用
 func normalRun(cnf *Config, seed int) ([]byte, error) {
 	if cnf.Cmd == "" {
-		return []byte{}, fmt.Errorf("config.Cmd is empty")
+		return nil, fmt.Errorf("config.Cmd is empty")
 	}
 	inputfile := filepath.Join(cnf.InfilePath, fmt.Sprintf("%04d.txt", seed))
+	outputfile := filepath.Join(cnf.OutfilePath, fmt.Sprintf("%04d.txt", seed))
+
 	if _, err := os.Stat(inputfile); err != nil {
 		return []byte{}, fmt.Errorf("input file [%s] does not exist", inputfile)
 	}
-	outputfile := filepath.Join(cnf.OutfilePath, fmt.Sprintf("%04d.out", seed))
 
-	err := checkOutputFolder(cnf.OutfilePath)
-	if err != nil {
-		log.Fatal(err)
+	if err := checkOutputFolder(cnf.OutfilePath); err != nil {
+		return nil, err
+	}
+	if !isExist(inputfile) {
+		return nil, fmt.Errorf("input file [%s] does not exist", inputfile)
 	}
 
-	cmdStr := cnf.Cmd + " < " + inputfile + " > " + outputfile
-	cmd := createComand(cmdStr)
+	var cmd *exec.Cmd
+	if runtime.GOOS == "windows" {
+		cmdStr := fmt.Sprintf("%s < %s > %s", cnf.Cmd, inputfile, outputfile)
+		cmd = exec.Command("cmd", "/C", cmdStr)
+	} else {
+		cmdStr := fmt.Sprintf("%s < %s > %s", cnf.Cmd, inputfile, outputfile)
+		cmd = exec.Command("/bin/sh", "-c", cmdStr)
+	}
+
 	out, err := runCommandWithTimeout(cmd, cnf)
 	if err != nil {
 		return []byte{}, fmt.Errorf("cmd.Run() for command [%q] failed with: %v", cmd, err)
@@ -37,13 +47,12 @@ func normalRun(cnf *Config, seed int) ([]byte, error) {
 }
 
 func runCommandWithTimeout(cmd *exec.Cmd, cnf *Config) ([]byte, error) {
-	timeout := time.Duration(cnf.TimeLimitMS) * time.Millisecond
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	cmd.Stderr = &out
+	var stdoutBuf, stderrBuf bytes.Buffer
+	cmd.Stdout = &stdoutBuf
+	cmd.Stderr = &stderrBuf
 
 	if err := cmd.Start(); err != nil {
-		return out.Bytes(), fmt.Errorf("cmd.Start() failed with: %v", err)
+		return nil, fmt.Errorf("cmd.Start() failed with: %v", err)
 	}
 
 	done := make(chan error, 1)
@@ -52,21 +61,23 @@ func runCommandWithTimeout(cmd *exec.Cmd, cnf *Config) ([]byte, error) {
 	}()
 
 	select {
-	case <-time.After(timeout):
+	case <-time.After(time.Duration(cnf.TimeLimitMS) * time.Millisecond):
 		if cmd.Process != nil {
 			err := cmd.Process.Kill()
 			if err != nil {
-				return out.Bytes(), fmt.Errorf("failed to kill process: %v", err)
+				return nil, fmt.Errorf("failed to kill process: %v", err)
 			}
-			return out.Bytes(), fmt.Errorf("process killed as timeout reached")
+			return nil, fmt.Errorf("process killed as timeout reached")
 		}
 	case err := <-done:
 		if err != nil {
-			return out.Bytes(), fmt.Errorf("cmd.Wait() failed with: %v", err)
+			return stdoutBuf.Bytes(), fmt.Errorf("cmd.Wait() failed with: %v \n%v", err, stderrBuf.String())
 		}
 	}
-
-	return out.Bytes(), nil
+	// エラーがなければ、標準出力を返す
+	rtn := stdoutBuf.Bytes()
+	rtn = append(rtn, stderrBuf.Bytes()...)
+	return rtn, nil
 }
 
 func checkOutputFolder(dir string) error {
@@ -77,4 +88,9 @@ func checkOutputFolder(dir string) error {
 		}
 	}
 	return nil
+}
+
+func isExist(file string) bool {
+	_, err := os.Stat(file)
+	return err == nil
 }

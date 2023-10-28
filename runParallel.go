@@ -1,14 +1,17 @@
 package fj
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"os/signal"
 	"runtime"
 	"sync"
 	"sync/atomic"
 	"syscall"
+	"time"
 )
 
 func RunParallel(cnf *Config, seeds []int) {
@@ -18,13 +21,14 @@ func RunParallel(cnf *Config, seeds []int) {
 		concurrentNum = cnf.Jobs
 	}
 	if cnf.Cloud {
-		concurrentNum = cnf.ConcurrentRequests
+		concurrentNum = maxInt(1, maxInt(concurrentNum, cnf.ConcurrentRequests))
 	}
 	log.Printf("Jobs: %d\n", concurrentNum)
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, concurrentNum)
 	datas := make([]map[string]float64, 0, len(seeds))
 	errorChan := make(chan string, len(seeds))
+	errorSeedChan := make(chan int, len(seeds))
 
 	var taskCompleted int32 = 0
 	totalTask := len(seeds)
@@ -60,9 +64,10 @@ func RunParallel(cnf *Config, seeds []int) {
 				atomic.AddInt32(&taskCompleted, 1)
 				printProgress(int(taskCompleted), totalTask)
 			}()
-			data, err := Run(cnf, seed)
+			data, err := RunSelector(cnf, seed)
 			if err != nil {
 				errorChan <- fmt.Sprintf("Run error: seed=%d %v\n", seed, err)
+				errorSeedChan <- seed
 				return
 			}
 			// 処理結果を格納
@@ -73,22 +78,57 @@ func RunParallel(cnf *Config, seeds []int) {
 		}(seed)
 	}
 	wg.Wait()
-	close(errorChan)
-
 	fmt.Fprintf(os.Stderr, "\n") // Newline after progress bar
-
+	close(errorChan)
+	close(errorSeedChan)
 	for err := range errorChan {
 		log.Println(err)
 	}
-
+	errSeeds := make([]int, 0, len(errorSeedChan))
+	for seed := range errorSeedChan {
+		errSeeds = append(errSeeds, seed)
+	}
 	sumScore := 0.0
 	for i := 0; i < len(datas); i++ {
 		//fmt.Println(datas[i])
 		sumScore += datas[i]["Score"]
 	}
+	//	log.Println(datas)
 	DisplayTable(datas)
-	fmt.Fprintf(os.Stderr, "sumScore=%.2f\n", sumScore)
+	fmt.Fprintln(os.Stderr, "Error seeds:", errSeeds)
+	// timeがあれば、平均と最大を表示
+	_, exsit := datas[0]["time"]
+	if exsit {
+		sumTime := 0.0
+		maxTime := 0.0
+		for i := 0; i < len(datas); i++ {
+			sumTime += datas[i]["time"]
+			maxTime = math.Max(maxTime, datas[i]["time"])
+		}
+		sumTime /= float64(len(datas))
+		fmt.Fprintf(os.Stderr, "avarageTime=%.2f  maxTime=%.2f\n", sumTime, maxTime)
+	}
+	avarageScore := sumScore / float64(len(datas))
+	fmt.Fprintf(os.Stderr, "(Score)sum=%.2f avarage=%.2f log=%f\n", sumScore, avarageScore, math.Log(sumScore))
 	fmt.Printf("%.2f\n", sumScore)
+	if jsonOutput != nil && *jsonOutput {
+		fileContent, err := json.MarshalIndent(datas, "", " ")
+		if err != nil {
+			log.Fatal("json marshal error:", err)
+		}
+		err = createDirIfNotExist("fj/data/")
+		if err != nil {
+			log.Fatal("create dir error:", err)
+		}
+		now := time.Now()
+		filename := fmt.Sprintf("fj/data/result_%s.json", fmt.Sprintf("%04d%02d%02d_%02d%02d%02d", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second()))
+		err = os.WriteFile(filename, fileContent, 0644)
+		if err != nil {
+			log.Fatal("json write error:", err)
+		}
+		log.Println("save json file:", filename)
+	}
+
 }
 
 const progressBarWidth = 40
@@ -118,4 +158,13 @@ func handleSignals(sigCh <-chan os.Signal, wg *sync.WaitGroup, curent *[]int) {
 		}
 	}
 
+}
+
+func createDirIfNotExist(dir string) error {
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return fmt.Errorf("failed to create directory: %v", err)
+		}
+	}
+	return nil
 }

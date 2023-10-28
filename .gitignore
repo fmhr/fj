@@ -4,6 +4,7 @@ build/
 sample/
 bin/*
 .vscode/
+testdata/
 
 # Output files and directories
 out/*
