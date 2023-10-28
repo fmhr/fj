@@ -1,6 +1,8 @@
+GOPATH:=$(shell go env GOPATH)
+GOBIN:=$(GOPATH)/bin
 # ビルド用の変数
 BINARY_NAME=fj
-BUILD_DIR=bin
+BUILD_DIR=$(GOBIN)
 BINARIES=$(BUILD_DIR)/$(BINARY_NAME)
 CMD_DIR=./cmd/fj
 GO_FILES:= $(shell find . -name '*.go' -type f)

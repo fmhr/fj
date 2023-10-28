@@ -73,10 +73,12 @@ func Fj() {
 			}
 			fmt.Fprintln(os.Stdout, rtn)
 		case tests.FullCommand():
-			if seed2 != nil && *seed2 == 0 {
+			// seed2 が指定されていれば end=seed2
+			if seed2 != nil && *seed2 != 0 {
 				*start = 0
 				*end = *seed2
 			}
+			// start, endが指定されていれば、その範囲のシードを並列実行
 			seeds := make([]int, *end-*start)
 			for i := *start; i < *end; i++ {
 				seeds[i-*start] = i
