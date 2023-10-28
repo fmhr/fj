@@ -23,7 +23,6 @@ func RunParallel(cnf *Config, seeds []int) {
 	if cnf.Cloud {
 		concurrentNum = maxInt(1, maxInt(concurrentNum, cnf.ConcurrentRequests))
 	}
-	log.Printf("Jobs: %d\n", concurrentNum)
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, concurrentNum)
 	datas := make([]map[string]float64, 0, len(seeds))

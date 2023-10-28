@@ -90,16 +90,16 @@ func Fj() {
 }
 
 func updateConfig(config *Config) {
-	if args1 != nil {
+	if test.GetFlag("args").HasEnvarValue() {
 		config.Args = *args1
 	}
-	if args2 != nil {
+	if tests.GetFlag("args").HasEnvarValue() {
 		config.Args = *args2
 	}
-	if jobs != nil {
+	if tests.GetFlag("jobs").HasEnvarValue() {
 		config.Jobs = *jobs
 	}
-	if cloud != nil {
+	if fj.GetFlag("cloud").HasEnvarValue() {
 		config.Cloud = *cloud
 	}
 }
