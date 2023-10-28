@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"time"
 )
@@ -27,7 +28,10 @@ func normalRun(cnf *Config, seed int) ([]byte, error) {
 	if err := checkOutputFolder(cnf.OutfilePath); err != nil {
 		return nil, err
 	}
-	if !isExist(inputfile) {
+	ok, err := isExist(outputfile)
+	if err != nil {
+		return nil, err
+	} else if !ok {
 		return nil, fmt.Errorf("input file [%s] does not exist", inputfile)
 	}
 
@@ -102,18 +106,23 @@ func checkOutputFolder(dir string) error {
 	return nil
 }
 
-func isExist(file string) bool {
+var validFilePath = regexp.MustCompile(`^(\./)?([^/]+/)*[^/]+\.txt$`)
+
+func isExist(file string) (bool, error) {
+	if !validFilePath.MatchString(file) {
+		return false, fmt.Errorf("invalid file path: %s", file)
+	}
 	if filepath.Clean(file) != file || filepath.IsAbs(file) {
-		return false
+		return false, fmt.Errorf("invalid file path: %s", file)
 	}
 
 	_, err := os.Stat(file)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return false
+			return false, err
 		}
-		log.Print(err)
-		return false
+		log.Printf("fFailed to check file: %v", err)
+		return false, fmt.Errorf("failed to check file: %w", err)
 	}
-	return true
+	return true, nil
 }
