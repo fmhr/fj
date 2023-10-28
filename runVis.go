@@ -3,7 +3,6 @@ package fj
 import (
 	"fmt"
 	"path/filepath"
-	"sort"
 )
 
 func RunVis(cnf *Config, seed int) (map[string]float64, error) {
@@ -42,27 +41,6 @@ func runVis(cnf *Config, seed int) (map[string]float64, error) {
 	}
 	pair["seed"] = float64(seed)
 	return pair, nil
-}
-
-func mapString(data map[string]float64) string {
-	var str string
-	if seed, exists := data["seed"]; exists {
-		str += fmt.Sprintf("seed=%d ", int(seed))
-	}
-	if score, exists := data["Score"]; exists {
-		str += fmt.Sprintf("Score=%.2f ", score)
-	}
-	orderKey := make([]string, 0)
-	for k := range data {
-		if k != "seed" && k != "Score" {
-			orderKey = append(orderKey, k)
-		}
-	}
-	sort.Strings(orderKey)
-	for _, k := range orderKey {
-		str += fmt.Sprintf("%s=%v ", k, data[k])
-	}
-	return str
 }
 
 // vis is a wrapper for vis command
