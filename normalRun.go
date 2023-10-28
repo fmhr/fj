@@ -91,7 +91,7 @@ func checkOutputFolder(dir string) error {
 		if os.IsNotExist(err) {
 			err = os.MkdirAll(dir, 0777)
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to create output folder: %w", err)
 			}
 		} else {
 			return err
