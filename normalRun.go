@@ -28,12 +28,6 @@ func normalRun(cnf *Config, seed int) ([]byte, error) {
 	if err := checkOutputFolder(cnf.OutfilePath); err != nil {
 		return nil, err
 	}
-	ok, err := isExist(outputfile)
-	if err != nil {
-		return nil, err
-	} else if !ok {
-		return nil, fmt.Errorf("input file [%s] does not exist", inputfile)
-	}
 
 	var cmd *exec.Cmd
 	if runtime.GOOS == "windows" {
