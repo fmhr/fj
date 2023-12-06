@@ -3,9 +3,12 @@ package fj
 import (
 	"fmt"
 	"log"
+	"math"
 	"os"
 
 	"github.com/alecthomas/kingpin/v2"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 )
 
 func init() {
@@ -73,6 +76,15 @@ func Fj() {
 				log.Fatal("Error: ", err)
 			}
 			fmt.Fprintln(os.Stdout, rtn)
+			for k, v := range rtn {
+				p := message.NewPrinter(language.English)
+				if v == math.Floor(v) {
+					p.Fprintf(os.Stdout, "%s:%d ", k, int(v))
+				} else {
+					p.Fprintf(os.Stdout, "%s:%f ", k, v)
+				}
+			}
+			fmt.Println("")
 		case tests.FullCommand():
 			// seed2 が指定されていれば end=seed2
 			if seed2 != nil && *seed2 != 0 {

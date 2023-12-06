@@ -16,4 +16,5 @@ require (
 require (
 	github.com/alecthomas/kingpin/v2 v2.3.2
 	github.com/mattn/go-runewidth v0.0.15 // indirect
+	golang.org/x/text v0.14.0
 )
