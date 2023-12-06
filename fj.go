@@ -101,7 +101,6 @@ func updateConfig(config *Config) {
 		config.Jobs = *jobs
 	}
 	config.Cloud = config.Cloud || *cloud
-	log.Println(config.Cloud)
 }
 
 func maxInt(a, b int) int {
