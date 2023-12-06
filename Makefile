@@ -23,7 +23,7 @@ $(BINARIES): $(GO_FILES)
 # 実行ファイルのクリーンアップ
 .PHONY: clean
 clean:
-	rm -rf $(BUILD_DIR)
+	rm -rf $(BUILD_DIR)/$(BINARY_NAME)
 
 # 依存関係のダウンロード
 .PHONY: deps
@@ -48,3 +48,4 @@ compiler: $(COMPILER_BINARY)
 $(COMPILER_BINARY): $(GO_FILES)
 	@echo "Building... compiler bunary..."
 	CGO_ENABLED=0 go build -o $(BUILD_DIR)/$(COMPILER_BINARY) $(COMPILER_DIR)
+

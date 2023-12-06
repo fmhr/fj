@@ -79,7 +79,7 @@ func CloudCompile(config *Config) (string, error) {
 		if err != nil {
 			return "", ErrorTrace("error reading response body: %w", err)
 		}
-		fmt.Print("server response:", string(bodyBytes))
+		fmt.Print("server response:", string(bodyBytes), "url:", config.CompilerURL, "\n")
 		return "", ErrorTrace(string(bodyBytes), fmt.Errorf("error response status code: %d", resp.StatusCode))
 	}
 

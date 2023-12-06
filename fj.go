@@ -42,7 +42,8 @@ func Fj() {
 		log.Println("debug mode")
 	}
 
-	switch kingpin.MustParse(fj.Parse(os.Args[1:])) {
+	result := kingpin.MustParse(fj.Parse(os.Args[1:]))
+	switch result {
 	// Setup generate config file
 	case setup.FullCommand():
 		GenerateConfig()
@@ -65,7 +66,7 @@ func Fj() {
 			}
 		}
 		// select run
-		switch kingpin.MustParse(fj.Parse(os.Args[1:])) {
+		switch result {
 		case test.FullCommand():
 			rtn, err := RunSelector(config, *seed)
 			if err != nil {
@@ -90,18 +91,17 @@ func Fj() {
 }
 
 func updateConfig(config *Config) {
-	if test.GetFlag("args").HasEnvarValue() {
+	if *args1 != nil && len(*args1) > 0 {
 		config.Args = *args1
 	}
-	if tests.GetFlag("args").HasEnvarValue() {
+	if args2 != nil && len(*args2) > 0 {
 		config.Args = *args2
 	}
-	if tests.GetFlag("jobs").HasEnvarValue() {
+	if jobs != nil && *jobs > 0 {
 		config.Jobs = *jobs
 	}
-	if fj.GetFlag("cloud").HasEnvarValue() {
-		config.Cloud = *cloud
-	}
+	config.Cloud = config.Cloud || *cloud
+	log.Println(config.Cloud)
 }
 
 func maxInt(a, b int) int {
