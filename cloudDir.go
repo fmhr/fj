@@ -2,7 +2,6 @@ package fj
 
 import (
 	"embed"
-	_ "embed"
 	"io/fs"
 	"log"
 	"os"
