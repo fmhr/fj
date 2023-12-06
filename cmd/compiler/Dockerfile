@@ -1,12 +1,18 @@
 FROM golang:1.21 as serverbuild
+
 WORKDIR /app
-RUN git clone -b make-builds https://github.com/fmhr/fj.git /app/fj \
-    && cd fj/cmd/compiler \
-    && go build -o /app/server 
+
+ADD main.go ./
+
+RUN go mod init server
+RUN go mod tidy
+RUN go build -o server
 
 # ここからターゲットのコンパイル環境をつくる
 FROM golang:1.20 as gocompile
+
 WORKDIR /work
+
 ENV PATH="/opt/go/bin:${PATH}"
 
 #RUN go install github.com/fmorenovr/gods/...
@@ -16,7 +22,9 @@ ENV PATH="/opt/go/bin:${PATH}"
 # ここまで
 
 COPY --from=serverbuild /app/server /work
+
 RUN chmod +x /work/server
 
 EXPOSE 8080
+
 CMD ["/work/server"]

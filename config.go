@@ -118,7 +118,6 @@ func LoadConfigFile() (*Config, error) {
 	if err != nil {
 		return conf, err
 	}
-	//log.Println("config:", conf.Binary)
 	return conf, checkConfigFile(conf)
 }
 

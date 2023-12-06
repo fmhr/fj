@@ -6,6 +6,12 @@
 ```
 go install github.com/fmhr/fj/cmd/fj@latest
 ```
+すでにインストールしていて、アップデートをする場合は、次のコマンドを実行してください。
+または＠latestを具体的なバージョンに置き換えてください。
+```
+go clean -modcache
+go install github.com/fmhr/fj/cmd/fj@latest
+```
 OSにはLinux(Windows Subsystem for Linux)かmacOSを推奨しますが、Windows上でも動作します。
 詳細な手順については(準備中)を読んでください。
 

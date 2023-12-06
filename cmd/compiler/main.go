@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -73,12 +75,16 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cmds := strings.Fields(compileCmd)
+	// compile
 
+	cmds := strings.Fields(compileCmd)
 	cmd := exec.Command(cmds[0], cmds[1:]...)
 	err = cmd.Run()
 	if err != nil {
-		msg := fmt.Sprintf("Failed to compile: [%s]%v", cmd.String(), err)
+		log.Println(err.Error())
+		var stderr bytes.Buffer
+		cmd.Stderr = &stderr
+		msg := fmt.Sprintf("Failed to compile: [%s]%v stderr: %s", cmd.String(), err, stderr.String())
 		http.Error(w, msg, http.StatusBadRequest)
 		return
 	}
@@ -106,7 +112,10 @@ func main() {
 		port = "8080"
 	}
 	fmt.Println("Server started on :8080")
-	http.ListenAndServe(":"+port, nil)
+	err := http.ListenAndServe(":"+port, nil)
+	if err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
 }
 
 func createFileWithDirs(path string, data []byte) error {

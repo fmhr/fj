@@ -2,15 +2,13 @@ package fj
 
 import (
 	"fmt"
-	"log"
 )
 
 // ReactiveRun はreactive=trueのときに使う
 func ReactiveRun(ctf *Config, seed int) (map[string]float64, error) {
 	rtn, err := reactiveRun(ctf, seed)
 	if err != nil {
-		log.Println("reactiveRun error", err)
-		return rtn, err
+		return rtn, ErrorTrace("failed to run: %v", err)
 	}
 	//fmt.Fprintln(os.Stderr, mapString(rtn))
 	//fmt.Println(rtn["Score"]) // ここだけ標準出力

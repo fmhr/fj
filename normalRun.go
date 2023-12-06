@@ -86,10 +86,6 @@ func runCommandWithTimeout(cmd *exec.Cmd, cnf *Config) ([]byte, error) {
 }
 
 func checkOutputFolder(dir string) error {
-	if filepath.Clean(dir) != dir || filepath.IsAbs(dir) {
-		return fmt.Errorf("invalid output folder: %s", dir)
-	}
-
 	stat, err := os.Stat(dir)
 	if err != nil {
 		if os.IsNotExist(err) {

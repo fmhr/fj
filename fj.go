@@ -3,9 +3,12 @@ package fj
 import (
 	"fmt"
 	"log"
+	"math"
 	"os"
 
 	"github.com/alecthomas/kingpin/v2"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 )
 
 func init() {
@@ -42,7 +45,8 @@ func Fj() {
 		log.Println("debug mode")
 	}
 
-	switch kingpin.MustParse(fj.Parse(os.Args[1:])) {
+	result := kingpin.MustParse(fj.Parse(os.Args[1:]))
+	switch result {
 	// Setup generate config file
 	case setup.FullCommand():
 		GenerateConfig()
@@ -65,18 +69,29 @@ func Fj() {
 			}
 		}
 		// select run
-		switch kingpin.MustParse(fj.Parse(os.Args[1:])) {
+		switch result {
 		case test.FullCommand():
 			rtn, err := RunSelector(config, *seed)
 			if err != nil {
 				log.Fatal("Error: ", err)
 			}
 			fmt.Fprintln(os.Stdout, rtn)
+			for k, v := range rtn {
+				p := message.NewPrinter(language.English)
+				if v == math.Floor(v) {
+					p.Fprintf(os.Stdout, "%s:%d ", k, int(v))
+				} else {
+					p.Fprintf(os.Stdout, "%s:%f ", k, v)
+				}
+			}
+			fmt.Println("")
 		case tests.FullCommand():
-			if seed2 != nil {
+			// seed2 が指定されていれば end=seed2
+			if seed2 != nil && *seed2 != 0 {
 				*start = 0
 				*end = *seed2
 			}
+			// start, endが指定されていれば、その範囲のシードを並列実行
 			seeds := make([]int, *end-*start)
 			for i := *start; i < *end; i++ {
 				seeds[i-*start] = i
@@ -88,18 +103,16 @@ func Fj() {
 }
 
 func updateConfig(config *Config) {
-	if args1 != nil {
+	if *args1 != nil && len(*args1) > 0 {
 		config.Args = *args1
 	}
-	if args2 != nil {
+	if args2 != nil && len(*args2) > 0 {
 		config.Args = *args2
 	}
-	if jobs != nil {
+	if jobs != nil && *jobs > 0 {
 		config.Jobs = *jobs
 	}
-	if cloud != nil {
-		config.Cloud = *cloud
-	}
+	config.Cloud = config.Cloud || *cloud
 }
 
 func maxInt(a, b int) int {

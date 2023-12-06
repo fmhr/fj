@@ -24,7 +24,7 @@ func runVis(cnf *Config, seed int) (map[string]float64, error) {
 	}
 	// vis
 	infile := filepath.Join(cnf.InfilePath, fmt.Sprintf("%04d.txt", seed))
-	outfile := filepath.Join(cnf.OutfilePath, fmt.Sprintf("%04d.out", seed))
+	outfile := filepath.Join(cnf.OutfilePath, fmt.Sprintf("%04d.txt", seed))
 
 	outVis, err := vis(cnf, infile, outfile)
 	if err != nil {
