@@ -3,7 +3,6 @@ package fj
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -41,7 +40,6 @@ func normalRun(cnf *Config, seed int) ([]byte, error) {
 	if err != nil {
 		return []byte{}, fmt.Errorf("cmd.Run() for command [%q] failed with: %v", cmd, err)
 	}
-	log.Println(out)
 	return out, nil
 }
 
