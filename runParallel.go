@@ -12,6 +12,9 @@ import (
 	"sync/atomic"
 	"syscall"
 	"time"
+
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 )
 
 func RunParallel(cnf *Config, seeds []int) {
@@ -108,7 +111,8 @@ func RunParallel(cnf *Config, seeds []int) {
 		fmt.Fprintf(os.Stderr, "avarageTime=%.2f  maxTime=%.2f\n", sumTime, maxTime)
 	}
 	avarageScore := sumScore / float64(len(datas))
-	fmt.Fprintf(os.Stderr, "(Score)sum=%.2f avarage=%.2f log=%f\n", sumScore, avarageScore, math.Log(sumScore))
+	p := message.NewPrinter(language.English)
+	p.Fprintf(os.Stderr, "(Score)sum=%.2f avarage=%.2f \n", sumScore, avarageScore)
 	fmt.Printf("%.2f\n", sumScore)
 	if jsonOutput != nil && *jsonOutput {
 		fileContent, err := json.MarshalIndent(datas, "", " ")
