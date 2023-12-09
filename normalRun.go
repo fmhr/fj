@@ -3,7 +3,6 @@ package fj
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -52,7 +51,6 @@ func runCommandWithTimeout(cmd *exec.Cmd, cnf *Config) ([]byte, error) {
 	if err := cmd.Start(); err != nil {
 		return nil, fmt.Errorf("cmd.Start() failed with: %v", err)
 	}
-	log.Println("cmd.Start() succeeded")
 	done := make(chan error, 1)
 	go func() {
 		done <- cmd.Wait()
