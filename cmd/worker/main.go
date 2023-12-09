@@ -58,7 +58,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	binaryPath, err := os.Create(config.Binary)
 	if err != nil {
-		errmsg := fmt.Sprintf("Failed to open the binary file: %v", err)
+		errmsg := fmt.Sprintf("Failed to Create the binary file: %v", err)
 		http.Error(w, errmsg, http.StatusInternalServerError)
 		return
 	}
