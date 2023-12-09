@@ -56,18 +56,12 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "BinaryName is empty", http.StatusInternalServerError)
 		return
 	}
-	err = createFileWithDirs(config.Binary, nil)
+	binaryPath, err := os.Create(config.Binary)
 	if err != nil {
-		http.Error(w, "Failed to create binary file", http.StatusInternalServerError)
-		return
-	}
-	binaryPath, err := os.OpenFile(config.Binary, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0755)
-	if err != nil {
-		errmsg := fmt.Sprint("Failed to open the binary file", err.Error())
+		errmsg := fmt.Sprintf("Failed to open the binary file: %v", err)
 		http.Error(w, errmsg, http.StatusInternalServerError)
 		return
 	}
-	defer binaryPath.Close()
 
 	_, err = io.Copy(binaryPath, file)
 	if err != nil {
@@ -75,6 +69,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, errmsg, http.StatusInternalServerError)
 		return
 	}
+
 	// 実行権限を与える
 	err = os.Chmod(binaryPath.Name(), 0755)
 	if err != nil {
@@ -82,6 +77,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, errmsg, http.StatusInternalServerError)
 		return
 	}
+
+	binaryPath.Close()
 
 	// seed
 	seedString := r.FormValue("seed")
