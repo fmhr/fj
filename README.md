@@ -87,8 +87,6 @@ Gcloudで動かす前に、ローカルでテストすることをおすすめ�
 [https://docs.docker.com/engine/install/]を参照してインストールしてください。
 #### 2. fj setupCloudを実行する。
 1. ```fj setupCloud ```を実行して必要なDockerfileを生成します。
-2. ./fj/compiler/Dockerfile を編集してください。
-  自分の使う環境に合わせてDockerfileを編集してください。
-3. ./fj/compiler/に移動して、localbuild.sh を実行してください。
-  実行権限がない場合は、chmod +x ./fj/compiler/localbuild.shを実行してください。
+2. ./fj/compiler/Dockerfile を自身の使う言語に合わせて編集してください。
+3. ./fj/compiler/に移動して、sh localbuild.sh を実行してください。
 4. 同様に ./fj/worker/に移動して、localbuild.sh を実行してください。

@@ -1,4 +1,2 @@
-# ホワイトリスト方式にする
-*
-# Dockerfileのみ例外
-!Dockerfile
+gcloudbuild.sh
+localbuild.sh

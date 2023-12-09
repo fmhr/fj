@@ -14,17 +14,17 @@ import (
 // normal モード用
 func normalRun(cnf *Config, seed int) ([]byte, error) {
 	if cnf.Cmd == "" {
-		return nil, fmt.Errorf("config.Cmd is empty")
+		return nil, ErrorTrace("config.Cmd is empty", nil)
 	}
 	inputfile := filepath.Join(cnf.InfilePath, fmt.Sprintf("%04d.txt", seed))
 	outputfile := filepath.Join(cnf.OutfilePath, fmt.Sprintf("%04d.txt", seed))
 
 	if _, err := os.Stat(inputfile); err != nil {
-		return []byte{}, fmt.Errorf("input file [%s] does not exist", inputfile)
+		return []byte{}, ErrorTrace(fmt.Sprintf("input file [%s] does not exist", inputfile), nil)
 	}
 
 	if err := checkOutputFolder(cnf.OutfilePath); err != nil {
-		return nil, err
+		return nil, ErrorTrace("failed to check output folder", err)
 	}
 
 	var cmd *exec.Cmd
