@@ -18,3 +18,5 @@ require (
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	golang.org/x/text v0.14.0
 )
+
+replace github.com/fmhr/fj => ./fj
