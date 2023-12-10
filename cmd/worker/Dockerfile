@@ -15,9 +15,12 @@ RUN wget -q https://img.atcoder.jp/ahc027/aPdjCUIZ_v2.zip -O tools.zip \
 
 FROM golang:1.21 as workerbuild
 WORKDIR /work
-RUN git clone -b debug-for-ahc027 https://github.com/fmhr/fj.git \
-    && cd fj/cmd/worker \
-    && CGO_ENABLED=0 go build -o /work/worker
+RUN git clone -b debug-for-ahc027 https://github.com/fmhr/fj.git
+
+WORKDIR /work/fj/cmd/worker 
+RUN go mod init worker 
+RUN go mod tidy
+RUN CGO_ENABLED=0 go build -o /work/worker
 
 
 # 3. 実行時の環境
