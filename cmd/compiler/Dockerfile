@@ -4,8 +4,6 @@ WORKDIR /app
 
 ADD main.go ./
 
-RUN go mod init server
-RUN go mod tidy
 RUN go build -o server
 
 # ここからターゲットのコンパイル環境をつくる

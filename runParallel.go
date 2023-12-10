@@ -91,13 +91,17 @@ func RunParallel(cnf *Config, seeds []int) {
 		errSeeds = append(errSeeds, seed)
 	}
 	sumScore := 0.0
+	zeroSeeds := make([]int, 0)
 	for i := 0; i < len(datas); i++ {
 		//fmt.Println(datas[i])
 		sumScore += datas[i]["Score"]
+		if datas[i]["Score"] == 0 {
+			zeroSeeds = append(zeroSeeds, i)
+		}
 	}
 	//	log.Println(datas)
 	DisplayTable(datas)
-	fmt.Fprintln(os.Stderr, "Error seeds:", errSeeds)
+	fmt.Fprintln(os.Stderr, "Error seeds:", errSeeds, "Zero seeds:", zeroSeeds)
 	// timeがあれば、平均と最大を表示
 	_, exsit := datas[0]["time"]
 	if exsit {
@@ -113,7 +117,13 @@ func RunParallel(cnf *Config, seeds []int) {
 	avarageScore := sumScore / float64(len(datas))
 	p := message.NewPrinter(language.English)
 	p.Fprintf(os.Stderr, "(Score)sum=%.2f avarage=%.2f \n", sumScore, avarageScore)
-	fmt.Printf("%.2f\n", sumScore)
+	// if zeroSeeds があれば、sumScoreを０にする
+	if len(zeroSeeds) > 0 {
+		log.Println("Score 0 seeds:", zeroSeeds)
+		fmt.Println("0")
+	} else {
+		fmt.Printf("%.2f\n", sumScore)
+	}
 	if jsonOutput != nil && *jsonOutput {
 		fileContent, err := json.MarshalIndent(datas, "", " ")
 		if err != nil {

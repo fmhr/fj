@@ -90,7 +90,7 @@ Gcloudで動かす前に、ローカルでテストすることをおすすめ�
 2. ./fj/compiler/Dockerfile を自身の使う言語に合わせて編集してください。
 3. ./fj/compiler/に移動して、sh localbuild.sh を実行してください。
 4. 同様に ./fj/worker/に移動して、localbuild.sh を実行してください。
-5.　設定ファイル(fj/config.toml)を自分の環境に合わせて編集します。
+5. 設定ファイル(fj/config.toml)を自分の環境に合わせて編集します。
 ```
 設定例
 CompilerURL = 'http://localhost:8080/compiler'
@@ -102,3 +102,23 @@ ConcurrentRequests = 1
 ```
 ConcurrentRequestsは、並列実行するときのリクエスト数です。ローカルではコンテナを１つしか立ち上げないので、1にしてください。
 設定後に、```fj test --cloud```を実行して、正しく動作するか確認してください。
+
+## Google Cloud 
+0. SDKをインストールする。
+1. 新しいプロジェクトを作成します。　プロジェクト名を適当に　ahc027-test とします。
+端末を開いて、
+```gcloud auth login```を実行して、ログインします。
+```gcloud config set project ahc027-test``を実行して、プロジェクトを設定します。
+2. fj/worker/gcloudbuild.sh と fj/compiler/gcloudbuile.sh のGCLOUD_PROJECTを自分のプロジェクトIDに変更します。
+3. fj/compiler/gcloudbuild.sh のIMAGE_NAMEを変更します。
+4. fj/compiler/gcloudbuild.sh を実行して、コンパイル用のコンテナをビルドします。
+スクリプトが成功すると以下の様なメッセージが表示されます。
+```
+(略)
+DONE
+Done.
+Service [go-compiler] revision [go-compiler-00002-ushi] has been deployed and is serving 100 percent of traffic.
+Service URL: https://go-compiler-xjfasdfae-an.a.run.app
+```
+5. Service URLをコピーして、fj/config.tomlのCompilerURLを変更します。
+6. 同様に　fj/worker/gcloudbuild.sh を実行して、URLをfj/config.tomlのWorkerURLを変更します。
