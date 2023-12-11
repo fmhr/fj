@@ -44,18 +44,17 @@ func sendBinaryToWorker(config *Config, seed int) (rtn map[string]float64, err e
 		return nil, fmt.Errorf("failed to write binary to form file: %v", err)
 	}
 
-	// seed
 	writer.WriteField("seed", fmt.Sprintf("%d", seed))
-
 	writer.Close()
 
-	// リクエストの送信
+	// リクエストの作成
 	req, err := http.NewRequest("POST", config.WorkerURL, body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create HTTP request: %v", err)
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 
+	// リクエストの送受信
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
