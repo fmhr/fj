@@ -91,7 +91,7 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, msg, http.StatusBadRequest)
 		return
 	}
-	bucketName := "ahc027-bucket"
+	bucketName := "ahc027-binary"
 
 	// google cloud storageにバイナリとソースファイルをアップロード
 	rdm := generateRandomString(10)
