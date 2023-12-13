@@ -5,13 +5,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
+	"time"
 )
 
 // sendBinaryToWorker はバイナリをワーカーに送信する
 func sendBinaryToWorker(config *Config, seed int) (rtn map[string]float64, err error) {
+	start := time.Now()
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
@@ -78,10 +81,13 @@ func sendBinaryToWorker(config *Config, seed int) (rtn map[string]float64, err e
 	if err := json.Unmarshal(bodyBytes, &rtn); err != nil {
 		return nil, fmt.Errorf("failed to parse response body: %v", err)
 	}
+	elapsed := time.Since(start)
+	log.Println("seed:", seed, "elapsed time:", elapsed)
+	rtn["elapsed"] = elapsed.Seconds()
 	return rtn, nil
 }
 
-func SendBinaryToWorker(config *Config, seed int) (rtn map[string]float64, err error) {
+func SendBinaryToWorker(config *Config, seed int, binaryNameInBucket string) (rtn map[string]float64, err error) {
 	if config.WorkerURL == "" {
 		return nil, ErrorTrace("", fmt.Errorf("worker URL is not specified"))
 	}

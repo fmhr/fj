@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"context"
+	"crypto/rand"
 	"fmt"
 	"io"
 	"log"
@@ -10,6 +12,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"cloud.google.com/go/storage"
 )
 
 // コンパイルに必要なもの
@@ -76,7 +80,6 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// compile
-
 	cmds := strings.Fields(compileCmd)
 	cmd := exec.Command(cmds[0], cmds[1:]...)
 	err = cmd.Run()
@@ -86,6 +89,19 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 		cmd.Stderr = &stderr
 		msg := fmt.Sprintf("Failed to compile: [%s]%v stderr: %s", cmd.String(), err, stderr.String())
 		http.Error(w, msg, http.StatusBadRequest)
+		return
+	}
+	bucketName := "ahc027-bucket"
+
+	// google cloud storageにバイナリとソースファイルをアップロード
+	newfilename, err := uploarFileToGoogleCloudStorage(bucketName, binaryFileName)
+	if err != nil {
+		http.Error(w, "Failed to upload binary file to bucket", http.StatusInternalServerError)
+		return
+	}
+	_, err = uploarFileToGoogleCloudStorage(bucketName, source)
+	if err != nil {
+		http.Error(w, "Failed to upload source file to bucket", http.StatusInternalServerError)
 		return
 	}
 
@@ -100,9 +116,14 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 	defer os.Remove(binaryFileName)
 
 	// バイナリをレスポンスとして返す
+	w.Header().Set("Content-Disposition", "attachment; filename="+newfilename)
 	w.Header().Set("Content-Type", "application/octet-stream")
 	w.WriteHeader(http.StatusOK)
-	w.Write(binary)
+	_, err = w.Write(binary)
+	if err != nil {
+		http.Error(w, "Failed to write binary to response", http.StatusInternalServerError)
+		return
+	}
 }
 
 func main() {
@@ -133,4 +154,42 @@ func createFileWithDirs(path string, data []byte) error {
 		return fmt.Errorf("failed to create file: %v", err)
 	}
 	return nil
+}
+
+func uploarFileToGoogleCloudStorage(bucketName string, file string) (string, error) {
+	// ファイルの読み込み
+	f, err := os.ReadFile(file)
+	if err != nil {
+		return "", fmt.Errorf("failed to read file: %v", err)
+	}
+
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return "", fmt.Errorf("failed to create client: %v", err)
+	}
+	defer client.Close()
+
+	newfilename := generateRandomString(10) + "_" + file
+
+	wc := client.Bucket(bucketName).Object(newfilename).NewWriter(ctx)
+	_, err = wc.Write(f)
+	if err != nil {
+		return "", fmt.Errorf("failed to write object: %v", err)
+	}
+	defer wc.Close()
+
+	return newfilename, nil
+}
+
+func generateRandomString(length int) string {
+	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	b := make([]byte, length)
+	if _, err := rand.Read(b); err != nil {
+		log.Println(err)
+	}
+	for i := 0; i < length; i++ {
+		b[i] = letters[b[i]%byte(len(letters))]
+	}
+	return string(b)
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"mime"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -84,6 +85,15 @@ func CloudCompile(config *Config) (string, error) {
 	}
 
 	// 受信後
+	content := resp.Header.Get("Content-Disposition")
+	_, params, err := mime.ParseMediaType(content)
+	if err != nil {
+		return "", ErrorTrace("error parsing media type: %w", err)
+	}
+	filename := params["filename"]
+	config.tmpBinary = filename
+
+	log.Println("binary filename:", filename)
 	// バイナリを保存 保存場所はOSの一時フォルダ
 	out, err := os.CreateTemp("", "binary-*")
 	if err != nil {

@@ -2,7 +2,9 @@ FROM golang:1.21 as serverbuild
 
 WORKDIR /app
 
-ADD main.go ./
+COPY . .
+
+RUN go mod download
 
 RUN go build -o server
 
@@ -17,7 +19,6 @@ ENV PATH="/opt/go/bin:${PATH}"
 #RUN go install gonum.org/v1/gonum/...
 #RUN go install github.com/liyue201/gostl/...
 #RUN go install golang.org/x/exp/...
-# ここまで
 
 COPY --from=serverbuild /app/server /work
 

@@ -123,3 +123,4 @@ Service URL: https://go-compiler-xjfasdfae-an.a.run.app
 5. Service URLをコピーして、fj/config.tomlのCompilerURLを変更します。
 6. 同様に　fj/worker/gcloudbuild.sh を実行して、URLをfj/config.tomlのWorkerURLを変更します。
 7. WebブラウザでGoogle Cloud Runのコンソールを開きます。ジャッジコンテナ(worker)を選んで、YAML のタブを開いて、autoscaling.knative.dev/maxScale: '100'　の'100'を'1000'に変更します。(現在設定できる最大値です。)
+gcloud storage buckets create gs:ahc027-bucket でバケットを作成します。
