@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"time"
@@ -64,6 +65,9 @@ func requestToWorker(config *Config, seed int) (rtn map[string]float64, err erro
 	}
 	elapsed := time.Since(start)
 	rtn["responseTime"] = elapsed.Seconds()
+	if rtn["Score"] == 0 {
+		log.Println("response body:", string(bodyBytes))
+	}
 	return rtn, nil
 }
 

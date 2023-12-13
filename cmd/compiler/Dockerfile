@@ -2,11 +2,20 @@ FROM golang:1.21 as serverbuild
 
 WORKDIR /app
 
-COPY . .
+RUN git clone -b debug-for-ahc027 https://github.com/fmhr/fj.git
 
-RUN go mod download
+WORKDIR /app/fj
 
-RUN go build -o server
+RUN go mod tidy
+
+WORKDIR /app/fj/cmd/compiler
+RUN go build -o /app/server
+
+#COPY . .
+
+#RUN go mod init fj/compiler && go mod tidy
+
+#RUN go build -o server
 
 # ここからターゲットのコンパイル環境をつくる
 FROM golang:1.20 as gocompile
@@ -24,6 +33,6 @@ COPY --from=serverbuild /app/server /work
 
 RUN chmod +x /work/server
 
-EXPOSE 8080
+EXPOSE $PORT
 
 CMD ["/work/server"]

@@ -91,7 +91,8 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, msg, http.StatusBadRequest)
 		return
 	}
-	bucketName := "ahc027-binary"
+
+	bucketName := r.FormValue("bucket")
 
 	// google cloud storageにバイナリとソースファイルをアップロード
 	rdm := generateRandomString(10)
@@ -106,13 +107,25 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// バイナリの読み込み
+	binary, err := os.ReadFile(binaryFileName)
+	if err != nil {
+		http.Error(w, "Failed to read compiled binary", http.StatusInternalServerError)
+		return
+	}
 	// ソースファイルとバイナリファイルを削除
 	defer os.Remove(source)
 	defer os.Remove(binaryFileName)
 
 	// バイナリをレスポンスとして返す
 	w.Header().Set("Content-Disposition", "attachment; filename="+newfilename)
+	w.Header().Set("Content-Type", "application/octet-stream")
 	w.WriteHeader(http.StatusOK)
+	_, err = w.Write(binary)
+	if err != nil {
+		http.Error(w, "Failed to write binary to response", http.StatusInternalServerError)
+		return
+	}
 }
 
 func main() {

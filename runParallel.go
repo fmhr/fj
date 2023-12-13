@@ -49,6 +49,7 @@ func RunParallel(cnf *Config, seeds []int) {
 		wg.Add(1)
 		sem <- struct{}{}
 		currentlyRunnningSeeds[seed] = true
+		time.Sleep(50 * time.Millisecond)
 		go func(seed int) {
 			data, err := RunSelector(cnf, seed)
 			if err != nil {
