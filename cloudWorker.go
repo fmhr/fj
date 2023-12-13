@@ -31,7 +31,7 @@ func sendBinaryToWorker(config *Config, seed int) (rtn map[string]float64, err e
 	configPart.Write(configData)
 
 	// バイナリの追加
-	file, err := os.Open(config.tmpBinary)
+	file, err := os.Open(config.TmpBinary)
 	if err != nil {
 		return nil, ErrorTrace(fmt.Sprintf("failed to open binary file %s:", config.Binary), err)
 	}
