@@ -42,24 +42,28 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// バイナリをCloud Storageからダウンロード
-	if config.Bucket == "" {
-		http.Error(w, "BucketName is empty", http.StatusInternalServerError)
-		return
-	}
-	err = downloadFileFromGoogleCloudStorage(config.Bucket, config.TmpBinary, config.Binary)
-	if err != nil {
-		errmsg := fmt.Sprint("Failed to download binary from Cloud Storage:", err.Error())
-		http.Error(w, errmsg, http.StatusInternalServerError)
-		return
-	}
+	_, err = os.Stat(config.Binary)
 
-	// 実行権限を与える
-	err = os.Chmod(config.Binary, 0755)
-	if err != nil {
-		errmsg := fmt.Sprint("Failed to chmod", err.Error())
-		http.Error(w, errmsg, http.StatusInternalServerError)
-		return
+	if os.IsNotExist(err) {
+		// バイナリをCloud Storageからダウンロード
+		if config.Bucket == "" {
+			http.Error(w, "BucketName is empty", http.StatusInternalServerError)
+			return
+		}
+		err = downloadFileFromGoogleCloudStorage(config.Bucket, config.TmpBinary, config.Binary)
+		if err != nil {
+			errmsg := fmt.Sprint("Failed to download binary from Cloud Storage:", err.Error())
+			http.Error(w, errmsg, http.StatusInternalServerError)
+			return
+		}
+
+		// 実行権限を与える
+		err = os.Chmod(config.Binary, 0755)
+		if err != nil {
+			errmsg := fmt.Sprint("Failed to chmod", err.Error())
+			http.Error(w, errmsg, http.StatusInternalServerError)
+			return
+		}
 	}
 
 	// 入力ファイルを作成
