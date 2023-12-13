@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -9,6 +10,7 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"cloud.google.com/go/storage"
 	"github.com/fmhr/fj"
 )
 
@@ -36,6 +38,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// バイナリをCloud Storageからダウンロード
+	err = downloadFileFromGoogleCloudStorage(config.Bucket, config.tmpBinary, config.Binary)
+	if err != nil {
+		errmsg := fmt.Sprint("Failed to download binary from Cloud Storage:", err.Error())
+		http.Error(w, errmsg, http.StatusInternalServerError)
+		return
+	}
+
 	// バイナリの受け取り
 	file, _, err := r.FormFile("binary")
 	if err != nil {
@@ -45,13 +55,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	//	tmpFile, err := os.CreateTemp("", "uploaded-binary-*")
-	//if err != nil {
-	//errmsg := fmt.Sprint("Failed to create a temp file", err.Error())
-	//http.Error(w, errmsg, http.StatusInternalServerError)
-	//return
-	//}
-	//defer tmpFile.Close()
 	if config.Binary == "" {
 		http.Error(w, "BinaryName is empty", http.StatusInternalServerError)
 		return
@@ -124,5 +127,32 @@ func createFileWithDirs(path string, data []byte) error {
 	if err := os.WriteFile(path, data, 0644); err != nil {
 		return fmt.Errorf("failed to create file: %v", err)
 	}
+	return nil
+}
+
+func downloadFileFromGoogleCloudStorage(bucketName string, objectName string, destination string) error {
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to create client: %v", err)
+	}
+	defer client.Close()
+
+	rc, err := client.Bucket(bucketName).Object(objectName).NewReader(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to create reader: %v", err)
+	}
+	defer rc.Close()
+
+	file, err := os.Create(destination)
+	if err != nil {
+		return fmt.Errorf("failed to create file: %v", err)
+	}
+	defer file.Close()
+
+	if _, err := io.Copy(file, rc); err != nil {
+		return fmt.Errorf("failed to copy: %v", err)
+	}
+
 	return nil
 }

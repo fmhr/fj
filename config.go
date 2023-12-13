@@ -31,10 +31,11 @@ type Config struct {
 	Source             string   `toml:"Source"`
 	CompileCmd         string   `toml:"CompileCmd"`
 	Binary             string   `toml:"Binary"`
-	tmpBinary          string
-	WorkerURL          string `toml:"WorkerURL"`
-	ConcurrentRequests int    `toml:"ConcurrentRequests"`
-	TimeLimitMS        uint64 `toml:"TimeLimitMS"`
+	tmpBinary          string   `toml:"tmpBinary"`
+	Bucket             string   `toml:"Bucket"`
+	WorkerURL          string   `toml:"WorkerURL"`
+	ConcurrentRequests int      `toml:"ConcurrentRequests"`
+	TimeLimitMS        uint64   `toml:"TimeLimitMS"`
 }
 
 func newConfig() *Config {
