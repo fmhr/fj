@@ -51,41 +51,41 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// バイナリの受け取り
-	file, _, err := r.FormFile("binary")
-	if err != nil {
-		errmsg := fmt.Sprint("Failed to get the binary:", err.Error())
-		http.Error(w, errmsg, http.StatusBadRequest)
-		return
-	}
-	defer file.Close()
+	//file, _, err := r.FormFile("binary")
+	//if err != nil {
+	//errmsg := fmt.Sprint("Failed to get the binary:", err.Error())
+	//http.Error(w, errmsg, http.StatusBadRequest)
+	//return
+	//}
+	//defer file.Close()
 
-	if config.Binary == "" {
-		http.Error(w, "BinaryName is empty", http.StatusInternalServerError)
-		return
-	}
-	binaryPath, err := os.Create(config.Binary)
-	if err != nil {
-		errmsg := fmt.Sprintf("Failed to Create the binary file: %v", err)
-		http.Error(w, errmsg, http.StatusInternalServerError)
-		return
-	}
+	//if config.Binary == "" {
+	//http.Error(w, "BinaryName is empty", http.StatusInternalServerError)
+	//return
+	//}
+	//binaryPath, err := os.Create(config.Binary)
+	//if err != nil {
+	//errmsg := fmt.Sprintf("Failed to Create the binary file: %v", err)
+	//http.Error(w, errmsg, http.StatusInternalServerError)
+	//return
+	//}
 
-	_, err = io.Copy(binaryPath, file)
-	if err != nil {
-		errmsg := fmt.Sprint("Failed to copy the binary to the temp file:", err.Error())
-		http.Error(w, errmsg, http.StatusInternalServerError)
-		return
-	}
+	//_, err = io.Copy(binaryPath, file)
+	//if err != nil {
+	//errmsg := fmt.Sprint("Failed to copy the binary to the temp file:", err.Error())
+	//http.Error(w, errmsg, http.StatusInternalServerError)
+	//return
+	//}
 
 	// 実行権限を与える
-	err = os.Chmod(binaryPath.Name(), 0755)
-	if err != nil {
-		errmsg := fmt.Sprint("Failed to chmod", err.Error())
-		http.Error(w, errmsg, http.StatusInternalServerError)
-		return
-	}
+	//err = os.Chmod(binaryPath.Name(), 0755)
+	//if err != nil {
+	//errmsg := fmt.Sprint("Failed to chmod", err.Error())
+	//http.Error(w, errmsg, http.StatusInternalServerError)
+	//return
+	//}
 
-	binaryPath.Close()
+	//binaryPath.Close()
 
 	// seed
 	seedString := r.FormValue("seed")

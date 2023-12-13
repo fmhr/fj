@@ -63,7 +63,7 @@ func Fj() {
 		updateConfig(config)
 		// cloud mode ならソースコードをアップロードしてバイナリを受け取る
 		if config.Cloud {
-			config.TmpBinary, err = CloudCompile(config)
+			err = CloudCompile(config)
 			if err != nil {
 				log.Fatal("Cloud mode Compile error:", err)
 			}
