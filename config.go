@@ -31,7 +31,7 @@ type Config struct {
 	Source             string   `toml:"Source"`
 	CompileCmd         string   `toml:"CompileCmd"`
 	Binary             string   `toml:"Binary"`
-	tmpBinary          string   `toml:"tmpBinary"`
+	TmpBinary          string   `toml:"tmpBinary"`
 	Bucket             string   `toml:"Bucket"`
 	WorkerURL          string   `toml:"WorkerURL"`
 	ConcurrentRequests int      `toml:"ConcurrentRequests"`

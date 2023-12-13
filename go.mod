@@ -5,7 +5,7 @@ go 1.21
 require (
 	cloud.google.com/go/storage v1.35.1
 	github.com/olekukonko/tablewriter v0.0.5
-	github.com/pelletier/go-toml/v2 v2.1.0
+	github.com/pelletier/go-toml/v2 v2.1.1
 )
 
 require (
@@ -13,7 +13,7 @@ require (
 	cloud.google.com/go/compute v1.23.1 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/iam v1.1.3 // indirect
-	github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137 // indirect
+	github.com/alecthomas/units v0.0.0-20231202071711-9a357b53e9c9 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/s2a-go v0.1.7 // indirect
@@ -40,7 +40,7 @@ require (
 )
 
 require (
-	github.com/alecthomas/kingpin/v2 v2.3.2
+	github.com/alecthomas/kingpin/v2 v2.4.0
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	golang.org/x/text v0.14.0
 )

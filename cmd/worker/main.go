@@ -39,7 +39,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// バイナリをCloud Storageからダウンロード
-	err = downloadFileFromGoogleCloudStorage(config.Bucket, config.tmpBinary, config.Binary)
+	err = downloadFileFromGoogleCloudStorage(config.Bucket, config.TmpBinary, config.Binary)
 	if err != nil {
 		errmsg := fmt.Sprint("Failed to download binary from Cloud Storage:", err.Error())
 		http.Error(w, errmsg, http.StatusInternalServerError)

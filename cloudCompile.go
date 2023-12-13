@@ -91,7 +91,7 @@ func CloudCompile(config *Config) (string, error) {
 		return "", ErrorTrace("error parsing media type: %w", err)
 	}
 	filename := params["filename"]
-	config.tmpBinary = filename
+	config.TmpBinary = filename
 
 	log.Println("binary filename:", filename)
 	// バイナリを保存 保存場所はOSの一時フォルダ
