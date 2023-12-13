@@ -84,7 +84,7 @@ func CloudCompile(config *Config) error {
 		return ErrorTrace(string(bodyBytes), fmt.Errorf("error response status code: %d", resp.StatusCode))
 	}
 
-	// 受信後
+	// cloud storageに保存したバイナルの名前を取得
 	content := resp.Header.Get("Content-Disposition")
 	_, params, err := mime.ParseMediaType(content)
 	if err != nil {
@@ -93,18 +93,5 @@ func CloudCompile(config *Config) error {
 	filename := params["filename"]
 	config.TmpBinary = filename
 
-	log.Println("binary filename:", filename)
-	// バイナリを保存 保存場所はOSの一時フォルダ
-	//out, err := os.CreateTemp("", "binary-*")
-	//if err != nil {
-	//return "", ErrorTrace("error createing output file: %w", err)
-	//}
-	//defer out.Close()
-
-	//_, err = io.Copy(out, resp.Body)
-	//if err != nil {
-	//return "", ErrorTrace("error saving binary: %w", err)
-	//}
-	//log.Println("binary saved to", out.Name())
 	return nil
 }

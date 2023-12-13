@@ -5,15 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"time"
 )
 
-// sendBinaryToWorker はバイナリをワーカーに送信する
-func sendBinaryToWorker(config *Config, seed int) (rtn map[string]float64, err error) {
-	log.Println(config)
+// requestToWorker はバイナリをワーカーに送信する
+func requestToWorker(config *Config, seed int) (rtn map[string]float64, err error) {
 	start := time.Now()
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
@@ -29,23 +27,6 @@ func sendBinaryToWorker(config *Config, seed int) (rtn map[string]float64, err e
 		return nil, ErrorTrace("failed to create form field for config: %v", err)
 	}
 	configPart.Write(configData)
-
-	// バイナリの追加
-	//file, err := os.Open(config.TmpBinary)
-	//if err != nil {
-	//return nil, ErrorTrace(fmt.Sprintf("failed to open binary file %s:", config.Binary), err)
-	//}
-	//defer file.Close()
-
-	//part, err := writer.CreateFormFile("binary", config.Binary)
-	//if err != nil {
-	//return nil, fmt.Errorf("failed to create form file for binary: %v", err)
-	//}
-	// バイナリの書き込み
-	//_, err = io.Copy(part, file)
-	//if err != nil {
-	//return nil, fmt.Errorf("failed to write binary to form file: %v", err)
-	//}
 
 	writer.WriteField("seed", fmt.Sprintf("%d", seed))
 	writer.Close()
@@ -82,8 +63,7 @@ func sendBinaryToWorker(config *Config, seed int) (rtn map[string]float64, err e
 		return nil, fmt.Errorf("failed to parse response body: %v", err)
 	}
 	elapsed := time.Since(start)
-	log.Println("seed:", seed, "elapsed time:", elapsed)
-	rtn["elapsed"] = elapsed.Seconds()
+	rtn["responseTime"] = elapsed.Seconds()
 	return rtn, nil
 }
 
@@ -94,5 +74,5 @@ func SendBinaryToWorker(config *Config, seed int, binaryNameInBucket string) (rt
 	if config.Binary == "" {
 		return nil, ErrorTrace("", fmt.Errorf("binary path is not specified"))
 	}
-	return sendBinaryToWorker(config, seed)
+	return requestToWorker(config, seed)
 }

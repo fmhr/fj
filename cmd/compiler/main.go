@@ -94,36 +94,25 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 	bucketName := "ahc027-bucket"
 
 	// google cloud storageにバイナリとソースファイルをアップロード
-	newfilename, err := uploarFileToGoogleCloudStorage(bucketName, binaryFileName)
+	rdm := generateRandomString(10)
+	newfilename, err := uploarFileToGoogleCloudStorage(bucketName, binaryFileName, rdm)
 	if err != nil {
 		http.Error(w, "Failed to upload binary file to bucket", http.StatusInternalServerError)
 		return
 	}
-	_, err = uploarFileToGoogleCloudStorage(bucketName, source)
+	_, err = uploarFileToGoogleCloudStorage(bucketName, source, rdm)
 	if err != nil {
 		http.Error(w, "Failed to upload source file to bucket", http.StatusInternalServerError)
 		return
 	}
 
-	// バイナリの読み込み
-	binary, err := os.ReadFile(binaryFileName)
-	if err != nil {
-		http.Error(w, "Failed to read compiled binary", http.StatusInternalServerError)
-		return
-	}
 	// ソースファイルとバイナリファイルを削除
 	defer os.Remove(source)
 	defer os.Remove(binaryFileName)
 
 	// バイナリをレスポンスとして返す
 	w.Header().Set("Content-Disposition", "attachment; filename="+newfilename)
-	w.Header().Set("Content-Type", "application/octet-stream")
 	w.WriteHeader(http.StatusOK)
-	_, err = w.Write(binary)
-	if err != nil {
-		http.Error(w, "Failed to write binary to response", http.StatusInternalServerError)
-		return
-	}
 }
 
 func main() {
@@ -156,7 +145,7 @@ func createFileWithDirs(path string, data []byte) error {
 	return nil
 }
 
-func uploarFileToGoogleCloudStorage(bucketName string, file string) (string, error) {
+func uploarFileToGoogleCloudStorage(bucketName string, file, rdm string) (string, error) {
 	// ファイルの読み込み
 	f, err := os.ReadFile(file)
 	if err != nil {
@@ -170,7 +159,7 @@ func uploarFileToGoogleCloudStorage(bucketName string, file string) (string, err
 	}
 	defer client.Close()
 
-	newfilename := generateRandomString(10) + "_" + file
+	newfilename := rdm + "-" + file
 
 	wc := client.Bucket(bucketName).Object(newfilename).NewWriter(ctx)
 	_, err = wc.Write(f)

@@ -4,7 +4,7 @@ package fj
 func RunSelector(config *Config, seed int) (map[string]float64, error) {
 	// Cloud mode なら、sendBinaryToWorker を呼び出す
 	if config.Cloud || (cloud != nil && *cloud) {
-		rtn, err := sendBinaryToWorker(config, seed)
+		rtn, err := requestToWorker(config, seed)
 		if err != nil {
 			return nil, ErrorTrace("failed to run: %v", err)
 		}
