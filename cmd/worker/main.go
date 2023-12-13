@@ -7,12 +7,16 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strconv"
 
 	"cloud.google.com/go/storage"
 	"github.com/fmhr/fj"
 )
+
+func main() {
+	http.HandleFunc("/worker", handler)
+	http.ListenAndServe(":8080", nil)
+}
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -50,33 +54,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// バイナリの受け取り
-	//file, _, err := r.FormFile("binary")
-	//if err != nil {
-	//errmsg := fmt.Sprint("Failed to get the binary:", err.Error())
-	//http.Error(w, errmsg, http.StatusBadRequest)
-	//return
-	//}
-	//defer file.Close()
-
-	//if config.Binary == "" {
-	//http.Error(w, "BinaryName is empty", http.StatusInternalServerError)
-	//return
-	//}
-	//binaryPath, err := os.Create(config.Binary)
-	//if err != nil {
-	//errmsg := fmt.Sprintf("Failed to Create the binary file: %v", err)
-	//http.Error(w, errmsg, http.StatusInternalServerError)
-	//return
-	//}
-
-	//_, err = io.Copy(binaryPath, file)
-	//if err != nil {
-	//errmsg := fmt.Sprint("Failed to copy the binary to the temp file:", err.Error())
-	//http.Error(w, errmsg, http.StatusInternalServerError)
-	//return
-	//}
-
 	// 実行権限を与える
 	err = os.Chmod(config.Binary, 0755)
 	if err != nil {
@@ -85,9 +62,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//binaryPath.Close()
-
-	// seed
+	// 入力ファイルを作成
 	seedString := r.FormValue("seed")
 	seedInt, err := strconv.Atoi(seedString)
 	if err != nil {
@@ -110,28 +85,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonData)
-}
-
-func main() {
-	http.HandleFunc("/worker", handler)
-	http.ListenAndServe(":8080", nil)
-}
-
-func createFileWithDirs(path string, data []byte) error {
-	dir := filepath.Dir(path)
-
-	// ディレクトリが存在しない場合は作成
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		if err := os.MkdirAll(dir, 0777); err != nil {
-			return fmt.Errorf("failed to create directory: %v", err)
-		}
-	}
-
-	// ファイルを作成
-	if err := os.WriteFile(path, data, 0644); err != nil {
-		return fmt.Errorf("failed to create file: %v", err)
-	}
-	return nil
 }
 
 func downloadFileFromGoogleCloudStorage(bucketName string, objectName string, destination string) error {
