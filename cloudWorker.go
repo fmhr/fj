@@ -14,6 +14,7 @@ import (
 
 // sendBinaryToWorker はバイナリをワーカーに送信する
 func sendBinaryToWorker(config *Config, seed int) (rtn map[string]float64, err error) {
+	log.Println(config)
 	start := time.Now()
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
