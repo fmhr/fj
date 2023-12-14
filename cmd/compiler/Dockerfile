@@ -9,13 +9,9 @@ WORKDIR /app/fj
 RUN go mod tidy
 
 WORKDIR /app/fj/cmd/compiler
+
 RUN go build -o /app/server
 
-#COPY . .
-
-#RUN go mod init fj/compiler && go mod tidy
-
-#RUN go build -o server
 
 # ここからターゲットのコンパイル環境をつくる
 FROM golang:1.20 as gocompile
