@@ -74,6 +74,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, errmsg, http.StatusBadRequest)
 		return
 	}
+	// 実行
 	out, err := exexute(&config, seedInt)
 	if err != nil {
 		errmsg := fmt.Sprint("Failed to execute", err.Error())

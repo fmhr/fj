@@ -56,8 +56,12 @@ func gen(cnf *Config, seed int) error {
 	}
 	// cnf.InfilePathを更新
 	cnf.InfilePath = "in2/"
-	// {seed}.txtを削除
+	// (seed.txt)を削除
 	err = os.Remove(filename)
+	if err != nil {
+		return fmt.Errorf("failed to remove file: %s", err)
+	}
+	err = os.Remove("in/0000.txt")
 	if err != nil {
 		return fmt.Errorf("failed to remove file: %s", err)
 	}
