@@ -86,8 +86,10 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err.Error())
 		var stderr bytes.Buffer
+		var stdout bytes.Buffer
 		cmd.Stderr = &stderr
-		msg := fmt.Sprintf("Failed to compile: [%s]%v stderr: %s", cmd.String(), err, stderr.String())
+		cmd.Stdout = &stdout
+		msg := fmt.Sprintf("Failed to compile: [%s]%v stderr: %s %s", cmd.String(), err, stderr.String(), stdout.String())
 		http.Error(w, msg, http.StatusBadRequest)
 		return
 	}

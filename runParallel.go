@@ -49,7 +49,7 @@ func RunParallel(cnf *Config, seeds []int) {
 		wg.Add(1)
 		sem <- struct{}{}
 		currentlyRunnningSeeds[seed] = true
-		time.Sleep(50 * time.Millisecond)
+		time.Sleep(5 * time.Millisecond)
 		go func(seed int) {
 			data, err := RunSelector(cnf, seed)
 			if err != nil {
@@ -63,9 +63,9 @@ func RunParallel(cnf *Config, seeds []int) {
 			atomic.AddInt32(&taskCompleted, 1)           // progressbar
 			printProgress(int(taskCompleted), totalTask) // progressbar
 			delete(currentlyRunnningSeeds, seed)         // 現在実行中のseedを削除
-			<-sem
-			wg.Done()
 			datasMutex.Unlock()
+			wg.Done()
+			<-sem
 		}(seed)
 	}
 	wg.Wait()

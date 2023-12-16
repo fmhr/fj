@@ -14,7 +14,7 @@ RUN go build -o /app/server
 
 
 # ここからターゲットのコンパイル環境をつくる
-FROM golang:1.20 as gocompile
+FROM golang:1.21.5 as gocompile
 
 WORKDIR /work
 
