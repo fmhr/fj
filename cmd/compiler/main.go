@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"crypto/rand"
 	"fmt"
@@ -82,14 +81,10 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 	// compile
 	cmds := strings.Fields(compileCmd)
 	cmd := exec.Command(cmds[0], cmds[1:]...)
-	err = cmd.Run()
+	msg, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Println(err.Error())
-		var stderr bytes.Buffer
-		var stdout bytes.Buffer
-		cmd.Stderr = &stderr
-		cmd.Stdout = &stdout
-		msg := fmt.Sprintf("Failed to compile: [%s]%v stderr: %s %s", cmd.String(), err, stderr.String(), stdout.String())
+		msg := fmt.Sprintf("Failed to compile: [%s]%v msg: %s", cmd.String(), err, string(msg))
 		http.Error(w, msg, http.StatusBadRequest)
 		return
 	}
