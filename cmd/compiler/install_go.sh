@@ -1,9 +1,10 @@
-pushd /tmp                                    
+cd /tmp                                    
 wget https://go.dev/dl/go1.20.6.linux-amd64.tar.gz
-sudo tar -C /opt -xf go1.20.6.linux-amd64.tar.gz
-popd
+tar -C /opt -xf go1.20.6.linux-amd64.tar.gz
 export PATH=$PATH:/opt/go/bin
 # create project and install libraries
+mkdir -p /go/src/atcoder.jp/golang
+cd /go/src/atcoder.jp/golang
 go mod init atcoder.jp/golang
 go get -u github.com/emirpasic/gods/...
 go get -u gonum.org/v1/gonum/...
