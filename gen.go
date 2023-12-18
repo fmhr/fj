@@ -22,6 +22,7 @@ var genMutex sync.Mutex
 func gen(cnf *Config, seed int) error {
 	genMutex.Lock()
 	defer genMutex.Unlock()
+	// in2/がなければ作成
 	path := "in2"
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		err := os.Mkdir(path, 0755)
@@ -31,18 +32,19 @@ func gen(cnf *Config, seed int) error {
 	} else if err != nil {
 		return ErrorTrace("error checking if directory exists: %s", err)
 	}
+	// genがあるか確認
 	_, err := os.Stat(cnf.GenPath)
 	if err != nil {
 		return ErrorTrace(fmt.Sprintf("gen not found: %s :", cnf.GenPath), err)
 	}
-	// seedを書き込んだ{seed}.txtをgenによませるとin/0000.txtが生成される
-	filename := fmt.Sprintf("%d.txt", seed)
-	err = writeIntToFile(seed, filename)
+	// seedを書き込んだ{seed}.txtを作成
+	seedfile := "seed.txt"
+	err = writeIntToFile(seed, seedfile)
 	if err != nil {
 		return ErrorTrace("failed to write seed to file: %s", err)
 	}
 	// genを実行
-	cmdStr := fmt.Sprintf("%s %s", cnf.GenPath, filename)
+	cmdStr := fmt.Sprintf("%s %s", cnf.GenPath, seedfile)
 	cmd := createCommand(cmdStr)
 	err = cmd.Run()
 	if err != nil {
@@ -56,14 +58,6 @@ func gen(cnf *Config, seed int) error {
 	// cnf.InfilePathを更新
 	cnf.InfilePath = "in2/"
 	// (seed.txt)を削除
-	//err = os.Remove(filename)
-	//if err != nil {
-	//return fmt.Errorf("failed to remove file: %s", err)
-	//}
-	//err = os.Remove("in/0000.txt")
-	//if err != nil {
-	//return fmt.Errorf("failed to remove file: %s", err)
-	//}
 	return nil
 }
 
