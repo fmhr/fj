@@ -2,14 +2,13 @@ package fj
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"sync"
 )
 
 func Gen(cnf *Config, seed int) error {
 	if cnf.GenPath == "" {
-		log.Fatal("GenPath is not set. please set GenPath: {} in fj_config.toml")
+		return fmt.Errorf("GenPath is not set. please set GenPath: {} in fj/config.toml")
 	}
 	err := gen(cnf, seed)
 	return err
@@ -27,20 +26,20 @@ func gen(cnf *Config, seed int) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		err := os.Mkdir(path, 0755)
 		if err != nil {
-			return fmt.Errorf("failed to create directory: %s", err)
+			return ErrorTrace("failed to create directory: %s", err)
 		}
 	} else if err != nil {
-		log.Fatalf("error checking if directory exists: %s", err)
+		return ErrorTrace("error checking if directory exists: %s", err)
 	}
 	_, err := os.Stat(cnf.GenPath)
 	if err != nil {
-		return fmt.Errorf("gen not found: %s", cnf.GenPath)
+		return ErrorTrace(fmt.Sprintf("gen not found: %s :", cnf.GenPath), err)
 	}
 	// seedを書き込んだ{seed}.txtをgenによませるとin/0000.txtが生成される
 	filename := fmt.Sprintf("%d.txt", seed)
 	err = writeIntToFile(seed, filename)
 	if err != nil {
-		return fmt.Errorf("failed to write seed to file: %s", err)
+		return ErrorTrace("failed to write seed to file: %s", err)
 	}
 	// genを実行
 	cmdStr := fmt.Sprintf("%s %s", cnf.GenPath, filename)
