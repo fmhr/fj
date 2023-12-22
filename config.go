@@ -31,10 +31,11 @@ type Config struct {
 	Source             string   `toml:"Source"`
 	CompileCmd         string   `toml:"CompileCmd"`
 	Binary             string   `toml:"Binary"`
-	tmpBinary          string
-	WorkerURL          string `toml:"WorkerURL"`
-	ConcurrentRequests int    `toml:"ConcurrentRequests"`
-	TimeLimitMS        uint64 `toml:"TimeLimitMS"`
+	TmpBinary          string   `toml:"tmpBinary"`
+	Bucket             string   `toml:"Bucket"`
+	WorkerURL          string   `toml:"WorkerURL"`
+	ConcurrentRequests int      `toml:"ConcurrentRequests"`
+	TimeLimitMS        uint64   `toml:"TimeLimitMS"`
 }
 
 func newConfig() *Config {
@@ -48,14 +49,14 @@ func newConfig() *Config {
 		GenPath:            "tools/target/release/gen",
 		InfilePath:         "tools/in/",
 		OutfilePath:        "out/",
-		Jobs:               1,
+		Jobs:               4,
 		Cloud:              false,
 		CloudURL:           "http://localhost:8888",
-		CompilerURL:        "",
+		CompilerURL:        "http://localhost:8080/compiler",
 		CompileCmd:         "go build -o bin/main src/main.go",
 		Source:             "src/main.go",
 		Binary:             "bin/main",
-		WorkerURL:          "",
+		WorkerURL:          "http://localhost:8081/worker",
 		ConcurrentRequests: 1000,
 		TimeLimitMS:        10000,
 	}

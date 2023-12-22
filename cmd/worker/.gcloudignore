@@ -1,4 +1,0 @@
-# ホワイトリスト方式にする
-*
-# Dockerfileのみ例外
-!Dockerfile

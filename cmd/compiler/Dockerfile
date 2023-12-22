@@ -2,29 +2,41 @@ FROM golang:1.21 as serverbuild
 
 WORKDIR /app
 
-ADD main.go ./
+RUN git clone -b debug-for-ahc027 https://github.com/fmhr/fj.git
 
-RUN go mod init server
+WORKDIR /app/fj
+
 RUN go mod tidy
-RUN go build -o server
 
+WORKDIR /app/fj/cmd/compiler
+
+RUN go build -o /app/server
+
+
+
+#
 # ここからターゲットのコンパイル環境をつくる
-FROM golang:1.20 as gocompile
+#FROM golang:1.21.5 as gocompile
 
-WORKDIR /work
+#WORKDIR /work
 
-ENV PATH="/opt/go/bin:${PATH}"
+#ENV PATH="/opt/go/bin:${PATH}"
 
 #RUN go install github.com/fmorenovr/gods/...
 #RUN go install gonum.org/v1/gonum/...
 #RUN go install github.com/liyue201/gostl/...
 #RUN go install golang.org/x/exp/...
-# ここまで
+
+
+FROM ubuntu:22.10
+WORKDIR /work
+
+RUN sh installGolang.sh
 
 COPY --from=serverbuild /app/server /work
 
 RUN chmod +x /work/server
 
-EXPOSE 8080
+EXPOSE $PORT
 
 CMD ["/work/server"]

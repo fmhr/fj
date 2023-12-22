@@ -7,21 +7,23 @@ import (
 	"math"
 	"os"
 	"os/signal"
-	"runtime"
 	"sync"
 	"sync/atomic"
 	"syscall"
 	"time"
+
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 )
 
 func RunParallel(cnf *Config, seeds []int) {
 	// 並列実行数の設定
-	concurrentNum := runtime.NumCPU() - 1
+	concurrentNum := 1
 	if cnf.Jobs > 0 {
 		concurrentNum = cnf.Jobs
 	}
 	if cnf.Cloud {
-		concurrentNum = maxInt(1, maxInt(concurrentNum, cnf.ConcurrentRequests))
+		concurrentNum = maxInt(1, cnf.ConcurrentRequests)
 	}
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, concurrentNum)
@@ -33,47 +35,37 @@ func RunParallel(cnf *Config, seeds []int) {
 	totalTask := len(seeds)
 
 	// Ctrl+Cで中断したときに、現在実行中のseedを表示する
-	currentlyRunnningSeeds := make([]int, 0, len(seeds))
-	var seedMutex sync.Mutex
+	currentlyRunnningSeeds := map[int]bool{}
 	var datasMutex sync.Mutex
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 
+	// Ctrl+Cで中断したときに、現在実行中のseedを表示する
 	go handleSignals(sigCh, &wg, &currentlyRunnningSeeds)
+
+	printProgress(int(taskCompleted), totalTask)
 
 	for _, seed := range seeds {
 		wg.Add(1)
 		sem <- struct{}{}
+		currentlyRunnningSeeds[seed] = true
+		time.Sleep(5 * time.Millisecond)
 		go func(seed int) {
-			seedMutex.Lock()
-			currentlyRunnningSeeds = append(currentlyRunnningSeeds, seed)
-			seedMutex.Unlock()
-
-			defer func() {
-				seedMutex.Lock()
-				for i, s := range currentlyRunnningSeeds {
-					if s == seed {
-						currentlyRunnningSeeds = append(currentlyRunnningSeeds[:i], currentlyRunnningSeeds[i+1:]...)
-						break
-					}
-				}
-				seedMutex.Unlock()
-				<-sem
-				wg.Done()
-				atomic.AddInt32(&taskCompleted, 1)
-				printProgress(int(taskCompleted), totalTask)
-			}()
 			data, err := RunSelector(cnf, seed)
 			if err != nil {
 				errorChan <- fmt.Sprintf("Run error: seed=%d %v\n", seed, err)
 				errorSeedChan <- seed
 				return
 			}
-			// 処理結果を格納
+			// 後処理
 			datasMutex.Lock()
-			datas = append(datas, data)
+			datas = append(datas, data)                  // 結果を追加
+			atomic.AddInt32(&taskCompleted, 1)           // progressbar
+			printProgress(int(taskCompleted), totalTask) // progressbar
+			delete(currentlyRunnningSeeds, seed)         // 現在実行中のseedを削除
 			datasMutex.Unlock()
-			//fmt.Fprintf(os.Stderr, "%v\n", data)
+			wg.Done()
+			<-sem
 		}(seed)
 	}
 	wg.Wait()
@@ -88,13 +80,17 @@ func RunParallel(cnf *Config, seeds []int) {
 		errSeeds = append(errSeeds, seed)
 	}
 	sumScore := 0.0
+	zeroSeeds := make([]int, 0)
 	for i := 0; i < len(datas); i++ {
 		//fmt.Println(datas[i])
 		sumScore += datas[i]["Score"]
+		if datas[i]["Score"] == 0 {
+			zeroSeeds = append(zeroSeeds, i)
+		}
 	}
 	//	log.Println(datas)
 	DisplayTable(datas)
-	fmt.Fprintln(os.Stderr, "Error seeds:", errSeeds)
+	fmt.Fprintln(os.Stderr, "Error seeds:", errSeeds, "Zero seeds:", zeroSeeds)
 	// timeがあれば、平均と最大を表示
 	_, exsit := datas[0]["time"]
 	if exsit {
@@ -108,8 +104,15 @@ func RunParallel(cnf *Config, seeds []int) {
 		fmt.Fprintf(os.Stderr, "avarageTime=%.2f  maxTime=%.2f\n", sumTime, maxTime)
 	}
 	avarageScore := sumScore / float64(len(datas))
-	fmt.Fprintf(os.Stderr, "(Score)sum=%.2f avarage=%.2f log=%f\n", sumScore, avarageScore, math.Log(sumScore))
-	fmt.Printf("%.2f\n", sumScore)
+	p := message.NewPrinter(language.English)
+	p.Fprintf(os.Stderr, "(Score)sum=%.2f avarage=%.2f \n", sumScore, avarageScore)
+	// if zeroSeeds があれば、sumScoreを０にする
+	if len(zeroSeeds) > 0 {
+		log.Println("Score 0 seeds:", zeroSeeds)
+		fmt.Println("0")
+	} else {
+		fmt.Printf("%.2f\n", sumScore)
+	}
 	if jsonOutput != nil && *jsonOutput {
 		fileContent, err := json.MarshalIndent(datas, "", " ")
 		if err != nil {
@@ -146,7 +149,7 @@ func printProgress(current, total int) {
 	fmt.Fprintf(os.Stderr, "\r[%d/%d] [%s] %.2f%%", current, total, string(progressBar), percentage*100)
 }
 
-func handleSignals(sigCh <-chan os.Signal, wg *sync.WaitGroup, curent *[]int) {
+func handleSignals(sigCh <-chan os.Signal, wg *sync.WaitGroup, curent *map[int]bool) {
 	for {
 		sig := <-sigCh
 		switch sig {

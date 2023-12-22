@@ -12,7 +12,7 @@ import (
 )
 
 func init() {
-	log.SetFlags(log.Lshortfile)
+	//log.SetFlags(log.Lshortfile)
 }
 
 var (
@@ -63,7 +63,7 @@ func Fj() {
 		updateConfig(config)
 		// cloud mode ならソースコードをアップロードしてバイナリを受け取る
 		if config.Cloud {
-			config.tmpBinary, err = CloudCompile(config)
+			err = CloudCompile(config)
 			if err != nil {
 				log.Fatal("Cloud mode Compile error:", err)
 			}

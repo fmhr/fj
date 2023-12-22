@@ -1,8 +1,0 @@
-steps:
-- name: 'docker.io/library/golang:1.20.9'
-  args: ['go', 'build', '-o', '${BUILD_ID}.out', 'main.go']
-  env: 'CGO_ENABLED=0'
-artifacts:
-  objects:
-    location: 'gs://fj-test_cloudbuild/'
-    paths: ['${BUILD_ID}.out']

@@ -1,16 +1,22 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strconv"
 
+	"cloud.google.com/go/storage"
 	"github.com/fmhr/fj"
 )
+
+func main() {
+	http.HandleFunc("/worker", handler)
+	http.ListenAndServe(":8080", nil)
+}
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -36,54 +42,31 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// バイナリの受け取り
-	file, _, err := r.FormFile("binary")
-	if err != nil {
-		errmsg := fmt.Sprint("Failed to get the binary:", err.Error())
-		http.Error(w, errmsg, http.StatusBadRequest)
-		return
-	}
-	defer file.Close()
+	_, err = os.Stat(config.Binary)
 
-	//	tmpFile, err := os.CreateTemp("", "uploaded-binary-*")
-	//if err != nil {
-	//errmsg := fmt.Sprint("Failed to create a temp file", err.Error())
-	//http.Error(w, errmsg, http.StatusInternalServerError)
-	//return
-	//}
-	//defer tmpFile.Close()
-	if config.Binary == "" {
-		http.Error(w, "BinaryName is empty", http.StatusInternalServerError)
-		return
-	}
-	err = createFileWithDirs(config.Binary, nil)
-	if err != nil {
-		http.Error(w, "Failed to create binary file", http.StatusInternalServerError)
-		return
-	}
-	binaryPath, err := os.OpenFile(config.Binary, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0755)
-	if err != nil {
-		errmsg := fmt.Sprint("Failed to open the binary file", err.Error())
-		http.Error(w, errmsg, http.StatusInternalServerError)
-		return
-	}
-	defer binaryPath.Close()
+	if os.IsNotExist(err) {
+		// バイナリをCloud Storageからダウンロード
+		if config.Bucket == "" {
+			http.Error(w, "BucketName is empty", http.StatusInternalServerError)
+			return
+		}
+		err = downloadFileFromGoogleCloudStorage(config.Bucket, config.TmpBinary, config.Binary)
+		if err != nil {
+			errmsg := fmt.Sprint("Failed to download binary from Cloud Storage:", err.Error())
+			http.Error(w, errmsg, http.StatusInternalServerError)
+			return
+		}
 
-	_, err = io.Copy(binaryPath, file)
-	if err != nil {
-		errmsg := fmt.Sprint("Failed to copy the binary to the temp file:", err.Error())
-		http.Error(w, errmsg, http.StatusInternalServerError)
-		return
-	}
-	// 実行権限を与える
-	err = os.Chmod(binaryPath.Name(), 0755)
-	if err != nil {
-		errmsg := fmt.Sprint("Failed to chmod", err.Error())
-		http.Error(w, errmsg, http.StatusInternalServerError)
-		return
+		// 実行権限を与える
+		err = os.Chmod(config.Binary, 0755)
+		if err != nil {
+			errmsg := fmt.Sprint("Failed to chmod", err.Error())
+			http.Error(w, errmsg, http.StatusInternalServerError)
+			return
+		}
 	}
 
-	// seed
+	// 入力ファイルを作成
 	seedString := r.FormValue("seed")
 	seedInt, err := strconv.Atoi(seedString)
 	if err != nil {
@@ -91,6 +74,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, errmsg, http.StatusBadRequest)
 		return
 	}
+	// 実行
 	out, err := exexute(&config, seedInt)
 	if err != nil {
 		errmsg := fmt.Sprint("Failed to execute", err.Error())
@@ -108,24 +92,29 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonData)
 }
 
-func main() {
-	http.HandleFunc("/worker", handler)
-	http.ListenAndServe(":8080", nil)
-}
-
-func createFileWithDirs(path string, data []byte) error {
-	dir := filepath.Dir(path)
-
-	// ディレクトリが存在しない場合は作成
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		if err := os.MkdirAll(dir, 0777); err != nil {
-			return fmt.Errorf("failed to create directory: %v", err)
-		}
+func downloadFileFromGoogleCloudStorage(bucketName string, objectName string, destination string) error {
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to create client: %v", err)
 	}
+	defer client.Close()
 
-	// ファイルを作成
-	if err := os.WriteFile(path, data, 0644); err != nil {
+	rc, err := client.Bucket(bucketName).Object(objectName).NewReader(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to create reader: %v", err)
+	}
+	defer rc.Close()
+
+	file, err := os.Create(destination)
+	if err != nil {
 		return fmt.Errorf("failed to create file: %v", err)
 	}
+	defer file.Close()
+
+	if _, err := io.Copy(file, rc); err != nil {
+		return fmt.Errorf("failed to copy: %v", err)
+	}
+
 	return nil
 }
