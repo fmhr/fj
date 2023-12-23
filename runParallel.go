@@ -107,12 +107,15 @@ func RunParallel(cnf *Config, seeds []int) {
 	p := message.NewPrinter(language.English)
 	p.Fprintf(os.Stderr, "(Score)sum=%.2f avarage=%.2f \n", sumScore, avarageScore)
 	// if zeroSeeds があれば、sumScoreを０にする
-	if len(zeroSeeds) > 0 {
-		log.Println("Score 0 seeds:", zeroSeeds)
-		fmt.Println("0")
-	} else {
-		fmt.Printf("%.2f\n", sumScore)
-	}
+	// TODO スコアが低ければいいい時は有効にする
+	//if len(zeroSeeds) > 0 {
+	//log.Println("Score 0 seeds:", zeroSeeds)
+	//fmt.Println("0")
+	//} else {
+	//fmt.Printf("%.2f\n", sumScore)
+	//}
+
+	fmt.Printf("%.2f\n", sumScore)
 	if jsonOutput != nil && *jsonOutput {
 		fileContent, err := json.MarshalIndent(datas, "", " ")
 		if err != nil {
