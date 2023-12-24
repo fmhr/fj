@@ -51,7 +51,7 @@ func extractHeaders(data []map[string]float64) []string {
 	headers = append(headers[:seedIndex], headers[seedIndex+1:]...)
 	headers = append([]string{"seed"}, headers...)
 	// seed以外をソート
-	//sort.Strings(headers[1:])
+	sort.Strings(headers[1:])
 
 	return headers
 }

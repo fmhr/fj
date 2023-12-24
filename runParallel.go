@@ -55,7 +55,6 @@ func RunParallel(cnf *Config, seeds []int) {
 			if err != nil {
 				errorChan <- fmt.Sprintf("Run error: seed=%d %v\n", seed, err)
 				errorSeedChan <- seed
-				return
 			}
 			// 後処理
 			datasMutex.Lock()
@@ -63,9 +62,9 @@ func RunParallel(cnf *Config, seeds []int) {
 			atomic.AddInt32(&taskCompleted, 1)           // progressbar
 			printProgress(int(taskCompleted), totalTask) // progressbar
 			delete(currentlyRunnningSeeds, seed)         // 現在実行中のseedを削除
-			datasMutex.Unlock()
 			wg.Done()
 			<-sem
+			datasMutex.Unlock()
 		}(seed)
 	}
 	wg.Wait()
