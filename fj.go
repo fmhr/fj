@@ -36,8 +36,6 @@ var (
 	start = tests.Flag("start", "Start seed value.").Default("0").Short('s').Int()
 	end   = tests.Flag("end", "End seed value.").Default("10").Short('e').Int()
 	jobs  = tests.Flag("jobs", "Number of parallel jobs.").Int()
-	//cloud = tests.Flag("cloud", "Enable cloud mode.").Default("false").Bool()
-
 )
 
 func Fj() {
