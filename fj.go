@@ -73,7 +73,7 @@ func Fj() {
 			if err != nil {
 				log.Fatal("Error: ", err)
 			}
-			fmt.Fprintln(os.Stdout, rtn)
+			//fmt.Fprintln(os.Stdout, rtn)
 			for k, v := range rtn {
 				p := message.NewPrinter(language.English)
 				if v == math.Floor(v) {
