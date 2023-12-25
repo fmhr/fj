@@ -53,6 +53,7 @@ func newConfig() *Config {
 		Cloud:              false,
 		CloudURL:           "http://localhost:8888",
 		CompilerURL:        "http://localhost:8080/compiler",
+		Bucket:             "",
 		CompileCmd:         "go build -o bin/main src/main.go",
 		Source:             "src/main.go",
 		Binary:             "bin/main",
