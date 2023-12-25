@@ -17,7 +17,7 @@ func DisplayTable(data []map[string]float64) {
 
 	sortBySeed(&data)
 
-	table := tablewriter.NewWriter(os.Stdout)
+	table := tablewriter.NewWriter(os.Stderr)
 	table.SetAutoFormatHeaders(false)
 	//	log.Println(data)
 	headers := extractHeaders(data)
