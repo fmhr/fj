@@ -42,7 +42,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = os.Stat(config.Binary)
+	_, err = os.Stat(config.TmpBinary)
 
 	if os.IsNotExist(err) {
 		// バイナリをCloud Storageからダウンロード
@@ -90,6 +90,13 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonData)
+	// バイナリをtmpネームに改名
+	err = os.Rename(config.Binary, config.TmpBinary)
+	if err != nil {
+		errmsg := fmt.Sprint("Failed to rename binary", err.Error())
+		http.Error(w, errmsg, http.StatusInternalServerError)
+		return
+	}
 }
 
 func downloadFileFromGoogleCloudStorage(bucketName string, objectName string, destination string) error {

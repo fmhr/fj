@@ -66,7 +66,7 @@ func requestToWorker(config *Config, seed int) (rtn map[string]float64, err erro
 	elapsed := time.Since(start)
 	rtn["responseTime"] = elapsed.Seconds()
 	if rtn["Score"] == 0 {
-		log.Println("response body:", string(bodyBytes))
+		log.Println("Score=0:response body:", string(bodyBytes))
 	}
 	return rtn, nil
 }

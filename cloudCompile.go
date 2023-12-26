@@ -93,6 +93,6 @@ func CloudCompile(config *Config) error {
 	}
 	filename := params["filename"]
 	config.TmpBinary = filename
-
+	log.Println("cloud compile done:", filename)
 	return nil
 }
