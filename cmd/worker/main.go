@@ -64,6 +64,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, errmsg, http.StatusInternalServerError)
 			return
 		}
+	} else {
+		// tmpバイナリをmainに改名
+		err = os.Rename(config.TmpBinary, config.Binary)
+		if err != nil {
+			errmsg := fmt.Sprint("Failed to rename binary", err.Error())
+			http.Error(w, errmsg, http.StatusInternalServerError)
+			return
+		}
 	}
 
 	// 入力ファイルを作成
