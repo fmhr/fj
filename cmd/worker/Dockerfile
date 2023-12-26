@@ -25,10 +25,14 @@ RUN CGO_ENABLED=0 go build -o /work/worker
 
 
 # 3. 実行時の環境
-FROM ubuntu:22.10
+FROM ubuntu:latest
 WORKDIR /judge
+
+RUN apt-get update && apt-get install ca-certificates openssl
+
 COPY --from=workerbuild /work/worker /judge/worker
 COPY --from=toolsbuilder /work/tools/target/release/* /judge/tools/target/release/
+
 RUN mkdir -p /judge/bin
 
 EXPOSE $PORT

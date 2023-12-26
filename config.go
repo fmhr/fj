@@ -2,6 +2,7 @@ package fj
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/pelletier/go-toml/v2"
@@ -53,7 +54,7 @@ func newConfig() *Config {
 		Cloud:              false,
 		CloudURL:           "http://localhost:8888",
 		CompilerURL:        "http://localhost:8080/compiler",
-		Bucket:             "",
+		Bucket:             "ahc",
 		CompileCmd:         "go build -o bin/main src/main.go",
 		Source:             "src/main.go",
 		Binary:             "bin/main",
@@ -65,6 +66,7 @@ func newConfig() *Config {
 
 func GenerateConfig() {
 	if _, err := os.Stat(directory + configFileName); err == nil {
+		log.Println("config file already exists")
 		if *force {
 			// if force flag is set, remove config file
 			err := os.Remove(configFileName)
@@ -108,7 +110,6 @@ func LoadConfigFile() (*Config, error) {
 	if !configExists() {
 		return &Config{}, ErrConfigNotFound
 	}
-
 	conf := &Config{}
 	file, err := os.Open("fj/" + configFileName)
 	if err != nil {
@@ -118,6 +119,7 @@ func LoadConfigFile() (*Config, error) {
 	decoder := toml.NewDecoder(file)
 	err = decoder.Decode(conf)
 	if err != nil {
+		log.Println("failed to decode config file: ", err)
 		return conf, err
 	}
 	return conf, checkConfigFile(conf)
