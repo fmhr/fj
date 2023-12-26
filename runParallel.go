@@ -169,6 +169,8 @@ func createDirIfNotExist(dir string) error {
 		if err := os.MkdirAll(dir, 0755); err != nil {
 			return fmt.Errorf("failed to create directory: %v", err)
 		}
+	} else if err != nil {
+		return fmt.Errorf("error checking if directory exists: %v", err)
 	}
 	return nil
 }
