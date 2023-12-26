@@ -16,6 +16,10 @@ func ReactiveRun(ctf *Config, seed int) (map[string]float64, error) {
 }
 
 func reactiveRun(ctf *Config, seed int) (map[string]float64, error) {
+	err := createDirIfNotExist(ctf.OutfilePath)
+	if err != nil {
+		return nil, err
+	}
 	out, err := reactiveRunCmd(ctf, seed)
 	if err != nil {
 		return nil, err
