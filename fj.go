@@ -30,12 +30,13 @@ var (
 	seed  = test.Arg("seed", "Seed value.").Default("0").Int()
 	args1 = test.Flag("args", "Command line arguments.").Strings()
 
-	tests = fj.Command("tests", "Run test cases.")
-	seed2 = tests.Arg("seed", "Seed value.").Int()
-	args2 = tests.Flag("args", "Command line arguments.").Strings()
-	start = tests.Flag("start", "Start seed value.").Default("0").Short('s').Int()
-	end   = tests.Flag("end", "End seed value.").Default("10").Short('e').Int()
-	jobs  = tests.Flag("jobs", "Number of parallel jobs.").Int()
+	tests        = fj.Command("tests", "Run test cases.")
+	seed2        = tests.Arg("seed", "Seed value.").Int()
+	args2        = tests.Flag("args", "Command line arguments.").Strings()
+	start        = tests.Flag("start", "Start seed value.").Default("0").Short('s').Int()
+	end          = tests.Flag("end", "End seed value.").Default("10").Short('e').Int()
+	jobs         = tests.Flag("jobs", "Number of parallel jobs.").Int()
+	displayTable = tests.Flag("table", "Output table format.").Default("true").Bool()
 )
 
 func Fj() {
@@ -77,12 +78,13 @@ func Fj() {
 			for k, v := range rtn {
 				p := message.NewPrinter(language.English)
 				if v == math.Floor(v) {
-					p.Fprintf(os.Stdout, "%s:%d ", k, int(v))
+					p.Fprintf(os.Stderr, "%s:%d ", k, int(v))
 				} else {
-					p.Fprintf(os.Stdout, "%s:%f ", k, v)
+					p.Fprintf(os.Stderr, "%s:%f ", k, v)
 				}
 			}
-			fmt.Println("")
+			fmt.Fprintln(os.Stderr, "")
+			fmt.Println(rtn["Score"])
 		case tests.FullCommand():
 			// seed2 が指定されていれば end=seed2
 			if seed2 != nil && *seed2 != 0 {

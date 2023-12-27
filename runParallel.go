@@ -88,7 +88,9 @@ func RunParallel(cnf *Config, seeds []int) {
 		}
 	}
 	//	log.Println(datas)
-	DisplayTable(datas)
+	if displayTable != nil && *displayTable {
+		DisplayTable(datas)
+	}
 	fmt.Fprintln(os.Stderr, "Error seeds:", errSeeds, "Zero seeds:", zeroSeeds)
 	// timeがあれば、平均と最大を表示
 	_, exsit := datas[0]["time"]

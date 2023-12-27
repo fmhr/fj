@@ -3,14 +3,17 @@
 FROM rust:buster as toolsbuilder
 WORKDIR /work
 
-# IMPORTANT: 問題によってテスターは異なるので、適宜URLを変更すること
+# 問題によってテスターは異なるので、適宜URLを変更すること
+# ローカルのtoolsディレクトリをマウントする場合は、以下のようにする
+# COPY ./tools /work/tools
 # ------------------------------------------------------------------
 # RUN wget -q https://img.atcoder.jp/ahc024/AU5KcDyn.zip -O tools.zip 
 # RUN wget -q https://img.atcoder.jp/ahc023/asprocon10_5XtyY7PgVPtBANvV.zip -O tools.zip \
 # AHC027
-RUN wget -q https://img.atcoder.jp/ahc027/aPdjCUIZ_v2.zip -O tools.zip \
-    && unzip tools.zip \
-    && (cd tools && cargo build --release --quiet)
+#RUN wget -q https://img.atcoder.jp/ahc027/aPdjCUIZ_v2.zip -O tools.zip \
+#    && unzip tools.zip 
+COPY ./tools /work/tools
+RUN (cd tools && cargo build --release --quiet)
 
 
 FROM golang:1.21 as workerbuild
