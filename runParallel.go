@@ -134,6 +134,9 @@ func RunParallel(cnf *Config, seeds []int) {
 		}
 		log.Println("save json file:", filename)
 	}
+	if csvOutput != nil && *csvOutput {
+		CsvOutput(datas)
+	}
 
 }
 
