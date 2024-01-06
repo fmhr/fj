@@ -2,33 +2,36 @@ package fj
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/elliotchance/orderedmap/v2"
 )
 
 type EncodableOrderedMap orderedmap.OrderedMap[string, any]
 
-func (m *EncodableOrderedMap) MarshalJSON() ([]byte, error) {
-	items := map[string]interface{}{}
-	for el := (*orderedmap.OrderedMap[string, any])(m).Front(); el != nil; el = el.Next() {
-		items[fmt.Sprintf("%v", el.Key)] = el.Value
-	}
+type EncodableOrderedMapItem struct {
+	key   string
+	value any
+}
 
+func (m *EncodableOrderedMap) MarshalJSON() ([]byte, error) {
+	items := make([]EncodableOrderedMapItem, (*orderedmap.OrderedMap[string, any])(m).Len())
+	for i, key := range (*orderedmap.OrderedMap[string, any])(m).Keys() {
+		value, _ := (*orderedmap.OrderedMap[string, any])(m).Get(key)
+		items[i] = EncodableOrderedMapItem{key, value}
+	}
 	return json.Marshal(items)
 }
 
-func (m *EncodableOrderedMap) UnmarshalJSON(data []byte) error {
-	var items map[string]interface{}
+func (m *EncodableOrderedMap) UnmarshalJson(data []byte) error {
+	var items []EncodableOrderedMapItem
 	err := json.Unmarshal(data, &items)
 	if err != nil {
 		return err
 	}
 
 	self := (*orderedmap.OrderedMap[string, any])(m)
-	for k, v := range items {
-		self.Set(k, v)
+	for _, item := range items {
+		self.Set(item.key, item.value)
 	}
-
 	return nil
 }
