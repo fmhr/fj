@@ -66,7 +66,6 @@ func requestToWorker(config *Config, seed int) (*orderedmap.OrderedMap[string, a
 	if err := json.Unmarshal(bodyBytes, (*EncodableOrderedMap)(rtn)); err != nil {
 		return nil, fmt.Errorf("failed to parse response body: %v", err)
 	}
-	log.Println(string(bodyBytes))
 	elapsed := time.Since(start)
 	rtn.Set("responseTime", elapsed.Seconds())
 	score, ok := rtn.Get("Score")

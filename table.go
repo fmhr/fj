@@ -41,7 +41,15 @@ func sortBySeed(data *[]*orderedmap.OrderedMap[string, any]) {
 	sort.Slice(*data, func(i, j int) bool {
 		iseed, _ := (*data)[i].Get("seed")
 		jseed, _ := (*data)[j].Get("seed")
-		return iseed.(int) < jseed.(int)
+		switch iseed.(type) {
+		case int:
+			return iseed.(int) < jseed.(int)
+		case float64:
+			return iseed.(float64) < jseed.(float64)
+		default:
+			log.Fatal("invalid type")
+		}
+		return false
 	})
 }
 
