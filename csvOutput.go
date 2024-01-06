@@ -24,10 +24,7 @@ func CsvOutput(datas []*orderedmap.OrderedMap[string, any]) {
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	heagders := make([]string, 0)
-	for _, key := range datas[0].Keys() {
-		heagders = append(heagders, key)
-	}
+	heagders := append([]string{}, datas[0].Keys()...)
 	if err := writer.Write(heagders); err != nil {
 		log.Fatal(":", err)
 	}

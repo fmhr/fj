@@ -55,16 +55,11 @@ func sortBySeed(data *[]*orderedmap.OrderedMap[string, any]) {
 
 // extractHeaders はデータからヘッダーを抽出する
 func extractHeaders(data []*orderedmap.OrderedMap[string, any]) []string {
-	headers := make([]string, 0)
-	for _, key := range data[0].Keys() {
-		headers = append(headers, key)
-	}
+	headers := append([]string(nil), data[0].Keys()...)
 	// seedを先頭に移動
 	seedIndex := slices.Index(headers, "seed")
 	headers = append(headers[:seedIndex], headers[seedIndex+1:]...)
 	headers = append([]string{"seed"}, headers...)
-	// seed以外をソート
-	//sort.Strings(headers[1:])
 
 	return headers
 }
