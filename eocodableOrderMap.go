@@ -7,6 +7,10 @@ import (
 	"github.com/elliotchance/orderedmap/v2"
 )
 
+// orderedmap.OrderedMap[string, any] を jsonで扱うために、EncodableOrderedMap を定義する
+// mapを使用すると、順序が保証されないため、sliceに変換する
+
+// EncodableOrderedMap is a wrapper of orderedmap.OrderedMap[string, any] for json.Marshal and json.Unmarshal
 type EncodableOrderedMap orderedmap.OrderedMap[string, any]
 
 type EncodableOrderedMapItem struct {
