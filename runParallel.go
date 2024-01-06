@@ -12,6 +12,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/elliotchance/orderedmap/v2"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
@@ -27,7 +28,7 @@ func RunParallel(cnf *Config, seeds []int) {
 	}
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, concurrentNum)
-	datas := make([]map[string]float64, 0, len(seeds))
+	datas := make([]*orderedmap.OrderedMap[string, any], 0, len(seeds))
 	errorChan := make(chan string, len(seeds))
 	errorSeedChan := make(chan int, len(seeds))
 
@@ -82,8 +83,12 @@ func RunParallel(cnf *Config, seeds []int) {
 	zeroSeeds := make([]int, 0)
 	for i := 0; i < len(datas); i++ {
 		//fmt.Println(datas[i])
-		sumScore += datas[i]["Score"]
-		if datas[i]["Score"] == 0 {
+		score, ok := datas[i].Get("Score")
+		if !ok {
+			log.Fatal("Score not found")
+		}
+		sumScore += score.(float64)
+		if score.(float64) == 0.0 {
 			zeroSeeds = append(zeroSeeds, i)
 		}
 	}
@@ -93,13 +98,17 @@ func RunParallel(cnf *Config, seeds []int) {
 	}
 	fmt.Fprintln(os.Stderr, "Error seeds:", errSeeds, "Zero seeds:", zeroSeeds)
 	// timeがあれば、平均と最大を表示
-	_, exsit := datas[0]["time"]
+	_, exsit := datas[0].Get("time")
 	if exsit {
 		sumTime := 0.0
 		maxTime := 0.0
 		for i := 0; i < len(datas); i++ {
-			sumTime += datas[i]["time"]
-			maxTime = math.Max(maxTime, datas[i]["time"])
+			if t, ok := datas[i].Get("time"); !ok {
+				log.Fatal("time is not float64")
+			} else {
+				sumTime += t.(float64)
+				maxTime = math.Max(maxTime, t.(float64))
+			}
 		}
 		sumTime /= float64(len(datas))
 		fmt.Fprintf(os.Stderr, "avarageTime=%.2f  maxTime=%.2f\n", sumTime, maxTime)

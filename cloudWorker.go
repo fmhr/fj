@@ -9,10 +9,12 @@ import (
 	"mime/multipart"
 	"net/http"
 	"time"
+
+	"github.com/elliotchance/orderedmap/v2"
 )
 
 // requestToWorker はバイナリをワーカーに送信する
-func requestToWorker(config *Config, seed int) (rtn map[string]float64, err error) {
+func requestToWorker(config *Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
 	start := time.Now()
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
@@ -60,18 +62,24 @@ func requestToWorker(config *Config, seed int) (rtn map[string]float64, err erro
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body: %v", err)
 	}
+	rtn := orderedmap.NewOrderedMap[string, any]()
 	if err := json.Unmarshal(bodyBytes, &rtn); err != nil {
 		return nil, fmt.Errorf("failed to parse response body: %v", err)
 	}
+	log.Println(string(bodyBytes))
 	elapsed := time.Since(start)
-	rtn["responseTime"] = elapsed.Seconds()
-	if rtn["Score"] == 0 {
+	rtn.Set("responseTime", elapsed.Seconds())
+	score, ok := rtn.Get("Score")
+	if !ok {
+		return nil, fmt.Errorf("failed to get score from response body: %v", err)
+	}
+	if score == 0.0 {
 		log.Println("Score=0:response body:", string(bodyBytes))
 	}
 	return rtn, nil
 }
 
-func SendBinaryToWorker(config *Config, seed int, binaryNameInBucket string) (rtn map[string]float64, err error) {
+func SendBinaryToWorker(config *Config, seed int, binaryNameInBucket string) (rtn *orderedmap.OrderedMap[string, any], err error) {
 	if config.WorkerURL == "" {
 		return nil, ErrorTrace("", fmt.Errorf("worker URL is not specified"))
 	}

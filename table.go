@@ -1,16 +1,18 @@
 package fj
 
 import (
+	"log"
 	"os"
 	"slices"
 	"sort"
 	"strconv"
 
+	"github.com/elliotchance/orderedmap/v2"
 	"github.com/olekukonko/tablewriter"
 )
 
 // DisplayTable はデータをテーブル形式で表示する
-func DisplayTable(data []map[string]float64) {
+func DisplayTable(data []*orderedmap.OrderedMap[string, any]) {
 	if len(data) == 0 {
 		return
 	}
@@ -24,9 +26,10 @@ func DisplayTable(data []map[string]float64) {
 	table.SetHeader(headers)
 
 	for _, rowMap := range data {
-		row := make([]string, 0, len(rowMap))
+		row := make([]string, 0)
 		for _, key := range headers {
-			row = append(row, formatFloat(rowMap[key]))
+			value, _ := rowMap.Get(key)
+			row = append(row, formatFloat(value))
 		}
 		table.Append(row)
 	}
@@ -34,16 +37,18 @@ func DisplayTable(data []map[string]float64) {
 }
 
 // sortBySeed はデータをseedでソートする
-func sortBySeed(data *[]map[string]float64) {
+func sortBySeed(data *[]*orderedmap.OrderedMap[string, any]) {
 	sort.Slice(*data, func(i, j int) bool {
-		return (*data)[i]["seed"] < (*data)[j]["seed"]
+		iseed, _ := (*data)[i].Get("seed")
+		jseed, _ := (*data)[j].Get("seed")
+		return iseed.(int) < jseed.(int)
 	})
 }
 
 // extractHeaders はデータからヘッダーを抽出する
-func extractHeaders(data []map[string]float64) []string {
-	headers := make([]string, 0, len(data[0]))
-	for key := range data[0] {
+func extractHeaders(data []*orderedmap.OrderedMap[string, any]) []string {
+	headers := make([]string, 0)
+	for _, key := range data[0].Keys() {
 		headers = append(headers, key)
 	}
 	// seedを先頭に移動
@@ -51,15 +56,20 @@ func extractHeaders(data []map[string]float64) []string {
 	headers = append(headers[:seedIndex], headers[seedIndex+1:]...)
 	headers = append([]string{"seed"}, headers...)
 	// seed以外をソート
-	sort.Strings(headers[1:])
+	//sort.Strings(headers[1:])
 
 	return headers
 }
 
 // formatFloat は小数点以下がh0の場合は整数に変換する
-func formatFloat(value float64) string {
-	if value == float64(int(value)) {
-		return strconv.Itoa(int(value))
+func formatFloat(value any) string {
+	switch v := value.(type) {
+	case int:
+		return strconv.Itoa(v)
+	case float64:
+		return strconv.FormatFloat(v, 'f', 3, 64)
+	default:
+		log.Fatal("invalid type")
 	}
-	return strconv.FormatFloat(value, 'f', 3, 64)
+	return ""
 }

@@ -3,16 +3,18 @@ package fj
 import (
 	"fmt"
 	"path/filepath"
+
+	"github.com/elliotchance/orderedmap/v2"
 )
 
-func RunVis(cnf *Config, seed int) (map[string]float64, error) {
+func RunVis(cnf *Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
 	return runVis(cnf, seed)
 }
 
 // runVis は指定された設定とシードに基づいてコマンドを実行して、
 // その結果をvisに渡して、両方の結果を返す
 // 通常の問題（reactive=false)で使う
-func runVis(cnf *Config, seed int) (map[string]float64, error) {
+func runVis(cnf *Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
 	out, err := normalRun(cnf, seed)
 	if err != nil {
 		return nil, ErrorTrace("falied: normalRun", err)
@@ -20,7 +22,7 @@ func runVis(cnf *Config, seed int) (map[string]float64, error) {
 
 	pair, err := ExtractKeyValuePairs(string(out))
 	if err != nil {
-		return pair, ErrorTrace("failed:ExtractKeyValuePairs", err)
+		return &pair, ErrorTrace("failed:ExtractKeyValuePairs", err)
 	}
 	// vis
 	infile := filepath.Join(cnf.InfilePath, fmt.Sprintf("%04d.txt", seed))
@@ -37,10 +39,10 @@ func runVis(cnf *Config, seed int) (map[string]float64, error) {
 	}
 
 	for k, v := range sc {
-		pair[k] = v
+		pair.Set(k, v)
 	}
-	pair["seed"] = float64(seed)
-	return pair, nil
+	pair.Set("seed", seed)
+	return &pair, nil
 }
 
 // vis is a wrapper for vis command

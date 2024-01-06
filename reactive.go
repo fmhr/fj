@@ -2,40 +2,42 @@ package fj
 
 import (
 	"fmt"
+
+	"github.com/elliotchance/orderedmap/v2"
 )
 
 // ReactiveRun はreactive=trueのときに使う
-func ReactiveRun(ctf *Config, seed int) (map[string]float64, error) {
+func ReactiveRun(ctf *Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
 	rtn, err := reactiveRun(ctf, seed)
 	if err != nil {
-		return rtn, ErrorTrace("failed to run: %v", err)
+		return nil, ErrorTrace("failed to run: %v", err)
 	}
 	//fmt.Fprintln(os.Stderr, mapString(rtn))
 	//fmt.Println(rtn["Score"]) // ここだけ標準出力
-	return rtn, nil
+	return &rtn, nil
 }
 
-func reactiveRun(ctf *Config, seed int) (map[string]float64, error) {
+func reactiveRun(ctf *Config, seed int) (orderedmap.OrderedMap[string, any], error) {
 	err := createDirIfNotExist(ctf.OutfilePath)
 	if err != nil {
-		return nil, err
+		return orderedmap.OrderedMap[string, any]{}, err
 	}
 	out, err := reactiveRunCmd(ctf, seed)
 	if err != nil {
-		return nil, err
+		return orderedmap.OrderedMap[string, any]{}, err
 	}
 	pair, err := ExtractKeyValuePairs(string(out))
 	if err != nil {
-		return nil, fmt.Errorf("failed to extract key-value pairs: %v, source: %s", err, string(out))
+		return orderedmap.OrderedMap[string, any]{}, fmt.Errorf("failed to extract key-value pairs: %v, source: %s", err, string(out))
 	}
 	testerDate, err := extractData((string(out)))
 	if err != nil {
-		return nil, err
+		return orderedmap.OrderedMap[string, any]{}, err
 	}
 	for k, v := range testerDate {
-		pair[k] = v
+		pair.Set(k, v)
 	}
-	pair["seed"] = float64(seed)
+	pair.Set("seed", seed)
 	return pair, nil
 }
 

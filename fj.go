@@ -76,16 +76,18 @@ func Fj() {
 				log.Fatal("Error: ", err)
 			}
 			//fmt.Fprintln(os.Stdout, rtn)
-			for k, v := range rtn {
+			for _, k := range rtn.Keys() {
+				v, _ := rtn.Get(k)
 				p := message.NewPrinter(language.English)
-				if v == math.Floor(v) {
-					p.Fprintf(os.Stderr, "%s:%d ", k, int(v))
+				if v == math.Floor(v.(float64)) {
+					p.Fprintf(os.Stderr, "%s:%d ", k, v.(int))
 				} else {
 					p.Fprintf(os.Stderr, "%s:%f ", k, v)
 				}
 			}
 			fmt.Fprintln(os.Stderr, "")
-			fmt.Println(rtn["Score"])
+			Score, _ := rtn.Get("Score")
+			fmt.Println(Score)
 		case tests.FullCommand():
 			// seed2 が指定されていれば end=seed2
 			if seed2 != nil && *seed2 != 0 {
