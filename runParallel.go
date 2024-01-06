@@ -80,6 +80,7 @@ func RunParallel(cnf *Config, seeds []int) {
 		errSeeds = append(errSeeds, seed)
 	}
 	sumScore := 0.0
+	logScore := 0.0
 	zeroSeeds := make([]int, 0)
 	for i := 0; i < len(datas); i++ {
 		//fmt.Println(datas[i])
@@ -88,11 +89,11 @@ func RunParallel(cnf *Config, seeds []int) {
 			log.Fatal("Score not found")
 		}
 		sumScore += score.(float64)
+		logScore += math.Log(score.(float64))
 		if score.(float64) == 0.0 {
 			zeroSeeds = append(zeroSeeds, i)
 		}
 	}
-	//	log.Println(datas)
 	if displayTable != nil && *displayTable {
 		DisplayTable(datas)
 	}
@@ -115,7 +116,7 @@ func RunParallel(cnf *Config, seeds []int) {
 	}
 	avarageScore := sumScore / float64(len(datas))
 	p := message.NewPrinter(language.English)
-	p.Fprintf(os.Stderr, "(Score)sum=%.2f avarage=%.2f \n", sumScore, avarageScore)
+	p.Fprintf(os.Stderr, "(Score)sum=%.2f avarage=%.2f log=%.2f\n", sumScore, avarageScore, logScore)
 	// if zeroSeeds があれば、sumScoreを０にする
 	// TODO スコアが低ければいいい時は有効にする
 	//if len(zeroSeeds) > 0 {
@@ -124,8 +125,11 @@ func RunParallel(cnf *Config, seeds []int) {
 	//} else {
 	//fmt.Printf("%.2f\n", sumScore)
 	//}
-
-	fmt.Printf("%.2f\n", sumScore)
+	if Logscore != nil && *Logscore {
+		fmt.Printf("%.4f\n", logScore)
+	} else {
+		fmt.Printf("%.2f\n", sumScore)
+	}
 	if jsonOutput != nil && *jsonOutput {
 		fileContent, err := json.MarshalIndent(datas, "", " ")
 		if err != nil {

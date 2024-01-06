@@ -10,6 +10,7 @@ import (
 	"github.com/elliotchance/orderedmap/v2"
 )
 
+// CsvOutput csvファイルに出力する
 func CsvOutput(datas []*orderedmap.OrderedMap[string, any]) {
 	now := time.Now()
 	filename := fmt.Sprintf("fj/data/result_%s.csv", fmt.Sprintf("%04d%02d%02d_%02d%02d%02d", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second()))

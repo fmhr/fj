@@ -38,6 +38,7 @@ var (
 	end          = tests.Flag("end", "End seed value.").Default("10").Short('e').Int()
 	jobs         = tests.Flag("jobs", "Number of parallel jobs.").Int()
 	displayTable = tests.Flag("table", "Output table format.").Default("true").Bool()
+	Logscore     = tests.Flag("logscore", "Output score log.").Default("false").Bool()
 )
 
 func Fj() {

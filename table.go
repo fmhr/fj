@@ -64,12 +64,15 @@ func extractHeaders(data []*orderedmap.OrderedMap[string, any]) []string {
 	return headers
 }
 
-// formatFloat は小数点以下がh0の場合は整数に変換する
 func formatFloat(value any) string {
 	switch v := value.(type) {
 	case int:
 		return strconv.Itoa(v)
 	case float64:
+		// 小数点以下が0の場合は整数に変換
+		if v == float64(int(v)) {
+			return strconv.Itoa(int(v))
+		}
 		return strconv.FormatFloat(v, 'f', 3, 64)
 	default:
 		log.Fatal("invalid type")
