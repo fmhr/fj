@@ -9,8 +9,8 @@ import (
 type EncodableOrderedMap orderedmap.OrderedMap[string, any]
 
 type EncodableOrderedMapItem struct {
-	key   string
-	value any
+	Key   string      `json:"key"`
+	Value interface{} `json:"value"`
 }
 
 func (m *EncodableOrderedMap) MarshalJSON() ([]byte, error) {
@@ -31,7 +31,7 @@ func (m *EncodableOrderedMap) UnmarshalJson(data []byte) error {
 
 	self := (*orderedmap.OrderedMap[string, any])(m)
 	for _, item := range items {
-		self.Set(item.key, item.value)
+		self.Set(item.Key, item.Value)
 	}
 	return nil
 }

@@ -59,6 +59,7 @@ func requestToWorker(config *Config, seed int) (*orderedmap.OrderedMap[string, a
 
 	// レスポンスボディから文字列を取り出す
 	bodyBytes, err := io.ReadAll(resp.Body)
+	log.Println("response body:", string(bodyBytes))
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body: %v", err)
 	}
