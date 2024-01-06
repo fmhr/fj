@@ -33,7 +33,7 @@ func (m *EncodableOrderedMap) UnmarshalJSON(data []byte) error {
 	}
 
 	self := (*orderedmap.OrderedMap[string, any])(m)
-	*self = *orderedmap.NewOrderedMap[string, any]()
+	//*self = *orderedmap.NewOrderedMap[string, any]()
 	for _, item := range items {
 		self.Set(item.Key, item.Value)
 	}
