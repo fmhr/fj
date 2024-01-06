@@ -24,7 +24,7 @@ func (m *EncodableOrderedMap) MarshalJSON() ([]byte, error) {
 	return json.Marshal(items)
 }
 
-func (m *EncodableOrderedMap) UnmarshalJson(data []byte) error {
+func (m *EncodableOrderedMap) UnmarshalJSON(data []byte) error {
 	var items []EncodableOrderedMapItem
 	err := json.Unmarshal(data, &items)
 	if err != nil {
@@ -33,8 +33,8 @@ func (m *EncodableOrderedMap) UnmarshalJson(data []byte) error {
 	}
 
 	self := (*orderedmap.OrderedMap[string, any])(m)
+	*self = *orderedmap.NewOrderedMap[string, any]()
 	for _, item := range items {
-		log.Println(item.Key, item.Value)
 		self.Set(item.Key, item.Value)
 	}
 	return nil
