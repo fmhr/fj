@@ -58,7 +58,7 @@ func Fj() {
 		mkDirWorkerBase()
 	// Test run test case
 	case test.FullCommand(), tests.FullCommand():
-		config, err := LoadConfigFile()
+		config, err := setConfig()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -82,14 +82,14 @@ func Fj() {
 			for _, k := range rtn.Keys() {
 				v, _ := rtn.Get(k)
 				p := message.NewPrinter(language.English)
-				switch v.(type) {
+				switch v := v.(type) {
 				case int:
-					p.Fprintf(os.Stderr, "%s:%d ", k, v.(int))
+					p.Fprintf(os.Stderr, "%s:%d ", k, v)
 				case float64:
-					if v.(float64) == float64(int(v.(float64))) {
-						p.Fprintf(os.Stderr, "%s:%d ", k, int(v.(float64)))
+					if v == float64(int(v)) {
+						p.Fprintf(os.Stderr, "%s:%d ", k, int(v))
 					} else {
-						p.Fprintf(os.Stderr, "%s:%f ", k, v.(float64))
+						p.Fprintf(os.Stderr, "%s:%f ", k, v)
 					}
 				}
 			}
@@ -113,6 +113,7 @@ func Fj() {
 
 }
 
+// updateConfig はコマンドライン引数でconfigを更新する
 func updateConfig(config *Config) {
 	if *args1 != nil && len(*args1) > 0 {
 		config.Args = *args1

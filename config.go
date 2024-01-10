@@ -14,11 +14,11 @@ import (
 var configContent embed.FS
 
 const (
-	configFileName = "config.toml"
-	directory      = "fj"
+	CONFIG_FILE  = "config.toml"
+	FJ_DIRECTORY = "fj/"
 )
 
-var ErrConfigNotFound = fmt.Errorf("%s not found, please run `fj init`", configFileName)
+var ErrConfigNotFound = fmt.Errorf("%s not found, please run `fj init`", CONFIG_FILE)
 
 type Config struct {
 	Language           string   `toml:"Language"`
@@ -43,10 +43,11 @@ type Config struct {
 	TimeLimitMS        uint64   `toml:"TimeLimitMS"`
 }
 
+// generateConfig はfj init コマンドで読み出されて fj/config.tomlを生成する
 func generateConfig() error {
 	// fj ディレクトリを作成
-	if _, err := os.Stat(directory); os.IsNotExist(err) {
-		if err := os.Mkdir(directory, 0755); err != nil {
+	if _, err := os.Stat(FJ_DIRECTORY); os.IsNotExist(err) {
+		if err := os.Mkdir(FJ_DIRECTORY, 0755); err != nil {
 			return err
 		}
 	}
@@ -58,7 +59,7 @@ func generateConfig() error {
 	}
 
 	// config.tomlを作成
-	filePath := filepath.Join(directory, configFileName)
+	filePath := filepath.Join(FJ_DIRECTORY, CONFIG_FILE)
 	file, err := os.Create(filePath)
 	if err != nil {
 		return err
@@ -73,12 +74,13 @@ func generateConfig() error {
 	return nil
 }
 
-func LoadConfigFile() (*Config, error) {
+// setConfig はconfig.tomlを読み込む
+func setConfig() (*Config, error) {
 	if !configExists() {
 		return &Config{}, ErrConfigNotFound
 	}
 	conf := &Config{}
-	file, err := os.Open("fj/" + configFileName)
+	file, err := os.Open(FJ_DIRECTORY + CONFIG_FILE)
 	if err != nil {
 		return conf, err
 	}
@@ -94,12 +96,12 @@ func LoadConfigFile() (*Config, error) {
 
 func checkConfigFile(cnf *Config) error {
 	if cnf.Cmd == "" {
-		return fmt.Errorf("cmd is empty. please set cmd in %s", configFileName)
+		return fmt.Errorf("cmd is empty. please set cmd in %s", CONFIG_FILE)
 	}
 	return nil
 }
 
 func configExists() bool {
-	_, err := os.Stat("fj/" + configFileName)
+	_, err := os.Stat("fj/" + CONFIG_FILE)
 	return err == nil
 }
