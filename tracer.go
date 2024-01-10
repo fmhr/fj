@@ -59,6 +59,9 @@ func NewStackTraceError(msg string) error {
 // WrapError はエラーにスタックトレースを追加する
 // NewStackTraceError で生成したエラーには追加できない
 func WrapError(err error) error {
+	if err == nil {
+		return nil
+	}
 	if stErr, ok := err.(*StackTraceError); ok {
 		return stErr
 	}

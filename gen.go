@@ -8,10 +8,9 @@ import (
 
 func Gen(cnf *Config, seed int) error {
 	if cnf.GenPath == "" {
-		return fmt.Errorf("GenPath is not set. please set GenPath: {} in fj/config.toml")
+		return NewStackTraceError("GenPath is not set. please set GenPath: {} in fj/config.toml")
 	}
-	err := gen(cnf, seed)
-	return err
+	return gen(cnf, seed)
 }
 
 var genMutex sync.Mutex
@@ -27,33 +26,33 @@ func gen(cnf *Config, seed int) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		err := os.Mkdir(path, 0755)
 		if err != nil {
-			return err
+			return WrapError(err)
 		}
 	} else if err != nil {
-		return err
+		return WrapError(err)
 	}
 	// genがあるか確認
 	_, err := os.Stat(cnf.GenPath)
 	if err != nil {
-		return err
+		return WrapError(err)
 	}
 	// seedを書き込んだ{seed}.txtを作成
 	seedfile := "seed.txt"
 	err = writeIntToFile(seed, seedfile)
 	if err != nil {
-		return err
+		return WrapError(err)
 	}
 	// genを実行
 	cmdStr := fmt.Sprintf("%s %s", cnf.GenPath, seedfile)
 	cmd := createCommand(cmdStr)
 	err = cmd.Run()
 	if err != nil {
-		return fmt.Errorf("failed to run gen: %s", err)
+		return WrapError(err)
 	}
 	// in/0000.txtをin/{seed}.txtにリネーム
 	err = os.Rename("in/0000.txt", fmt.Sprintf("in2/%04d.txt", seed))
 	if err != nil {
-		return fmt.Errorf("failed to rename file: %s", err)
+		return WrapError(err)
 	}
 	// cnf.InfilePathを更新
 	cnf.InfilePath = "in2/"
