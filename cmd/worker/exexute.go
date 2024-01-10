@@ -9,12 +9,12 @@ func exexute(config *fj.Config, seed int) (rtn *orderedmap.OrderedMap[string, an
 	// GEN
 	err = fj.Gen(config, seed)
 	if err != nil {
-		return nil, fj.ErrorTrace("failed to gen: %v", err)
+		return nil, err
 	}
 	// RUN
 	rtn, err = run(config, seed)
 	if err != nil {
-		return nil, fj.ErrorTrace("failed to run: %v", err)
+		return nil, err
 	}
 	return rtn, nil
 }

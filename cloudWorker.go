@@ -22,12 +22,12 @@ func requestToWorker(config *Config, seed int) (*orderedmap.OrderedMap[string, a
 	// configをJSONに変換
 	configData, err := json.Marshal(config)
 	if err != nil {
-		return nil, ErrorTrace("failed to marshal config: %v", err)
+		return nil, NewStackTraceError(err.Error())
 	}
 	// JSON configを追加
 	configPart, err := writer.CreateFormField("config")
 	if err != nil {
-		return nil, ErrorTrace("failed to create form field for config: %v", err)
+		return nil, NewStackTraceError(err.Error())
 	}
 	configPart.Write(configData)
 
@@ -52,9 +52,9 @@ func requestToWorker(config *Config, seed int) (*orderedmap.OrderedMap[string, a
 	if resp.StatusCode != http.StatusOK {
 		bodyBytes, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return nil, ErrorTrace("error reading response body: %w", err)
+			return nil, WrapError(err)
 		}
-		return nil, ErrorTrace(fmt.Sprintf("error response status code:%d resp:%s", resp.StatusCode, string(bodyBytes)), err)
+		return nil, NewStackTraceError(fmt.Sprintf("error response status code:%d resp:%s", resp.StatusCode, string(bodyBytes)))
 	}
 
 	// レスポンスボディから文字列を取り出す
@@ -78,12 +78,12 @@ func requestToWorker(config *Config, seed int) (*orderedmap.OrderedMap[string, a
 	return rtn, nil
 }
 
-func SendBinaryToWorker(config *Config, seed int, binaryNameInBucket string) (rtn *orderedmap.OrderedMap[string, any], err error) {
+func SendBinaryToWorker(config *Config, seed int, binaryNameInBucket string) (*orderedmap.OrderedMap[string, any], error) {
 	if config.WorkerURL == "" {
-		return nil, ErrorTrace("", fmt.Errorf("worker URL is not specified"))
+		return nil, NewStackTraceError("worker URL is not specified")
 	}
 	if config.Binary == "" {
-		return nil, ErrorTrace("", fmt.Errorf("binary path is not specified"))
+		return nil, NewStackTraceError("binary path is not specified")
 	}
 	return requestToWorker(config, seed)
 }

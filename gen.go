@@ -27,21 +27,21 @@ func gen(cnf *Config, seed int) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		err := os.Mkdir(path, 0755)
 		if err != nil {
-			return ErrorTrace("failed to create directory: %s", err)
+			return err
 		}
 	} else if err != nil {
-		return ErrorTrace("error checking if directory exists: %s", err)
+		return err
 	}
 	// genがあるか確認
 	_, err := os.Stat(cnf.GenPath)
 	if err != nil {
-		return ErrorTrace(fmt.Sprintf("gen not found: %s :", cnf.GenPath), err)
+		return err
 	}
 	// seedを書き込んだ{seed}.txtを作成
 	seedfile := "seed.txt"
 	err = writeIntToFile(seed, seedfile)
 	if err != nil {
-		return ErrorTrace("failed to write seed to file: %s", err)
+		return err
 	}
 	// genを実行
 	cmdStr := fmt.Sprintf("%s %s", cnf.GenPath, seedfile)

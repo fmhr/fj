@@ -8,7 +8,7 @@ func RunSelector(config *Config, seed int) (*orderedmap.OrderedMap[string, any],
 	if config.Cloud || (cloud != nil && *cloud) {
 		rtn, err := requestToWorker(config, seed)
 		if err != nil {
-			return nil, ErrorTrace("failed to run: %v", err)
+			return nil, err
 		}
 		return rtn, nil
 	}

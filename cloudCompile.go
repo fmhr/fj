@@ -14,16 +14,16 @@ import (
 
 func checkConfigCloudCompile(config *Config) error {
 	if config.Source == "" {
-		return ErrorTrace("error: [SourcePath] must not be empty", nil)
+		return NewStackTraceError("error: [SourcePath] must not be empty")
 	}
 	if config.Binary == "" {
-		return ErrorTrace("error: [BinaryPath] must not be empty", nil)
+		return NewStackTraceError("error: [BinaryPath] must not be empty")
 	}
 	if config.CompileCmd == "" {
-		return ErrorTrace("error: [CompileCmd] must not be empty", nil)
+		return NewStackTraceError("error: [CompileCmd] must not be empty")
 	}
 	if config.CompilerURL == "" {
-		return ErrorTrace("error: [CompilerURL] must not be empty", nil)
+		return NewStackTraceError("error: [CompilerURL] must not be empty")
 	}
 	return nil
 }
@@ -37,12 +37,12 @@ func checkConfigCloudCompile(config *Config) error {
 func CloudCompile(config *Config) error {
 	log.Println("cloud compiling...")
 	if err := checkConfigCloudCompile(config); err != nil {
-		return ErrorTrace("invalid config: %w", err)
+		return err
 	}
 	// ソースファイルを開く
 	file, err := os.Open(config.Source)
 	if err != nil {
-		return ErrorTrace("error opening file: %w", err)
+		return err
 	}
 	defer file.Close()
 	// マルチパートフォームを作成
@@ -50,11 +50,11 @@ func CloudCompile(config *Config) error {
 	writer := multipart.NewWriter(body)
 	part, err := writer.CreateFormFile("file", filepath.Base(config.Source))
 	if err != nil {
-		return ErrorTrace("error creating form file: %w", err)
+		return err
 	}
 	_, err = io.Copy(part, file)
 	if err != nil {
-		return ErrorTrace("error writing to form file: %w", err)
+		return err
 	}
 	writer.WriteField("sourcePath", config.Source)
 	writer.WriteField("compileCmd", config.CompileCmd)
@@ -67,29 +67,29 @@ func CloudCompile(config *Config) error {
 	req, err := http.NewRequest("POST", config.CompilerURL, body)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	if err != nil {
-		return ErrorTrace("error making new requets: %w", err)
+		return err
 	}
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return ErrorTrace("error making request: %w", err)
+		return err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		bodyBytes, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return ErrorTrace("error reading response body: %w", err)
+			return err
 		}
-		fmt.Print("server response:", string(bodyBytes), "url:", config.CompilerURL, "\n")
-		return ErrorTrace(string(bodyBytes), fmt.Errorf("error response status code: %d", resp.StatusCode))
+		msg := fmt.Sprint("server response:", string(bodyBytes), "url:", config.CompilerURL, "\n")
+		return NewStackTraceError(msg)
 	}
 
 	// cloud storageに保存したバイナルの名前を取得
 	content := resp.Header.Get("Content-Disposition")
 	_, params, err := mime.ParseMediaType(content)
 	if err != nil {
-		return ErrorTrace("error parsing media type: %w", err)
+		return err
 	}
 	filename := params["filename"]
 	config.TmpBinary = filename

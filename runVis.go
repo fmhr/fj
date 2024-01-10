@@ -17,12 +17,12 @@ func RunVis(cnf *Config, seed int) (*orderedmap.OrderedMap[string, any], error) 
 func runVis(cnf *Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
 	out, err := normalRun(cnf, seed)
 	if err != nil {
-		return nil, ErrorTrace("falied: normalRun", err)
+		return nil, err
 	}
 
 	pair, err := ExtractKeyValuePairs(string(out))
 	if err != nil {
-		return &pair, ErrorTrace("failed:ExtractKeyValuePairs", err)
+		return &pair, err
 	}
 	// vis
 	infile := filepath.Join(cnf.InfilePath, fmt.Sprintf("%04d.txt", seed))
@@ -31,11 +31,11 @@ func runVis(cnf *Config, seed int) (*orderedmap.OrderedMap[string, any], error) 
 	outVis, err := vis(cnf, infile, outfile)
 	if err != nil {
 		//return nil, TraceMsg(fmt.Errorf("failed: %v", err).Error())
-		return nil, ErrorTrace("failed:vis", err)
+		return nil, err
 	}
 	sc, err := extractData(string(outVis))
 	if err != nil {
-		return nil, ErrorTrace("failed:extractData", err)
+		return nil, err
 	}
 
 	for k, v := range sc {
@@ -51,7 +51,7 @@ func vis(cnf *Config, infile, outfile string) ([]byte, error) {
 	cmd := createCommand(cmdStr)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return nil, ErrorTrace(fmt.Sprintf("failed: command %s", cmdStr), err)
+		return nil, err
 	}
 	return out, nil
 }

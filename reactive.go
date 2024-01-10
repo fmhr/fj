@@ -10,7 +10,7 @@ import (
 func ReactiveRun(ctf *Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
 	rtn, err := reactiveRun(ctf, seed)
 	if err != nil {
-		return nil, ErrorTrace("failed to run: %v", err)
+		return nil, err
 	}
 	//fmt.Fprintln(os.Stderr, mapString(rtn))
 	//fmt.Println(rtn["Score"]) // ここだけ標準出力
