@@ -3,7 +3,6 @@ package fj
 import (
 	"fmt"
 	"log"
-	"math"
 	"os"
 
 	"github.com/alecthomas/kingpin/v2"
@@ -50,7 +49,10 @@ func Fj() {
 	switch result {
 	// Setup generate config file
 	case setup.FullCommand():
-		GenerateConfig()
+		err := generateConfig()
+		if err != nil {
+			log.Fatal(err)
+		}
 	case setupcloud.FullCommand():
 		mkDirCompilerBase()
 		mkDirWorkerBase()
@@ -80,10 +82,15 @@ func Fj() {
 			for _, k := range rtn.Keys() {
 				v, _ := rtn.Get(k)
 				p := message.NewPrinter(language.English)
-				if v == math.Floor(v.(float64)) {
+				switch v.(type) {
+				case int:
 					p.Fprintf(os.Stderr, "%s:%d ", k, v.(int))
-				} else {
-					p.Fprintf(os.Stderr, "%s:%f ", k, v)
+				case float64:
+					if v.(float64) == float64(int(v.(float64))) {
+						p.Fprintf(os.Stderr, "%s:%d ", k, int(v.(float64)))
+					} else {
+						p.Fprintf(os.Stderr, "%s:%f ", k, v.(float64))
+					}
 				}
 			}
 			fmt.Fprintln(os.Stderr, "")

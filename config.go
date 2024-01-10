@@ -1,16 +1,21 @@
 package fj
 
 import (
+	"embed"
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/pelletier/go-toml/v2"
 )
 
+//go:embed config.toml
+var configContent embed.FS
+
 const (
 	configFileName = "config.toml"
-	directory      = "fj/"
+	directory      = "fj"
 )
 
 var ErrConfigNotFound = fmt.Errorf("%s not found, please run `fj init`", configFileName)
@@ -27,7 +32,6 @@ type Config struct {
 	OutfilePath        string   `toml:"OutfilePath"`
 	Jobs               int      `toml:"Jobs"`
 	Cloud              bool     `toml:"Cloud"`
-	CloudURL           string   `toml:"CloudURL"`
 	CompilerURL        string   `toml:"CompilerURL"`
 	Source             string   `toml:"Source"`
 	CompileCmd         string   `toml:"CompileCmd"`
@@ -39,71 +43,34 @@ type Config struct {
 	TimeLimitMS        uint64   `toml:"TimeLimitMS"`
 }
 
-func newConfig() *Config {
-	return &Config{
-		Language:           "Go",
-		Cmd:                "./bin/main",
-		Args:               []string{},
-		Reactive:           false,
-		TesterPath:         "tools/target/release/tester",
-		VisPath:            "tools/target/release/vis",
-		GenPath:            "tools/target/release/gen",
-		InfilePath:         "tools/in/",
-		OutfilePath:        "out/",
-		Jobs:               4,
-		Cloud:              false,
-		CloudURL:           "http://localhost:8888",
-		CompilerURL:        "http://localhost:8080/compiler",
-		Bucket:             "ahc",
-		CompileCmd:         "go build -o bin/main src/main.go",
-		Source:             "src/main.go",
-		Binary:             "bin/main",
-		WorkerURL:          "http://localhost:8081/worker",
-		ConcurrentRequests: 1000,
-		TimeLimitMS:        10000,
-	}
-}
-
-func GenerateConfig() {
-	if _, err := os.Stat(directory + configFileName); err == nil {
-		log.Println("config file already exists")
-		if *force {
-			// if force flag is set, remove config file
-			err := os.Remove(configFileName)
-			if err != nil {
-				fmt.Println("Failed to remove config file: ", err)
-				return
-			}
-		} else {
-			fmt.Printf("%s already exists\n", configFileName)
-			return
+func generateConfig() error {
+	// fj ディレクトリを作成
+	if _, err := os.Stat(directory); os.IsNotExist(err) {
+		if err := os.Mkdir(directory, 0755); err != nil {
+			return err
 		}
 	}
-	conf := newConfig()
 
-	if err := generateConfig(conf); err != nil {
-		fmt.Println("Error: ", err)
-		return
+	// config.tomlの内容を所得
+	configBytes, err := configContent.ReadFile("config.toml")
+	if err != nil {
+		return err
 	}
-	fmt.Printf("%s is generated\n", configFileName)
-}
 
-func generateConfig(conf *Config) error {
-	// create fj directory
-	if _, err := os.Stat("fj"); err != nil {
-		if err := os.Mkdir("fj", 0777); err != nil {
-			return fmt.Errorf("failed to create fj directory: %v", err)
-		}
-	}
-	// create config file
-	file, err := os.Create(directory + configFileName)
+	// config.tomlを作成
+	filePath := filepath.Join(directory, configFileName)
+	file, err := os.Create(filePath)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	encoder := toml.NewEncoder(file)
-	return encoder.Encode(conf)
+	// config.tomlに書き込む
+	if _, err := file.Write(configBytes); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func LoadConfigFile() (*Config, error) {

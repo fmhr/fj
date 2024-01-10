@@ -1,0 +1,21 @@
+Language = 'C++12'
+Cmd = './a.out'
+Args = []
+Reactive = true
+TesterPath = 'tools/target/release/tester'
+VisPath = 'tools/target/release/vis'
+GenPath = 'tools/target/release/gen'
+InfilePath = 'tools/in/'
+OutfilePath = 'out/'
+Jobs = 4
+Cloud = false
+CompilerURL = ''
+Source = 'Main.cpp'
+CompileCmd = 'g++-12 -std=gnu++2b -O2 -DONLINE_JUDGE -DATCODER -Wall -Wextra -mtune=native -march=native -fconstexpr-depth=2147483647 -fconstexpr-loop-limit=2147483647 -fconstexpr-ops-limit=2147483647 -I/opt/ac-library -I/opt/boost/gcc/include -L/opt/boost/gcc/lib -o a.out Main.cpp -lgmpxx -lgmp -I/usr/include/eigen3'
+Binary = 'a.out'
+tmpBinary = ''
+Bucket = ''
+WorkerURL = ''
+ConcurrentRequests = 1000
+TimeLimitMS = 10000
+
