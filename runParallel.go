@@ -24,7 +24,7 @@ func RunParallel(cnf *Config, seeds []int) {
 		concurrentNum = cnf.Jobs
 	}
 	if cnf.Cloud {
-		concurrentNum = maxInt(1, cnf.ConcurrentRequests)
+		concurrentNum = max(1, cnf.ConcurrentRequests)
 	}
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, concurrentNum)

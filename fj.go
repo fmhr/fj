@@ -22,7 +22,6 @@ var (
 	csvOutput  = fj.Flag("csv", "Output csv format.").Default("false").Bool()
 
 	setup = fj.Command("init", "Generate config file.")
-	force = setup.Flag("force", "Force generate config file.").Default("false").Bool()
 
 	setupcloud = fj.Command("setupCloud", "Generate Dockerfile and gcloud build files for cloud mode.")
 
@@ -40,6 +39,7 @@ var (
 	Logscore     = tests.Flag("logscore", "Output score log.").Default("false").Bool()
 )
 
+// fj is main function
 func Fj() {
 	if debug != nil && *debug {
 		log.Println("debug mode")
@@ -124,11 +124,4 @@ func updateConfig(config *Config) {
 		config.Jobs = *jobs
 	}
 	config.Cloud = config.Cloud || *cloud
-}
-
-func maxInt(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
 }
