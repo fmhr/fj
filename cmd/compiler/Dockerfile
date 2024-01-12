@@ -2,11 +2,9 @@ FROM golang:1.21 as serverbuild
 
 WORKDIR /app
 
-RUN git clone -b debug-for-ahc027 https://github.com/fmhr/fj.git
-
-WORKDIR /app/fj
-
-RUN go mod tidy
+RUN git clone -b debug-ahc029 https://github.com/fmhr/fj.git \
+    && cd fj \
+    && go mod tidy
 
 WORKDIR /app/fj/cmd/compiler
 
@@ -14,24 +12,20 @@ RUN go build -o /app/server
 
 
 
-#
-# ここからターゲットのコンパイル環境をつくる
-#FROM golang:1.21.5 as gocompile
+FROM ubuntu:latest
 
-#WORKDIR /work
-
-#ENV PATH="/opt/go/bin:${PATH}"
-
-#RUN go install github.com/fmorenovr/gods/...
-#RUN go install gonum.org/v1/gonum/...
-#RUN go install github.com/liyue201/gostl/...
-#RUN go install golang.org/x/exp/...
-
-
-FROM ubuntu:22.10
 WORKDIR /work
 
-RUN sh installGolang.sh
+RUN apt-get update && apt-get install -y \
+    apt-utils \
+    wget \
+    unzip \
+    gzip
+
+COPY . /work
+RUN sh install_go.sh
+ENV PATH $PATH:/opt/go/bin
+# RUN sh install_cpp20.sh
 
 COPY --from=serverbuild /app/server /work
 

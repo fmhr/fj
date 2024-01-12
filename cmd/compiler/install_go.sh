@@ -1,7 +1,8 @@
 cd /tmp                                    
-wget https://go.dev/dl/go1.20.6.linux-amd64.tar.gz
+wget -q https://go.dev/dl/go1.20.6.linux-amd64.tar.gz
 tar -C /opt -xf go1.20.6.linux-amd64.tar.gz
-export PATH=$PATH:/opt/go/bin
+export PATH=$PATH:/opt/go/bin # 一時的にパスを通す　コンテナには反映されない
+
 mkdir -p /go/src/atcoder.jp/golang
 cd /go/src/atcoder.jp/golang
 go mod init atcoder.jp/golang
