@@ -36,20 +36,20 @@ func RunParallel(cnf *Config, seeds []int) {
 	totalTask := len(seeds)
 
 	// Ctrl+Cで中断したときに、現在実行中のseedを表示する
-	currentlyRunnningSeeds := map[int]bool{}
+	var currentlyRunningSeed sync.Map
 	var datasMutex sync.Mutex
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 
 	// Ctrl+Cで中断したときに、現在実行中のseedを表示する
-	go handleSignals(sigCh, &wg, &currentlyRunnningSeeds)
+	go handleSignals(sigCh, &wg, &currentlyRunningSeed)
 
 	printProgress(int(taskCompleted), totalTask)
 
 	for _, seed := range seeds {
 		wg.Add(1)
 		sem <- struct{}{}
-		currentlyRunnningSeeds[seed] = true
+		currentlyRunningSeed.Store(seed, true)
 		time.Sleep(5 * time.Millisecond)
 		go func(seed int) {
 			data, err := RunSelector(cnf, seed)
@@ -59,13 +59,14 @@ func RunParallel(cnf *Config, seeds []int) {
 			}
 			// 後処理
 			datasMutex.Lock()
-			datas = append(datas, data)                  // 結果を追加
-			atomic.AddInt32(&taskCompleted, 1)           // progressbar
-			printProgress(int(taskCompleted), totalTask) // progressbar
-			delete(currentlyRunnningSeeds, seed)         // 現在実行中のseedを削除
+			datas = append(datas, data)                                // 結果を追加
+			currentTaskCompleted := atomic.AddInt32(&taskCompleted, 1) // progressbar
+			currentlyRunningSeed.Delete(seed)
+			datasMutex.Unlock()
+
+			printProgress(int(currentTaskCompleted), totalTask) // progressbar
 			wg.Done()
 			<-sem
-			datasMutex.Unlock()
 		}(seed)
 	}
 	wg.Wait()
@@ -169,13 +170,18 @@ func printProgress(current, total int) {
 	fmt.Fprintf(os.Stderr, "\r[%d/%d] [%s] %.2f%%", current, total, string(progressBar), percentage*100)
 }
 
-func handleSignals(sigCh <-chan os.Signal, wg *sync.WaitGroup, curent *map[int]bool) {
+func handleSignals(sigCh <-chan os.Signal, wg *sync.WaitGroup, curent *sync.Map) {
 	for {
 		sig := <-sigCh
 		switch sig {
 		case syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT:
+			seeds := make([]int, 0)
+			curent.Range(func(key, value interface{}) bool {
+				seeds = append(seeds, key.(int))
+				return true
+			})
 			fmt.Println("\nReceived signal:", sig)
-			fmt.Println("Currently running seeds:", *curent)
+			fmt.Println("Currently running seeds:", seeds)
 			os.Exit(1)
 		}
 	}
