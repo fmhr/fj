@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 )
 
-//go:embed cmd/compiler/*
+//go:embed cmd/compiler/script/*
 var compilerFiles embed.FS
 
-//go:embed cmd/worker/*
+//go:embed cmd/worker/script/*
 var workerFiles embed.FS
 
 func mkDirCompilerBase() {
