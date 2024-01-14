@@ -1,6 +1,6 @@
 #!/bin/sh
 
-GCLOUD_PROJECT="ahc027-test"
+GCLOUD_PROJECT="project2323"
 IMAGE_NAME="fj-compiler"
 
 set -e #コマンドが失敗したらそこで終了する

@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 
 	"cloud.google.com/go/storage"
 	"github.com/fmhr/fj"
@@ -45,11 +44,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// すでにバイナリがあるか確認
-
-	if filepath.IsAbs(config.TmpBinary) ||
-		strings.Contains(config.TmpBinary, ".") ||
-		strings.Contains(config.TmpBinary, "/") ||
-		strings.Contains(config.TmpBinary, "\\") {
+	if filepath.Clean(config.TmpBinary) != config.TmpBinary {
 		http.Error(w, "Invalid file path", http.StatusBadRequest)
 		return
 	}

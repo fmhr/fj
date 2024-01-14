@@ -2,7 +2,7 @@ FROM golang:1.21 as serverbuild
 
 WORKDIR /app
 
-RUN git clone -b debug-ahc029 https://github.com/fmhr/fj.git \
+RUN git clone https://github.com/fmhr/fj.git \
     && cd fj \
     && go mod tidy
 
