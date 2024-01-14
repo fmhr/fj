@@ -5,6 +5,7 @@ WORKDIR /work
 #RUN wget -q https://img.atcoder.jp/ahc027/aPdjCUIZ_v2.zip -O tools.zip \
 #    && unzip tools.zip 
 
+# ローカルのtoolsをコピーするときは tools/　をDockerfileと同じ階層に置く
 COPY ./tools /work/tools
 RUN (cd tools && cargo build --release --quiet)
 
