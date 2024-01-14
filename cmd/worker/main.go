@@ -7,7 +7,9 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	"cloud.google.com/go/storage"
 	"github.com/fmhr/fj"
@@ -42,6 +44,15 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// すでにバイナリがあるか確認
+
+	if filepath.IsAbs(config.TmpBinary) ||
+		strings.Contains(config.TmpBinary, ".") ||
+		strings.Contains(config.TmpBinary, "/") ||
+		strings.Contains(config.TmpBinary, "\\") {
+		http.Error(w, "Invalid file path", http.StatusBadRequest)
+		return
+	}
 	_, err = os.Stat(config.TmpBinary)
 
 	if os.IsNotExist(err) {
