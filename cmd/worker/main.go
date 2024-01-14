@@ -48,7 +48,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid file path", http.StatusBadRequest)
 		return
 	}
-	_, err = os.Stat(config.TmpBinary)
+	_, err = os.Stat(filepath.Clean(config.TmpBinary))
 
 	if os.IsNotExist(err) {
 		// バイナリをCloud Storageからダウンロード
