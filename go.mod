@@ -41,6 +41,7 @@ require (
 
 require (
 	github.com/alecthomas/kingpin/v2 v2.4.0
+	github.com/elliotchance/orderedmap/v2 v2.2.0
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	golang.org/x/text v0.14.0
 )

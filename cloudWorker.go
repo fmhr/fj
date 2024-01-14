@@ -9,10 +9,12 @@ import (
 	"mime/multipart"
 	"net/http"
 	"time"
+
+	"github.com/elliotchance/orderedmap/v2"
 )
 
 // requestToWorker はバイナリをワーカーに送信する
-func requestToWorker(config *Config, seed int) (rtn map[string]float64, err error) {
+func requestToWorker(config *Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
 	start := time.Now()
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
@@ -20,12 +22,12 @@ func requestToWorker(config *Config, seed int) (rtn map[string]float64, err erro
 	// configをJSONに変換
 	configData, err := json.Marshal(config)
 	if err != nil {
-		return nil, ErrorTrace("failed to marshal config: %v", err)
+		return nil, NewStackTraceError(err.Error())
 	}
 	// JSON configを追加
 	configPart, err := writer.CreateFormField("config")
 	if err != nil {
-		return nil, ErrorTrace("failed to create form field for config: %v", err)
+		return nil, NewStackTraceError(err.Error())
 	}
 	configPart.Write(configData)
 
@@ -50,9 +52,9 @@ func requestToWorker(config *Config, seed int) (rtn map[string]float64, err erro
 	if resp.StatusCode != http.StatusOK {
 		bodyBytes, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return nil, ErrorTrace("error reading response body: %w", err)
+			return nil, WrapError(err)
 		}
-		return nil, ErrorTrace(fmt.Sprintf("error response status code:%d resp:%s", resp.StatusCode, string(bodyBytes)), err)
+		return nil, NewStackTraceError(fmt.Sprintf("error response status code:%d resp:%s", resp.StatusCode, string(bodyBytes)))
 	}
 
 	// レスポンスボディから文字列を取り出す
@@ -60,23 +62,28 @@ func requestToWorker(config *Config, seed int) (rtn map[string]float64, err erro
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body: %v", err)
 	}
-	if err := json.Unmarshal(bodyBytes, &rtn); err != nil {
+	rtn := orderedmap.NewOrderedMap[string, any]()
+	if err := json.Unmarshal(bodyBytes, (*EncodableOrderedMap)(rtn)); err != nil {
 		return nil, fmt.Errorf("failed to parse response body: %v", err)
 	}
 	elapsed := time.Since(start)
-	rtn["responseTime"] = elapsed.Seconds()
-	if rtn["Score"] == 0 {
-		log.Println("response body:", string(bodyBytes))
+	rtn.Set("responseTime", elapsed.Seconds())
+	score, ok := rtn.Get("Score")
+	if !ok {
+		return nil, fmt.Errorf("failed to get score from response body: %v", err)
+	}
+	if score == 0.0 {
+		log.Println("Score=0:response body:", string(bodyBytes))
 	}
 	return rtn, nil
 }
 
-func SendBinaryToWorker(config *Config, seed int, binaryNameInBucket string) (rtn map[string]float64, err error) {
+func SendBinaryToWorker(config *Config, seed int, binaryNameInBucket string) (*orderedmap.OrderedMap[string, any], error) {
 	if config.WorkerURL == "" {
-		return nil, ErrorTrace("", fmt.Errorf("worker URL is not specified"))
+		return nil, NewStackTraceError("worker URL is not specified")
 	}
 	if config.Binary == "" {
-		return nil, ErrorTrace("", fmt.Errorf("binary path is not specified"))
+		return nil, NewStackTraceError("binary path is not specified")
 	}
 	return requestToWorker(config, seed)
 }

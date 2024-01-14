@@ -3,7 +3,6 @@ package fj
 import (
 	"fmt"
 	"log"
-	"math"
 	"os"
 
 	"github.com/alecthomas/kingpin/v2"
@@ -20,9 +19,9 @@ var (
 	debug      = fj.Flag("debug", "Enable debug mode.").Default("false").Bool()
 	cloud      = fj.Flag("cloud", "Enable cloud mode.").Default("false").Bool()
 	jsonOutput = fj.Flag("json", "Output json format.").Default("false").Bool()
+	csvOutput  = fj.Flag("csv", "Output csv format.").Default("false").Bool()
 
 	setup = fj.Command("init", "Generate config file.")
-	force = setup.Flag("force", "Force generate config file.").Default("false").Bool()
 
 	setupcloud = fj.Command("setupCloud", "Generate Dockerfile and gcloud build files for cloud mode.")
 
@@ -30,16 +29,17 @@ var (
 	seed  = test.Arg("seed", "Seed value.").Default("0").Int()
 	args1 = test.Flag("args", "Command line arguments.").Strings()
 
-	tests = fj.Command("tests", "Run test cases.")
-	seed2 = tests.Arg("seed", "Seed value.").Int()
-	args2 = tests.Flag("args", "Command line arguments.").Strings()
-	start = tests.Flag("start", "Start seed value.").Default("0").Short('s').Int()
-	end   = tests.Flag("end", "End seed value.").Default("10").Short('e').Int()
-	jobs  = tests.Flag("jobs", "Number of parallel jobs.").Int()
-	//cloud = tests.Flag("cloud", "Enable cloud mode.").Default("false").Bool()
-
+	tests        = fj.Command("tests", "Run test cases.")
+	seed2        = tests.Arg("seed", "Seed value.").Int()
+	args2        = tests.Flag("args", "Command line arguments.").Strings()
+	start        = tests.Flag("start", "Start seed value.").Default("0").Short('s').Int()
+	end          = tests.Flag("end", "End seed value.").Default("10").Short('e').Int()
+	jobs         = tests.Flag("jobs", "Number of parallel jobs.").Int()
+	displayTable = tests.Flag("table", "Output table format.").Default("true").Bool()
+	Logscore     = tests.Flag("logscore", "Output score log.").Default("false").Bool()
 )
 
+// fj is main function
 func Fj() {
 	if debug != nil && *debug {
 		log.Println("debug mode")
@@ -49,13 +49,16 @@ func Fj() {
 	switch result {
 	// Setup generate config file
 	case setup.FullCommand():
-		GenerateConfig()
+		err := generateConfig()
+		if err != nil {
+			log.Fatal(err)
+		}
 	case setupcloud.FullCommand():
 		mkDirCompilerBase()
 		mkDirWorkerBase()
 	// Test run test case
 	case test.FullCommand(), tests.FullCommand():
-		config, err := LoadConfigFile()
+		config, err := setConfig()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -75,16 +78,24 @@ func Fj() {
 			if err != nil {
 				log.Fatal("Error: ", err)
 			}
-			fmt.Fprintln(os.Stdout, rtn)
-			for k, v := range rtn {
+			//fmt.Fprintln(os.Stdout, rtn)
+			for _, k := range rtn.Keys() {
+				v, _ := rtn.Get(k)
 				p := message.NewPrinter(language.English)
-				if v == math.Floor(v) {
-					p.Fprintf(os.Stdout, "%s:%d ", k, int(v))
-				} else {
-					p.Fprintf(os.Stdout, "%s:%f ", k, v)
+				switch v := v.(type) {
+				case int:
+					p.Fprintf(os.Stderr, "%s:%d ", k, v)
+				case float64:
+					if v == float64(int(v)) {
+						p.Fprintf(os.Stderr, "%s:%d ", k, int(v))
+					} else {
+						p.Fprintf(os.Stderr, "%s:%f ", k, v)
+					}
 				}
 			}
-			fmt.Println("")
+			fmt.Fprintln(os.Stderr, "")
+			Score, _ := rtn.Get("Score")
+			fmt.Println(Score)
 		case tests.FullCommand():
 			// seed2 が指定されていれば end=seed2
 			if seed2 != nil && *seed2 != 0 {
@@ -102,6 +113,7 @@ func Fj() {
 
 }
 
+// updateConfig はコマンドライン引数でconfigを更新する
 func updateConfig(config *Config) {
 	if *args1 != nil && len(*args1) > 0 {
 		config.Args = *args1
@@ -113,11 +125,4 @@ func updateConfig(config *Config) {
 		config.Jobs = *jobs
 	}
 	config.Cloud = config.Cloud || *cloud
-}
-
-func maxInt(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
 }

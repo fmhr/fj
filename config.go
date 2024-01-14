@@ -1,18 +1,24 @@
 package fj
 
 import (
+	"embed"
 	"fmt"
+	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/pelletier/go-toml/v2"
 )
 
+//go:embed config.toml
+var configContent embed.FS
+
 const (
-	configFileName = "config.toml"
-	directory      = "fj/"
+	CONFIG_FILE  = "config.toml"
+	FJ_DIRECTORY = "fj/"
 )
 
-var ErrConfigNotFound = fmt.Errorf("%s not found, please run `fj init`", configFileName)
+var ErrConfigNotFound = fmt.Errorf("%s not found, please run `fj init`", CONFIG_FILE)
 
 type Config struct {
 	Language           string   `toml:"Language"`
@@ -26,7 +32,6 @@ type Config struct {
 	OutfilePath        string   `toml:"OutfilePath"`
 	Jobs               int      `toml:"Jobs"`
 	Cloud              bool     `toml:"Cloud"`
-	CloudURL           string   `toml:"CloudURL"`
 	CompilerURL        string   `toml:"CompilerURL"`
 	Source             string   `toml:"Source"`
 	CompileCmd         string   `toml:"CompileCmd"`
@@ -38,78 +43,44 @@ type Config struct {
 	TimeLimitMS        uint64   `toml:"TimeLimitMS"`
 }
 
-func newConfig() *Config {
-	return &Config{
-		Language:           "Go",
-		Cmd:                "./bin/main",
-		Args:               []string{},
-		Reactive:           false,
-		TesterPath:         "tools/target/release/tester",
-		VisPath:            "tools/target/release/vis",
-		GenPath:            "tools/target/release/gen",
-		InfilePath:         "tools/in/",
-		OutfilePath:        "out/",
-		Jobs:               4,
-		Cloud:              false,
-		CloudURL:           "http://localhost:8888",
-		CompilerURL:        "http://localhost:8080/compiler",
-		CompileCmd:         "go build -o bin/main src/main.go",
-		Source:             "src/main.go",
-		Binary:             "bin/main",
-		WorkerURL:          "http://localhost:8081/worker",
-		ConcurrentRequests: 1000,
-		TimeLimitMS:        10000,
-	}
-}
-
-func GenerateConfig() {
-	if _, err := os.Stat(directory + configFileName); err == nil {
-		if *force {
-			// if force flag is set, remove config file
-			err := os.Remove(configFileName)
-			if err != nil {
-				fmt.Println("Failed to remove config file: ", err)
-				return
-			}
-		} else {
-			fmt.Printf("%s already exists\n", configFileName)
-			return
+// generateConfig はfj init コマンドで読み出されて fj/config.tomlを生成する
+func generateConfig() error {
+	// fj ディレクトリを作成
+	if _, err := os.Stat(FJ_DIRECTORY); os.IsNotExist(err) {
+		if err := os.Mkdir(FJ_DIRECTORY, 0755); err != nil {
+			return err
 		}
 	}
-	conf := newConfig()
 
-	if err := generateConfig(conf); err != nil {
-		fmt.Println("Error: ", err)
-		return
+	// config.tomlの内容を所得
+	configBytes, err := configContent.ReadFile("config.toml")
+	if err != nil {
+		return err
 	}
-	fmt.Printf("%s is generated\n", configFileName)
-}
 
-func generateConfig(conf *Config) error {
-	// create fj directory
-	if _, err := os.Stat("fj"); err != nil {
-		if err := os.Mkdir("fj", 0777); err != nil {
-			return fmt.Errorf("failed to create fj directory: %v", err)
-		}
-	}
-	// create config file
-	file, err := os.Create(directory + configFileName)
+	// config.tomlを作成
+	filePath := filepath.Join(FJ_DIRECTORY, CONFIG_FILE)
+	file, err := os.Create(filePath)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	encoder := toml.NewEncoder(file)
-	return encoder.Encode(conf)
+	// config.tomlに書き込む
+	if _, err := file.Write(configBytes); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func LoadConfigFile() (*Config, error) {
+// setConfig はconfig.tomlを読み込む
+func setConfig() (*Config, error) {
 	if !configExists() {
 		return &Config{}, ErrConfigNotFound
 	}
-
 	conf := &Config{}
-	file, err := os.Open("fj/" + configFileName)
+	file, err := os.Open(FJ_DIRECTORY + CONFIG_FILE)
 	if err != nil {
 		return conf, err
 	}
@@ -117,6 +88,7 @@ func LoadConfigFile() (*Config, error) {
 	decoder := toml.NewDecoder(file)
 	err = decoder.Decode(conf)
 	if err != nil {
+		log.Println("failed to decode config file: ", err)
 		return conf, err
 	}
 	return conf, checkConfigFile(conf)
@@ -124,12 +96,12 @@ func LoadConfigFile() (*Config, error) {
 
 func checkConfigFile(cnf *Config) error {
 	if cnf.Cmd == "" {
-		return fmt.Errorf("cmd is empty. please set cmd in %s", configFileName)
+		return fmt.Errorf("cmd is empty. please set cmd in %s", CONFIG_FILE)
 	}
 	return nil
 }
 
 func configExists() bool {
-	_, err := os.Stat("fj/" + configFileName)
+	_, err := os.Stat("fj/" + CONFIG_FILE)
 	return err == nil
 }

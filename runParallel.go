@@ -12,6 +12,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/elliotchance/orderedmap/v2"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
@@ -23,11 +24,11 @@ func RunParallel(cnf *Config, seeds []int) {
 		concurrentNum = cnf.Jobs
 	}
 	if cnf.Cloud {
-		concurrentNum = maxInt(1, cnf.ConcurrentRequests)
+		concurrentNum = max(1, cnf.ConcurrentRequests)
 	}
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, concurrentNum)
-	datas := make([]map[string]float64, 0, len(seeds))
+	datas := make([]*orderedmap.OrderedMap[string, any], 0, len(seeds))
 	errorChan := make(chan string, len(seeds))
 	errorSeedChan := make(chan int, len(seeds))
 
@@ -35,35 +36,35 @@ func RunParallel(cnf *Config, seeds []int) {
 	totalTask := len(seeds)
 
 	// Ctrl+Cで中断したときに、現在実行中のseedを表示する
-	currentlyRunnningSeeds := map[int]bool{}
+	var currentlyRunningSeed sync.Map
 	var datasMutex sync.Mutex
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 
 	// Ctrl+Cで中断したときに、現在実行中のseedを表示する
-	go handleSignals(sigCh, &wg, &currentlyRunnningSeeds)
+	go handleSignals(sigCh, &wg, &currentlyRunningSeed)
 
 	printProgress(int(taskCompleted), totalTask)
 
 	for _, seed := range seeds {
 		wg.Add(1)
 		sem <- struct{}{}
-		currentlyRunnningSeeds[seed] = true
+		currentlyRunningSeed.Store(seed, true)
 		time.Sleep(5 * time.Millisecond)
 		go func(seed int) {
 			data, err := RunSelector(cnf, seed)
 			if err != nil {
 				errorChan <- fmt.Sprintf("Run error: seed=%d %v\n", seed, err)
 				errorSeedChan <- seed
-				return
 			}
 			// 後処理
 			datasMutex.Lock()
-			datas = append(datas, data)                  // 結果を追加
-			atomic.AddInt32(&taskCompleted, 1)           // progressbar
-			printProgress(int(taskCompleted), totalTask) // progressbar
-			delete(currentlyRunnningSeeds, seed)         // 現在実行中のseedを削除
+			datas = append(datas, data)                                // 結果を追加
+			currentTaskCompleted := atomic.AddInt32(&taskCompleted, 1) // progressbar
+			currentlyRunningSeed.Delete(seed)
 			datasMutex.Unlock()
+
+			printProgress(int(currentTaskCompleted), totalTask) // progressbar
 			wg.Done()
 			<-sem
 		}(seed)
@@ -80,36 +81,53 @@ func RunParallel(cnf *Config, seeds []int) {
 		errSeeds = append(errSeeds, seed)
 	}
 	sumScore := 0.0
+	logScore := 0.0
 	zeroSeeds := make([]int, 0)
 	for i := 0; i < len(datas); i++ {
 		//fmt.Println(datas[i])
-		sumScore += datas[i]["Score"]
-		if datas[i]["Score"] == 0 {
+		score, ok := datas[i].Get("Score")
+		if !ok {
+			log.Fatal("Score not found")
+		}
+		sumScore += score.(float64)
+		logScore += math.Log(score.(float64))
+		if score.(float64) == 0.0 {
 			zeroSeeds = append(zeroSeeds, i)
 		}
 	}
-	//	log.Println(datas)
-	DisplayTable(datas)
+	if displayTable != nil && *displayTable {
+		DisplayTable(datas)
+	}
 	fmt.Fprintln(os.Stderr, "Error seeds:", errSeeds, "Zero seeds:", zeroSeeds)
 	// timeがあれば、平均と最大を表示
-	_, exsit := datas[0]["time"]
+	_, exsit := datas[0].Get("time")
 	if exsit {
 		sumTime := 0.0
 		maxTime := 0.0
 		for i := 0; i < len(datas); i++ {
-			sumTime += datas[i]["time"]
-			maxTime = math.Max(maxTime, datas[i]["time"])
+			if t, ok := datas[i].Get("time"); !ok {
+				log.Fatal("time is not float64")
+			} else {
+				sumTime += t.(float64)
+				maxTime = math.Max(maxTime, t.(float64))
+			}
 		}
 		sumTime /= float64(len(datas))
 		fmt.Fprintf(os.Stderr, "avarageTime=%.2f  maxTime=%.2f\n", sumTime, maxTime)
 	}
 	avarageScore := sumScore / float64(len(datas))
 	p := message.NewPrinter(language.English)
-	p.Fprintf(os.Stderr, "(Score)sum=%.2f avarage=%.2f \n", sumScore, avarageScore)
+	p.Fprintf(os.Stderr, "(Score)sum=%.2f avarage=%.2f log=%.2f\n", sumScore, avarageScore, logScore)
 	// if zeroSeeds があれば、sumScoreを０にする
-	if len(zeroSeeds) > 0 {
-		log.Println("Score 0 seeds:", zeroSeeds)
-		fmt.Println("0")
+	// TODO スコアが低ければいいい時は有効にする
+	//if len(zeroSeeds) > 0 {
+	//log.Println("Score 0 seeds:", zeroSeeds)
+	//fmt.Println("0")
+	//} else {
+	//fmt.Printf("%.2f\n", sumScore)
+	//}
+	if Logscore != nil && *Logscore {
+		fmt.Printf("%.4f\n", logScore)
 	} else {
 		fmt.Printf("%.2f\n", sumScore)
 	}
@@ -130,6 +148,9 @@ func RunParallel(cnf *Config, seeds []int) {
 		}
 		log.Println("save json file:", filename)
 	}
+	if csvOutput != nil && *csvOutput {
+		CsvOutput(datas)
+	}
 
 }
 
@@ -149,13 +170,18 @@ func printProgress(current, total int) {
 	fmt.Fprintf(os.Stderr, "\r[%d/%d] [%s] %.2f%%", current, total, string(progressBar), percentage*100)
 }
 
-func handleSignals(sigCh <-chan os.Signal, wg *sync.WaitGroup, curent *map[int]bool) {
+func handleSignals(sigCh <-chan os.Signal, wg *sync.WaitGroup, curent *sync.Map) {
 	for {
 		sig := <-sigCh
 		switch sig {
 		case syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT:
+			seeds := make([]int, 0)
+			curent.Range(func(key, value interface{}) bool {
+				seeds = append(seeds, key.(int))
+				return true
+			})
 			fmt.Println("\nReceived signal:", sig)
-			fmt.Println("Currently running seeds:", *curent)
+			fmt.Println("Currently running seeds:", seeds)
 			os.Exit(1)
 		}
 	}
@@ -167,6 +193,8 @@ func createDirIfNotExist(dir string) error {
 		if err := os.MkdirAll(dir, 0755); err != nil {
 			return fmt.Errorf("failed to create directory: %v", err)
 		}
+	} else if err != nil {
+		return fmt.Errorf("error checking if directory exists: %v", err)
 	}
 	return nil
 }

@@ -1,7 +1,12 @@
 package main
 
-import "github.com/fmhr/fj"
+import (
+	"log"
+
+	"github.com/fmhr/fj"
+)
 
 func main() {
+	log.SetFlags(log.Lshortfile)
 	fj.Fj()
 }

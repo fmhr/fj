@@ -8,20 +8,20 @@ import (
 	"path/filepath"
 )
 
-//go:embed cmd/compiler/*
+//go:embed cmd/compiler/script/*
 var compilerFiles embed.FS
 
-//go:embed cmd/worker/*
+//go:embed cmd/worker/script/*
 var workerFiles embed.FS
 
 func mkDirCompilerBase() {
 	targetDir := "./fj/compiler/"
-	extractEmbeddedFiles(compilerFiles, "cmd/compiler", targetDir)
+	extractEmbeddedFiles(compilerFiles, "cmd/compiler/script", targetDir)
 }
 
 func mkDirWorkerBase() {
 	targetDir := "./fj/worker/"
-	extractEmbeddedFiles(workerFiles, "cmd/worker", targetDir)
+	extractEmbeddedFiles(workerFiles, "cmd/worker/script", targetDir)
 }
 
 func extractEmbeddedFiles(embeddedFS embed.FS, sourcdDir, targetDir string) {

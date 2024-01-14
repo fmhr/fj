@@ -1,24 +1,25 @@
 package main
 
 import (
+	"github.com/elliotchance/orderedmap/v2"
 	"github.com/fmhr/fj"
 )
 
-func exexute(config *fj.Config, seed int) (rtn map[string]float64, err error) {
+func exexute(config *fj.Config, seed int) (rtn *orderedmap.OrderedMap[string, any], err error) {
 	// GEN
 	err = fj.Gen(config, seed)
 	if err != nil {
-		return nil, fj.ErrorTrace("failed to gen: %v", err)
+		return nil, err
 	}
 	// RUN
 	rtn, err = run(config, seed)
 	if err != nil {
-		return nil, fj.ErrorTrace("failed to run: %v", err)
+		return nil, err
 	}
 	return rtn, nil
 }
 
-func run(config *fj.Config, seed int) (map[string]float64, error) {
+func run(config *fj.Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
 	if config.Reactive {
 		return fj.ReactiveRun(config, seed)
 	} else {

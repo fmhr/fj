@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 
 	"cloud.google.com/go/storage"
@@ -42,7 +43,13 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = os.Stat(config.Binary)
+	// すでにバイナリがあるか確認
+	if filepath.Clean(config.TmpBinary) != config.TmpBinary {
+		http.Error(w, "Invalid file path", http.StatusBadRequest)
+		return
+	}
+	tmpBinaryFileName := filepath.Clean(config.TmpBinary)
+	_, err = os.Stat(tmpBinaryFileName)
 
 	if os.IsNotExist(err) {
 		// バイナリをCloud Storageからダウンロード
@@ -64,6 +71,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, errmsg, http.StatusInternalServerError)
 			return
 		}
+	} else {
+		// tmpバイナリをmainに改名
+		err = os.Rename(config.TmpBinary, config.Binary)
+		if err != nil {
+			errmsg := fmt.Sprint("Failed to rename binary", err.Error())
+			http.Error(w, errmsg, http.StatusInternalServerError)
+			return
+		}
 	}
 
 	// 入力ファイルを作成
@@ -82,7 +97,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// json
-	jsonData, err := json.Marshal(out)
+	jsonData, err := json.Marshal((*fj.EncodableOrderedMap)(out))
 	if err != nil {
 		errmsg := fmt.Sprint("Failed to marshal", err.Error())
 		http.Error(w, errmsg, http.StatusInternalServerError)
@@ -90,6 +105,13 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonData)
+	// バイナリをtmpネームに改名
+	err = os.Rename(config.Binary, config.TmpBinary)
+	if err != nil {
+		errmsg := fmt.Sprint("Failed to rename binary", err.Error())
+		http.Error(w, errmsg, http.StatusInternalServerError)
+		return
+	}
 }
 
 func downloadFileFromGoogleCloudStorage(bucketName string, objectName string, destination string) error {

@@ -33,9 +33,10 @@ func TestExtractKeyValuePairs(t *testing.T) {
 		if (err != nil) != test.err {
 			t.Errorf("Expected error %v, but got %v", test.err, err)
 		}
-		for k, v := range test.output {
-			if result[k] != v {
-				t.Errorf("For key %s, expected %f but got %f", k, v, result[k])
+		for key, value := range test.output {
+			v, _ := result.Get(key)
+			if value != v {
+				t.Errorf("For key %s, expected %f but got %f", key, value, v)
 			}
 		}
 	}

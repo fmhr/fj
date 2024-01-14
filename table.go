@@ -1,65 +1,61 @@
 package fj
 
 import (
+	"log"
 	"os"
 	"slices"
-	"sort"
 	"strconv"
 
+	"github.com/elliotchance/orderedmap/v2"
 	"github.com/olekukonko/tablewriter"
 )
 
 // DisplayTable はデータをテーブル形式で表示する
-func DisplayTable(data []map[string]float64) {
+func DisplayTable(data []*orderedmap.OrderedMap[string, any]) {
 	if len(data) == 0 {
 		return
 	}
 
-	sortBySeed(&data)
-
-	table := tablewriter.NewWriter(os.Stdout)
+	table := tablewriter.NewWriter(os.Stderr)
 	table.SetAutoFormatHeaders(false)
 	//	log.Println(data)
 	headers := extractHeaders(data)
 	table.SetHeader(headers)
 
 	for _, rowMap := range data {
-		row := make([]string, 0, len(rowMap))
+		row := make([]string, 0)
 		for _, key := range headers {
-			row = append(row, formatFloat(rowMap[key]))
+			value, _ := rowMap.Get(key)
+			row = append(row, formatFloat(value))
 		}
 		table.Append(row)
 	}
 	table.Render()
 }
 
-// sortBySeed はデータをseedでソートする
-func sortBySeed(data *[]map[string]float64) {
-	sort.Slice(*data, func(i, j int) bool {
-		return (*data)[i]["seed"] < (*data)[j]["seed"]
-	})
-}
-
 // extractHeaders はデータからヘッダーを抽出する
-func extractHeaders(data []map[string]float64) []string {
-	headers := make([]string, 0, len(data[0]))
-	for key := range data[0] {
-		headers = append(headers, key)
-	}
+func extractHeaders(data []*orderedmap.OrderedMap[string, any]) []string {
+	headers := append([]string(nil), data[0].Keys()...)
 	// seedを先頭に移動
 	seedIndex := slices.Index(headers, "seed")
 	headers = append(headers[:seedIndex], headers[seedIndex+1:]...)
 	headers = append([]string{"seed"}, headers...)
-	// seed以外をソート
-	//sort.Strings(headers[1:])
 
 	return headers
 }
 
-// formatFloat は小数点以下がh0の場合は整数に変換する
-func formatFloat(value float64) string {
-	if value == float64(int(value)) {
-		return strconv.Itoa(int(value))
+func formatFloat(value any) string {
+	switch v := value.(type) {
+	case int:
+		return strconv.Itoa(v)
+	case float64:
+		// 小数点以下が0の場合は整数に変換
+		if v == float64(int(v)) {
+			return strconv.Itoa(int(v))
+		}
+		return strconv.FormatFloat(v, 'f', 3, 64)
+	default:
+		log.Fatal("invalid type")
 	}
-	return strconv.FormatFloat(value, 'f', 3, 64)
+	return ""
 }
