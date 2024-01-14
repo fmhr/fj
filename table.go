@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 	"slices"
-	"sort"
 	"strconv"
 
 	"github.com/elliotchance/orderedmap/v2"
@@ -16,8 +15,6 @@ func DisplayTable(data []*orderedmap.OrderedMap[string, any]) {
 	if len(data) == 0 {
 		return
 	}
-
-	sortBySeed(&data)
 
 	table := tablewriter.NewWriter(os.Stderr)
 	table.SetAutoFormatHeaders(false)
@@ -34,23 +31,6 @@ func DisplayTable(data []*orderedmap.OrderedMap[string, any]) {
 		table.Append(row)
 	}
 	table.Render()
-}
-
-// sortBySeed はデータをseedでソートする
-func sortBySeed(data *[]*orderedmap.OrderedMap[string, any]) {
-	sort.Slice(*data, func(i, j int) bool {
-		iseed, _ := (*data)[i].Get("seed")
-		jseed, _ := (*data)[j].Get("seed")
-		switch iseed.(type) {
-		case int:
-			return iseed.(int) < jseed.(int)
-		case float64:
-			return iseed.(float64) < jseed.(float64)
-		default:
-			log.Fatal("invalid type")
-		}
-		return false
-	})
 }
 
 // extractHeaders はデータからヘッダーを抽出する
