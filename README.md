@@ -56,62 +56,29 @@ fj tests 100
 ```
 
 
-設定ファイル(fj/config.toml)の設定例
-```
-Language = 'Go'
-Cmd = './bin/a.out'
-Args = []
-Reactive = true
-TesterPath = 'tools/target/release/tester'
-VisPath = 'tools/target/release/vis'
-GenPath = 'tools/target/release/gen'
-InfilePath = 'tools/in/'
-OutfilePath = 'out/'
-Jobs = 3
-Cloud = false
-CloudURL = 'http://localhost:8888'
-CompilerURL = 'http://localhost:8080/compiler'
-WorkerURL = 'http://localhost:8081/worker'
-Source = 'src/main.go'
-CompileCmd = 'go build -o bin/main src/main.go'
-Binary = 'bin/main'
-ConcurrentRequests = 1000
-TimeLimitMS = 10000
-
-```
 ## Google Cloud Runを使った並列テスト
+#### 1. fj setupCloudを実行する。
+1. ```fj setupCloud ```をコンテストのディレクトリで実行してcompileコンテナと実際にテストするworkerコンテナ必要なDockerfileとシェルスクリプトを生成します。
+2. ./fj/compiler/ の中のファイルを使用する言語にあわせて修正します
 
-### ローカルでテストする。
-Gcloudで動かす前に、ローカルでテストすることをおすすめします。
-#### 1. Docker Desktopをインストールする。
-[https://docs.docker.com/engine/install/]を参照してインストールしてください。
-#### 2. fj setupCloudを実行する。
-1. ```fj setupCloud ```を実行して必要なDockerfileを生成します。
-2. ./fj/compiler/Dockerfile を自身の使う言語に合わせて編集してください。
-3. ./fj/compiler/に移動して、sh localbuild.sh を実行してください。
-4. 同様に ./fj/worker/に移動して、localbuild.sh を実行してください。
-5. 設定ファイル(fj/config.toml)を自分の環境に合わせて編集します。
-```
-設定例
-CompilerURL = 'http://localhost:8080/compiler'
-Source = 'src/main.go'
-CompileCmd = 'go build -o bin/main src/main.go'
-Binary = 'bin/main'
-WorkerURL = 'http://localhost:8081/worker'
-ConcurrentRequests = 1
-```
 ConcurrentRequestsは、並列実行するときのリクエスト数です。ローカルではコンテナを１つしか立ち上げないので、1にしてください。
 設定後に、```fj test --cloud```を実行して、正しく動作するか確認してください。
 
+## Docker Desktopをインストールする。
+[https://docs.docker.com/engine/install/]を参照してインストールしてください。
 ## Google Cloud 
 0. SDKをインストールする。
 1. 新しいプロジェクトを作成します。　プロジェクト名を適当に　ahc027-test とします。
 端末を開いて、
-```gcloud auth login```を実行して、ログインします。
-```gcloud config set project ahc027-test``を実行して、プロジェクトを設定します。
-2. fj/worker/gcloudbuild.sh と fj/compiler/gcloudbuile.sh のGCLOUD_PROJECTを自分のプロジェクトIDに変更します。
-3. fj/compiler/gcloudbuild.sh のIMAGE_NAMEを変更します。
-4. fj/compiler/gcloudbuild.sh を実行して、コンパイル用のコンテナをビルドします。
+```gcloud auth login```を実行して、ログインします
+```gcloud projects PROJECT_NAME ``` でプロジェクトを作成します.
+Google Cloud　のコンソールページから作成したプロジェクトを選択して、メニューの「お支払い」から「請求先アカウントにリンク」を選択します。
+Cloud Build APIの有効化:　```gcloud services enable cloudbuild.googleapis.com --project=YOUR_PROJECT_ID```
+Cloud Storage APIの有効化: ```gcloud services enable storage.googleapis.com --project=YOUR_PROJECT_ID```
+3. fj/worker/gcloudbuild.sh と fj/compiler/gcloudbuile.sh のGCLOUD_PROJECTを自分のプロジェクトIDに変更します。
+4. 途中に、google cloud run のAPIを有効にする質問がくるので y を推します
+5. fj/compiler/gcloudbuild.sh のIMAGE_NAMEを変更します。
+6. fj/compiler/gcloudbuild.sh を実行して、コンパイル用のコンテナをビルドします。
 スクリプトが成功すると以下の様なメッセージが表示されます。
 ```
 (略)
