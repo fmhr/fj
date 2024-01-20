@@ -85,14 +85,19 @@ func RunParallel(cnf *Config, seeds []int) {
 	zeroSeeds := make([]int, 0)
 	for i := 0; i < len(datas); i++ {
 		//fmt.Println(datas[i])
-		score, ok := datas[i].Get("Score")
-		if !ok {
-			log.Fatal("Score not found")
-		}
-		sumScore += score.(float64)
-		logScore += math.Log(score.(float64))
-		if score.(float64) == 0.0 {
-			zeroSeeds = append(zeroSeeds, i)
+		if datas[i] != nil {
+			score, ok := datas[i].Get("Score")
+			if !ok {
+				log.Fatal("Score not found")
+			}
+			sumScore += score.(float64)
+			logScore += math.Log(score.(float64))
+			if score.(float64) == 0.0 {
+				zeroSeeds = append(zeroSeeds, i)
+			}
+		} else {
+			log.Println("datas[i] is nil")
+			errSeeds = append(errSeeds, i)
 		}
 	}
 	if displayTable != nil && *displayTable {
