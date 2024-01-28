@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ahc028-test
+spec:
+  selector:
+    matchLabels:
+      app: products
+      department: sales
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: products
+        department: sales
+    spec:
+      containers:
+      - name: ahc028-worker
+        image: gcr.io/ahc028/ahc028-worker
+        env:
+        - name: "PORT"
+          value: "8080"
