@@ -24,8 +24,17 @@ func DisplayTable(data []*orderedmap.OrderedMap[string, any]) {
 
 	for _, rowMap := range data {
 		row := make([]string, 0)
+		// エラーでrowMap全体がnilの場合がある
+		if rowMap == nil {
+			continue
+		}
 		for _, key := range headers {
-			value, _ := rowMap.Get(key)
+			value, ok := rowMap.Get(key)
+			if !ok {
+				// seed(key)がなんらかの理由でない場合はスキップ
+				log.Println("Error no value key:", key)
+				continue
+			}
 			row = append(row, formatFloat(value))
 		}
 		table.Append(row)

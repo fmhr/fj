@@ -74,6 +74,7 @@ func RunParallel(cnf *Config, seeds []int) {
 	close(errorChan)
 	close(errorSeedChan)
 	for err := range errorChan {
+		// TODO if err == TLE
 		log.Println(err)
 	}
 	errSeeds := make([]int, 0, len(errorSeedChan))
@@ -84,7 +85,7 @@ func RunParallel(cnf *Config, seeds []int) {
 	logScore := 0.0
 	zeroSeeds := make([]int, 0)
 	for i := 0; i < len(datas); i++ {
-		//fmt.Println(datas[i])
+		// error のときnilになる
 		if datas[i] != nil {
 			score, ok := datas[i].Get("Score")
 			if !ok {
@@ -95,9 +96,6 @@ func RunParallel(cnf *Config, seeds []int) {
 			if score.(float64) == 0.0 {
 				zeroSeeds = append(zeroSeeds, i)
 			}
-		} else {
-			log.Println("datas[i] is nil")
-			errSeeds = append(errSeeds, i)
 		}
 	}
 	if displayTable != nil && *displayTable {
@@ -110,6 +108,10 @@ func RunParallel(cnf *Config, seeds []int) {
 		sumTime := 0.0
 		maxTime := 0.0
 		for i := 0; i < len(datas); i++ {
+			if datas[i] == nil {
+				log.Println("skip seed=", i)
+				continue
+			}
 			if t, ok := datas[i].Get("time"); !ok {
 				log.Fatal("time is not float64")
 			} else {
@@ -117,20 +119,13 @@ func RunParallel(cnf *Config, seeds []int) {
 				maxTime = math.Max(maxTime, t.(float64))
 			}
 		}
-		sumTime /= float64(len(datas))
+		sumTime /= float64(len(datas) - len(errSeeds))
 		fmt.Fprintf(os.Stderr, "avarageTime=%.2f  maxTime=%.2f\n", sumTime, maxTime)
 	}
-	avarageScore := sumScore / float64(len(datas))
+	avarageScore := sumScore / float64(len(datas)-len(errSeeds))
 	p := message.NewPrinter(language.English)
 	p.Fprintf(os.Stderr, "(Score)sum=%.2f avarage=%.2f log=%.2f\n", sumScore, avarageScore, logScore)
-	// if zeroSeeds があれば、sumScoreを０にする
-	// TODO スコアが低ければいいい時は有効にする
-	//if len(zeroSeeds) > 0 {
-	//log.Println("Score 0 seeds:", zeroSeeds)
-	//fmt.Println("0")
-	//} else {
-	//fmt.Printf("%.2f\n", sumScore)
-	//}
+
 	if Logscore != nil && *Logscore {
 		fmt.Printf("%.4f\n", logScore)
 	} else {
