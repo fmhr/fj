@@ -99,6 +99,10 @@ func RunParallel(cnf *Config, seeds []int) {
 		}
 	}
 	if displayTable != nil && *displayTable {
+		// delete stdErr
+		for i := 0; i < len(datas); i++ {
+			datas[i].Delete("stdErr")
+		}
 		DisplayTable(datas)
 	}
 	fmt.Fprintln(os.Stderr, "Error seeds:", errSeeds, "Zero seeds:", zeroSeeds)

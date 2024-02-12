@@ -38,6 +38,7 @@ func reactiveRun(ctf *Config, seed int) (orderedmap.OrderedMap[string, any], err
 		pair.Set(k, v)
 	}
 	pair.Set("seed", seed)
+	pair.Set("stdErr", out)
 	return pair, nil
 }
 

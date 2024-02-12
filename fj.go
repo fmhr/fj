@@ -96,6 +96,11 @@ func Fj() {
 			fmt.Fprintln(os.Stderr, "")
 			Score, _ := rtn.Get("Score")
 			fmt.Println(Score)
+			stderr, ok := rtn.Get("stdErr")
+			if ok {
+				log.Print("StdErr:------->\n", string(stderr.([]byte)))
+			}
+			log.Println("ここまで<-----")
 		case tests.FullCommand():
 			// seed2 が指定されていれば end=seed2
 			if seed2 != nil && *seed2 != 0 {
