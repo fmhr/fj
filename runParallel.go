@@ -93,15 +93,18 @@ func RunParallel(cnf *Config, seeds []int) {
 			}
 			sumScore += score.(float64)
 			logScore += math.Log(score.(float64))
+			seed, _ := datas[i].Get("seed")
 			if score.(float64) == 0.0 {
-				zeroSeeds = append(zeroSeeds, i)
+				zeroSeeds = append(zeroSeeds, seed.(int))
 			}
 		}
 	}
 	if displayTable != nil && *displayTable {
 		// delete stdErr
 		for i := 0; i < len(datas); i++ {
-			datas[i].Delete("stdErr")
+			if datas[i] != nil {
+				datas[i].Delete("stdErr")
+			}
 		}
 		DisplayTable(datas)
 	}
