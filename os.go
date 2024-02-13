@@ -1,14 +1,15 @@
 package fj
 
 import (
-	"os/exec"
 	"runtime"
 )
 
 // OS別のコマンド実行
-func createCommand(cmdStr string) *exec.Cmd {
+func createCommand(cmdStr string) (strs []string) {
 	if runtime.GOOS == "windows" {
-		return exec.Command("cmd", "/C", cmdStr)
+		strs = []string{"cmd", "/C", cmdStr}
+	} else {
+		strs = []string{"/bin/sh", "-c", cmdStr}
 	}
-	return exec.Command("sh", "-c", cmdStr)
+	return strs
 }

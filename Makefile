@@ -18,7 +18,7 @@ WORKER_DIR=./cmd/worker
 build: $(BINARIES)
 $(BINARIES): $(GO_FILES)
 	@echo "Building..."
-	go build -race -o $(BUILD_DIR)/$(BINARY_NAME) $(CMD_DIR)
+	go build -o $(BUILD_DIR)/$(BINARY_NAME) $(CMD_DIR)
 
 # 実行ファイルのクリーンアップ
 .PHONY: clean

@@ -76,11 +76,18 @@ func Fj() {
 		case test.FullCommand():
 			rtn, err := RunSelector(config, *seed)
 			if err != nil {
-				log.Fatal("Error: ", err)
+				v, ok := rtn.Get("tle")
+				if ok {
+					log.Println("TLE:", string(v.([]byte)))
+				}
+				log.Fatal("Error: ", err, "\nout:", rtn)
 			}
 			//fmt.Fprintln(os.Stdout, rtn)
 			for _, k := range rtn.Keys() {
-				v, _ := rtn.Get(k)
+				v, ok := rtn.Get(k)
+				if !ok {
+					continue
+				}
 				p := message.NewPrinter(language.English)
 				switch v := v.(type) {
 				case int:

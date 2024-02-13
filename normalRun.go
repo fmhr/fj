@@ -3,10 +3,11 @@ package fj
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
+	"syscall"
 	"time"
 )
 
@@ -27,52 +28,51 @@ func normalRun(cnf *Config, seed int) ([]byte, error) {
 		return nil, err
 	}
 
-	var cmd *exec.Cmd
-	if runtime.GOOS == "windows" {
-		cmdStr := fmt.Sprintf("%s < %s > %s", cnf.Cmd, inputfile, outputfile)
-		cmd = exec.Command("cmd", "/C", cmdStr)
-	} else {
-		cmdStr := fmt.Sprintf("%s < %s > %s", cnf.Cmd, inputfile, outputfile)
-		cmd = exec.Command("/bin/sh", "-c", cmdStr)
-	}
+	cmdStr := fmt.Sprintf("%s < %s > %s", cnf.Cmd, inputfile, outputfile)
 
-	out, err := runCommandWithTimeout(cmd, cnf)
+	cmdStrings := createCommand(cmdStr)
+
+	out, err := runCommandWithTimeout(cmdStrings, cnf)
 	if err != nil {
-		return []byte{}, fmt.Errorf("cmd.Run() for command [%q] failed with: %v", cmd, err)
+		return []byte{}, fmt.Errorf("cmd.Run() for command [%q] failed with: %v", cmdStrings, err)
 	}
 	return out, nil
 }
 
-func runCommandWithTimeout(cmd *exec.Cmd, cnf *Config) ([]byte, error) {
+func runCommandWithTimeout(cmdStrings []string, cnf *Config) ([]byte, error) {
+	cmd := exec.Command(cmdStrings[0], cmdStrings[1:]...)
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	var stdoutBuf, stderrBuf bytes.Buffer
 	cmd.Stdout = &stdoutBuf
 	cmd.Stderr = &stderrBuf
-
 	if err := cmd.Start(); err != nil {
 		return nil, fmt.Errorf("cmd.Start() failed with: %v", err)
 	}
-	done := make(chan error, 1)
+	errCh := make(chan error, 1)
 	go func() {
-		done <- cmd.Wait()
+		errCh <- cmd.Wait()
+		close(errCh)
 	}()
+	var err error
 	select {
 	case <-time.After(time.Duration(cnf.TimeLimitMS) * time.Millisecond):
 		if cmd.Process != nil {
-			err := cmd.Process.Kill()
-			if err != nil {
-				return nil, fmt.Errorf("failed to kill process: %v", err)
-			}
-			return nil, fmt.Errorf("process killed as timeout reached")
+			syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL) // -pgidで子プロセスもkill
+			err = fmt.Errorf("time Limit Exceeded")
 		}
-	case err := <-done:
+	case err := <-errCh:
 		if err != nil {
-			return stdoutBuf.Bytes(), fmt.Errorf("cmd.Wait() failed with: %v \n%v", err, stderrBuf.String())
+			log.Println("Error: ", err, "command:", cmd.String())
+			return nil, fmt.Errorf("cmd.Wait() failed with: %v", err)
 		}
 	}
-	// エラーがなければ、標準出力を返す
-	rtn := stdoutBuf.Bytes()
+
+	// タイムアウトして、-race をつけたときに、WARNING: DATA RACE がでるのは避けられない
+	// https://github.com/golang/go/issues/22757
+	rtn := make([]byte, 0, len(stdoutBuf.Bytes())+len(stderrBuf.Bytes()))
+	rtn = append(rtn, stdoutBuf.Bytes()...)
 	rtn = append(rtn, stderrBuf.Bytes()...)
-	return rtn, nil
+	return rtn, err
 }
 
 func checkOutputFolder(dir string) error {

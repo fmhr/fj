@@ -89,7 +89,8 @@ func RunParallel(cnf *Config, seeds []int) {
 		if datas[i] != nil {
 			score, ok := datas[i].Get("Score")
 			if !ok {
-				log.Fatal("Score not found")
+				log.Println("Score not found")
+				continue
 			}
 			sumScore += score.(float64)
 			logScore += math.Log(score.(float64))

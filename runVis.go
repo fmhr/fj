@@ -2,6 +2,7 @@ package fj
 
 import (
 	"fmt"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/elliotchance/orderedmap/v2"
@@ -48,7 +49,8 @@ func runVis(cnf *Config, seed int) (*orderedmap.OrderedMap[string, any], error) 
 // vis is a wrapper for vis command
 func vis(cnf *Config, infile, outfile string) ([]byte, error) {
 	cmdStr := fmt.Sprintf(cnf.VisPath+" %s %s", infile, outfile)
-	cmd := createCommand(cmdStr)
+	cmdStrings := createCommand(cmdStr)
+	cmd := exec.Command(cmdStrings[0], cmdStrings[1:]...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return nil, err
