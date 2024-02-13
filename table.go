@@ -32,8 +32,9 @@ func DisplayTable(data []*orderedmap.OrderedMap[string, any]) {
 			value, ok := rowMap.Get(key)
 			if !ok {
 				// seed(key)がなんらかの理由でない場合はスキップ
-				log.Println("Error no value key:", key)
-				continue
+				//log.Println("Error no value key:", key)
+				//continue
+				value = -1
 			}
 			row = append(row, formatFloat(value))
 		}
@@ -63,6 +64,8 @@ func formatFloat(value any) string {
 			return strconv.Itoa(int(v))
 		}
 		return strconv.FormatFloat(v, 'f', 3, 64)
+	case string:
+		return v
 	default:
 		log.Fatal("invalid type")
 	}

@@ -17,11 +17,9 @@ func reactiveRun(ctf *Config, seed int) (*orderedmap.OrderedMap[string, any], er
 	if err != nil {
 		return &orderedmap.OrderedMap[string, any]{}, err
 	}
-	out, err := reactiveRunCmd(ctf, seed)
+	out, result, err := reactiveRunCmd(ctf, seed)
 	if err != nil {
-		m := orderedmap.NewOrderedMap[string, any]()
-		m.Set("tle", out)
-		return m, err
+		log.Fatal(err)
 	}
 	pair, err := ExtractKeyValuePairs(string(out))
 	if err != nil {
@@ -36,16 +34,21 @@ func reactiveRun(ctf *Config, seed int) (*orderedmap.OrderedMap[string, any], er
 	}
 	pair.Set("seed", seed)
 	pair.Set("stdErr", out)
+	pair.Set("result", result)
+	if result == "TLE" {
+		pair.Set("Score", -1)
+		pair.Set("time", float64(ctf.TimeLimitMS/1000))
+	}
 	return &pair, nil
 }
 
-func reactiveRunCmd(ctf *Config, seed int) ([]byte, error) {
+func reactiveRunCmd(ctf *Config, seed int) ([]byte, string, error) {
 	infile := ctf.InfilePath + fmt.Sprintf("%04d.txt", seed)
 	outfile := ctf.OutfilePath + fmt.Sprintf("%04d.txt", seed)
 	setsArgs := setArgs(ctf.Args)
 	cmdStr := fmt.Sprintf("%s %s %s < %s > %s", ctf.TesterPath, ctf.Cmd, setsArgs, infile, outfile)
 	cmdStrings := createCommand(cmdStr)
-	out, err := runCommandWithTimeout(cmdStrings, ctf)
+	out, result, err := runCommandWithTimeout(cmdStrings, ctf)
 	//ctx, cancel := context.WithTimeout(context.Background(), time.Duration(ctf.TimeLimitMS)*time.Millisecond)
 	//defer cancel()
 	//cmd := exec.CommandContext(ctx, cmdStrings[0], cmdStrings[1:]...)
@@ -54,7 +57,7 @@ func reactiveRunCmd(ctf *Config, seed int) ([]byte, error) {
 		log.Println("Error: ", err, "command:", cmdStr)
 		//return nil, fmt.Errorf("command [%q] failed with: %v out: %v", cmd, err, out)
 	}
-	return out, err
+	return out, result, err
 }
 
 func setArgs(args []string) string {

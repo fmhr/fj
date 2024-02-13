@@ -75,11 +75,13 @@ func Fj() {
 		switch result {
 		case test.FullCommand():
 			rtn, err := RunSelector(config, *seed)
-			if err != nil {
-				v, ok := rtn.Get("tle")
-				if ok {
-					log.Println("TLE:", string(v.([]byte)))
+			r, ok := rtn.Get("result")
+			if ok {
+				if r == "TLE" {
+					log.Println("TLE")
 				}
+			}
+			if err != nil {
 				log.Fatal("Error: ", err, "\nout:", rtn)
 			}
 			//fmt.Fprintln(os.Stdout, rtn)

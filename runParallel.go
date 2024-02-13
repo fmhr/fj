@@ -74,7 +74,6 @@ func RunParallel(cnf *Config, seeds []int) {
 	close(errorChan)
 	close(errorSeedChan)
 	for err := range errorChan {
-		// TODO if err == TLE
 		log.Println(err)
 	}
 	errSeeds := make([]int, 0, len(errorSeedChan))
@@ -84,7 +83,15 @@ func RunParallel(cnf *Config, seeds []int) {
 	sumScore := 0.0
 	logScore := 0.0
 	zeroSeeds := make([]int, 0)
+	tleSeeds := make([]int, 0)
 	for i := 0; i < len(datas); i++ {
+		v, ok := datas[i].Get("result")
+		if ok {
+			if v == "TLE" {
+				tleSeeds = append(tleSeeds, i)
+			}
+		}
+
 		// error のときnilになる
 		if datas[i] != nil {
 			score, ok := datas[i].Get("Score")
@@ -92,9 +99,16 @@ func RunParallel(cnf *Config, seeds []int) {
 				log.Println("Score not found")
 				continue
 			}
+			if score == -1 {
+				continue
+			}
 			sumScore += score.(float64)
-			logScore += math.Log(score.(float64))
-			seed, _ := datas[i].Get("seed")
+			logScore += math.Max(0, math.Log(score.(float64)))
+			seed, ok := datas[i].Get("seed")
+			if !ok {
+				log.Println("seed not found")
+				continue
+			}
 			if score.(float64) == 0.0 {
 				zeroSeeds = append(zeroSeeds, seed.(int))
 			}
@@ -109,7 +123,7 @@ func RunParallel(cnf *Config, seeds []int) {
 		}
 		DisplayTable(datas)
 	}
-	fmt.Fprintln(os.Stderr, "Error seeds:", errSeeds, "Zero seeds:", zeroSeeds)
+	fmt.Fprintln(os.Stderr, "Errorss:", errSeeds, "Zeros:", zeroSeeds, "TLEs::", tleSeeds)
 	// timeがあれば、平均と最大を表示
 	_, exsit := datas[0].Get("time")
 	if exsit {
@@ -159,7 +173,6 @@ func RunParallel(cnf *Config, seeds []int) {
 	if csvOutput != nil && *csvOutput {
 		CsvOutput(datas)
 	}
-
 }
 
 const progressBarWidth = 40
