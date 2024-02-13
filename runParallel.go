@@ -123,7 +123,7 @@ func RunParallel(cnf *Config, seeds []int) {
 		}
 		DisplayTable(datas)
 	}
-	fmt.Fprintln(os.Stderr, "Errorss:", errSeeds, "Zeros:", zeroSeeds, "TLEs::", tleSeeds)
+	fmt.Fprintln(os.Stderr, "Errors:", errSeeds, "Zeros:", zeroSeeds, "TLEs:", tleSeeds)
 	// timeがあれば、平均と最大を表示
 	_, exsit := datas[0].Get("time")
 	if exsit {
