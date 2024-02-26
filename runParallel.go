@@ -85,10 +85,15 @@ func RunParallel(cnf *Config, seeds []int) {
 	zeroSeeds := make([]int, 0)
 	tleSeeds := make([]int, 0)
 	for i := 0; i < len(datas); i++ {
+		seed, ok := datas[i].Get("seed")
+		if !ok {
+			log.Println("seed not found")
+			continue
+		}
 		v, ok := datas[i].Get("result")
 		if ok {
 			if v == "TLE" {
-				tleSeeds = append(tleSeeds, i)
+				tleSeeds = append(tleSeeds, seed.(int))
 			}
 		}
 
