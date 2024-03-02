@@ -16,10 +16,11 @@ func RunVis(cnf *Config, seed int) (*orderedmap.OrderedMap[string, any], error) 
 // その結果をvisに渡して、両方の結果を返す
 // 通常の問題（reactive=false)で使う
 func runVis(cnf *Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
-	// TODO: _ to result (TLE)
 	out, _, err := normalRun(cnf, seed)
 	if err != nil {
-		return nil, err
+		//log.Println("Error: ", err, "\nout:", string(out))
+		err = fmt.Errorf("Error: %v\nout: %s", err, string(out))
+		return nil, WrapError(err)
 	}
 
 	pair, err := ExtractKeyValuePairs(string(out))

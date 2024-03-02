@@ -75,14 +75,14 @@ func Fj() {
 		switch result {
 		case test.FullCommand():
 			rtn, err := RunSelector(config, *seed)
+			if err != nil {
+				log.Fatal(err)
+			}
 			r, ok := rtn.Get("result")
 			if ok {
 				if r == "TLE" {
 					log.Println("TLE")
 				}
-			}
-			if err != nil {
-				log.Fatal("Error: ", err, "\nout:", rtn)
 			}
 			//fmt.Fprintln(os.Stdout, rtn)
 			for _, k := range rtn.Keys() {
