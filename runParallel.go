@@ -42,7 +42,7 @@ func RunParallel(cnf *Config, seeds []int) {
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 
 	// Ctrl+Cで中断したときに、現在実行中のseedを表示する
-	go handleSignals(sigCh, &wg, &currentlyRunningSeed)
+	go handleSignals(sigCh, &currentlyRunningSeed)
 
 	printProgress(int(taskCompleted), totalTask)
 
@@ -196,7 +196,7 @@ func printProgress(current, total int) {
 	fmt.Fprintf(os.Stderr, "\r[%d/%d] [%s] %.2f%%", current, total, string(progressBar), percentage*100)
 }
 
-func handleSignals(sigCh <-chan os.Signal, wg *sync.WaitGroup, curent *sync.Map) {
+func handleSignals(sigCh <-chan os.Signal, curent *sync.Map) {
 	for {
 		sig := <-sigCh
 		switch sig {
