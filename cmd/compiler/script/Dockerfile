@@ -23,9 +23,10 @@ RUN apt-get update && apt-get install -y \
     gzip
 
 COPY . /work
-RUN sh install_go.sh
-ENV PATH $PATH:/opt/go/bin
-# RUN sh install_cpp20.sh
+# RUN sh install_go.sh || echo "failed to install go"
+# ENV PATH $PATH:/opt/go/bin
+# RUN sh install_cpp20.sh || echo "failed to install cpp20"
+RUN sh install_cs.sh || echo "failed to install cs"
 
 COPY --from=serverbuild /app/server /work
 
