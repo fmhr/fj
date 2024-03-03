@@ -76,11 +76,20 @@ func Fj() {
 		case test.FullCommand():
 			rtn, err := RunSelector(config, *seed)
 			if err != nil {
-				log.Fatal("Error: ", err)
+				log.Fatal(err)
+			}
+			r, ok := rtn.Get("result")
+			if ok {
+				if r == "TLE" {
+					log.Println("TLE")
+				}
 			}
 			//fmt.Fprintln(os.Stdout, rtn)
 			for _, k := range rtn.Keys() {
-				v, _ := rtn.Get(k)
+				v, ok := rtn.Get(k)
+				if !ok {
+					continue
+				}
 				p := message.NewPrinter(language.English)
 				switch v := v.(type) {
 				case int:
@@ -96,6 +105,11 @@ func Fj() {
 			fmt.Fprintln(os.Stderr, "")
 			Score, _ := rtn.Get("Score")
 			fmt.Println(Score)
+			stderr, ok := rtn.Get("stdErr")
+			if ok {
+				log.Print("StdErr:------->\n", string(stderr.([]byte)))
+			}
+			log.Println("ここまで<-----")
 		case tests.FullCommand():
 			// seed2 が指定されていれば end=seed2
 			if seed2 != nil && *seed2 != 0 {

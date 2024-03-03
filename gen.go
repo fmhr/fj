@@ -3,6 +3,7 @@ package fj
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"sync"
 )
 
@@ -44,7 +45,8 @@ func gen(cnf *Config, seed int) error {
 	}
 	// genを実行
 	cmdStr := fmt.Sprintf("%s %s", cnf.GenPath, seedfile)
-	cmd := createCommand(cmdStr)
+	cmdStrings := createCommand(cmdStr)
+	cmd := exec.Command(cmdStrings[0], cmdStrings[1:]...)
 	err = cmd.Run()
 	if err != nil {
 		return WrapError(err)

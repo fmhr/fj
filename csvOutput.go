@@ -33,12 +33,34 @@ func CsvOutput(datas []*orderedmap.OrderedMap[string, any]) {
 	for _, data := range datas {
 		values := make([]string, 0)
 		for _, key := range heagders {
-			v, _ := data.Get(key)
-			values = append(values, fmt.Sprintf("%f", v.(float64)))
+			v, ok := data.Get(key)
+			if !ok {
+				values = append(values, "")
+				continue
+			}
+			values = append(values, numToString(v))
 		}
 		if err := writer.Write(values); err != nil {
 			log.Fatal(":", err)
 		}
 	}
 	log.Println("save csv file:", filename)
+}
+
+func numToString(num any) string {
+	switch v := num.(type) {
+	case int:
+		return fmt.Sprintf("%d", v)
+	case float64:
+		if float64(int(v)) == v {
+			return fmt.Sprintf("%d", int(v))
+		}
+		return fmt.Sprintf("%f", v)
+	case string:
+		return string(v)
+	case []byte:
+		return string(v)
+	default:
+		return ""
+	}
 }

@@ -2,6 +2,7 @@ package fj
 
 import (
 	"fmt"
+	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -20,6 +21,7 @@ func ExtractKeyValuePairs(msg string) (orderedmap.OrderedMap[string, any], error
 		key := match[1]
 		value, err := strconv.ParseFloat(match[2], 64)
 		if err != nil {
+			log.Println("Error: ", err, "key:", key, "from:", match[2])
 			return orderedmap.OrderedMap[string, any]{}, fmt.Errorf("failed to convert %s to number: %s", match[2], err)
 		}
 		m.Set(key, value)
@@ -36,12 +38,13 @@ func extractData(src string) (map[string]float64, error) {
 		key := strings.TrimSpace(match[1])
 		value, err := strconv.ParseFloat(match[2], 64)
 		if err != nil {
+			log.Println("Error: ", err, "key:", key, "from:", match[2])
 			return nil, fmt.Errorf("failed to convert %s to number: %s", match[2], err)
 		}
 		data[key] = value
 	}
 	if len(data) == 0 {
-		return nil, fmt.Errorf("failed to convert %s to number: %s", src, "no data")
+		log.Println("Error: no data found. [a = b] pattern is not found")
 	}
 	return data, nil
 }

@@ -68,27 +68,57 @@ ConcurrentRequestsは、並列実行するときのリクエスト数です。�
 [https://docs.docker.com/engine/install/]を参照してインストールしてください。
 ## Google Cloud 
 0. SDKをインストールする。
-1. 新しいプロジェクトを作成します。　プロジェクト名を適当に　ahc027-test とします。
-端末を開いて、
-```gcloud auth login```を実行して、ログインします
-```gcloud projects PROJECT_NAME ``` でプロジェクトを作成します.
-Google Cloud　のコンソールページから作成したプロジェクトを選択して、メニューの「お支払い」から「請求先アカウントにリンク」を選択します。
-Cloud Build APIの有効化:　```gcloud services enable cloudbuild.googleapis.com --project=YOUR_PROJECT_ID```
-Cloud Storage APIの有効化: ```gcloud services enable storage.googleapis.com --project=YOUR_PROJECT_ID```
-3. fj/worker/gcloudbuild.sh と fj/compiler/gcloudbuile.sh のGCLOUD_PROJECTを自分のプロジェクトIDに変更します。
-4. 途中に、google cloud run のAPIを有効にする質問がくるので y を推します
-5. fj/compiler/gcloudbuild.sh のIMAGE_NAMEを変更します。
-6. fj/compiler/gcloudbuild.sh を実行して、コンパイル用のコンテナをビルドします。
+1. 新しいプロジェクトを作成します。
+
+gcloud Cloud にログインします。
+
+```gcloud auth login```
+
+プロジェクトを作成します。
+
+```gcloud projects PROJECT_NAME ``` 
+
+プロジェクトを選択します。
+
+```gcloud config set project PROJECT_NAME```
+
+必要に応じてGoogle Cloud　のコンソールページから作成したプロジェクトを選択して、メニューの「お支払い」から「請求先アカウントにリンク」を選択します。
+
+Cloud Build APIの有効化:　
+
+```gcloud services enable cloudbuild.googleapis.com --project=YOUR_PROJECT_ID```
+
+Cloud Storage APIの有効化: 
+
+```gcloud services enable storage.googleapis.com --project=YOUR_PROJECT_ID```
+
+Cloud Artifact Registry APIの有効化: 
+
+```gcloud services enable artifactregistry.googleapis.com --project=YOUR_PROJECT_ID```
+
+コンパイル後の実行ファイルを保存するためのバケットを作成します。
+
+```gcloud storage buckets create gs://YOUR_BUCKET_NAME```
+fj/config.tomlのbucketに指定したYOUR_BUCKET_NAMEを設定します。
+
+### コンパイラコンテナのビルド
+1. fj/compiler/gcloudbuild.sh のGCLOUD_PROJECTとIMAGE_NAMEを変更します。
+2. fj/compiler/Dockerfileをコンパイルする言語に合わせて修正します。
+3. fj/compiler/に移動して、gcloudbuild.sh を実行して、コンパイル用のコンテナをビルドします。
+
+```Do you want enable these APIs to continue (this will take a few minutes)? (y/N)?  ```と聞かれたら、```y```を入力してください。
+
 スクリプトが成功すると以下の様なメッセージが表示されます。
 ```
 (略)
 DONE
 Done.
 Service [go-compiler] revision [go-compiler-00002-ushi] has been deployed and is serving 100 percent of traffic.
-Service URL: https://go-compiler-xjfasdfae-an.a.run.app
+Service URL: https://go-compiler-abcdefghij-an.a.run.app
 ```
-5. Service URLをコピーして、fj/config.tomlのCompilerURLを変更します。
-6. 同様に　fj/worker/gcloudbuild.sh を実行して、URLをfj/config.tomlのWorkerURLを変更します。
-7. WebブラウザでGoogle Cloud Runのコンソールを開きます。ジャッジコンテナ(worker)を選んで、YAML のタブを開いて、autoscaling.knative.dev/maxScale: '100'　の'100'を'1000'に変更します。(現在設定できる最大値です。)
-gcloud storage buckets create [BUCKET_NAME] --location=[LOCATION]でバケットを作成します。
-指定したバケット名をfj/config.tomlのbucketに設定します。
+4. Service URLをコピーして、fj/config.tomlのCompilerURLに先ほどのURLの末尾に/compilerを追加して設定します。
+### ジャッジコンテナのビルド
+1. 公式toolsを回答して、toolsディレクトリをfj/worker/にコピーします。
+2. fj/worker/gcloudbuild.sh のGCLOUD_PROJECTとIMAGE_NAMEを変更します。
+3. fj/worker/に移動して gcloudbuild.sh を実行して、コンパイラコンテナ同様 Service URL: をfj/config.tomlのWorkerURLに設定します。
+4. WebブラウザでGoogle Cloud Runのコンソールを開きます。ジャッジコンテナ(worker)を選んで、YAML のタブを開いて、autoscaling.knative.dev/maxScale: '100'　の'100'を'1000'に変更します。(現在設定できる最大値です。)
