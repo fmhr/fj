@@ -1,6 +1,8 @@
 package fj
 
-import "github.com/elliotchance/orderedmap/v2"
+import (
+	"github.com/elliotchance/orderedmap/v2"
+)
 
 // RunSelector Cloud mode でなければ、reactiveRun か RunVis を呼び出す
 func RunSelector(config *Config, seed int) (*orderedmap.OrderedMap[string, any], error) {

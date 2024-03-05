@@ -108,8 +108,8 @@ func Fj() {
 			stderr, ok := rtn.Get("stdErr")
 			if ok {
 				log.Print("StdErr:------->\n", string(stderr.([]byte)))
+				log.Println("ここまで<-----")
 			}
-			log.Println("ここまで<-----")
 		case tests.FullCommand():
 			// seed2 が指定されていれば end=seed2
 			if seed2 != nil && *seed2 != 0 {

@@ -55,7 +55,7 @@ func vis(cnf *Config, infile, outfile string) ([]byte, error) {
 	cmd := exec.Command(cmdStrings[0], cmdStrings[1:]...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return nil, err
+		return nil, WrapError(fmt.Errorf("failed: %v\nout: %s", err, string(out)))
 	}
 	return out, nil
 }
