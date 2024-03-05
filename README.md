@@ -1,8 +1,7 @@
 # fj
 ```fj```コマンドはAtCoder Heuristic Contestの問題を解くことを助けるツールです。 このコマンドは、テストの実行を自動化します。
-(注意)現在、AHC023,AHC022,を対象に作成しています。
 ## インストール
-最新のGo(1.21)が導入されている環境であれば、次のコマンドだけでインストールできます。
+Go(1.21~)が導入されている環境であれば、次のコマンドだけでインストールできます。
 ```
 go install github.com/fmhr/fj/cmd/fj@latest
 ```
@@ -12,8 +11,7 @@ go install github.com/fmhr/fj/cmd/fj@latest
 go clean -modcache
 go install github.com/fmhr/fj/cmd/fj@latest
 ```
-OSにはLinux(Windows Subsystem for Linux)かmacOSを推奨しますが、Windows上でも動作します。
-詳細な手順については(準備中)を読んでください。
+macOS上で開発しています。
 
 # Features
 - テストの実行
