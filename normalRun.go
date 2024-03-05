@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"syscall"
 	"time"
 )
@@ -42,7 +43,9 @@ func normalRun(cnf *Config, seed int) ([]byte, string, error) {
 func runCommandWithTimeout(cmdStrings []string, cnf *Config) ([]byte, string, error) {
 	var result string
 	cmd := exec.Command(cmdStrings[0], cmdStrings[1:]...)
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	if runtime.GOOS != "windows" {
+		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	}
 	var stdoutBuf, stderrBuf bytes.Buffer
 	cmd.Stdout = &stdoutBuf
 	cmd.Stderr = &stderrBuf
@@ -58,7 +61,10 @@ func runCommandWithTimeout(cmdStrings []string, cnf *Config) ([]byte, string, er
 	select {
 	case <-time.After(time.Duration(cnf.TimeLimitMS) * time.Millisecond):
 		if cmd.Process != nil {
-			syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL) // -pgidで子プロセスもkill
+			if runtime.GOOS != "windows" {
+				syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL) // -pgidで子プロセスもkill
+			}
+			cmd.Process.Kill()
 			result = "TLE"
 		}
 	case err := <-errCh:
