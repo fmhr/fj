@@ -1,3 +1,5 @@
+#!/bin/bash
+
 cd /tmp                                    
 wget -q https://go.dev/dl/go1.20.6.linux-amd64.tar.gz
 tar -C /opt -xf go1.20.6.linux-amd64.tar.gz

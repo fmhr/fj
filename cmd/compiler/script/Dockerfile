@@ -26,11 +26,11 @@ COPY . /work
 ###################################################################
 # 必要な言語のコメントアウトをはずしてね
 ###################################################################
-RUN sh install_go.sh || echo "failed to install go"
+RUN sh install_go.sh 
 ENV PATH $PATH:/opt/go/bin
-# RUN sh install_cpp20.sh || echo "failed to install cpp20"
-# RUN sh install_cs.sh || echo "failed to install cs"
-RUN sh install_java.sh || echo "failed to install java"
+# RUN sh install_cpp20.sh 
+# RUN sh install_cs.sh
+RUN sh install_java.sh 
 
 COPY --from=serverbuild /app/server /work
 

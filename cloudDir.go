@@ -35,12 +35,10 @@ func extractEmbeddedFiles(embeddedFS embed.FS, sourcdDir, targetDir string) {
 		if err != nil {
 			return err
 		}
-
 		// ディレクトリの場合はスキップ
 		if d.IsDir() {
 			return nil
 		}
-
 		// ファイルの内容を取得
 		content, err := fs.ReadFile(embeddedFS, path)
 		if err != nil {
