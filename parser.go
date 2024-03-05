@@ -44,7 +44,7 @@ func extractData(src string) (map[string]float64, error) {
 		data[key] = value
 	}
 	if len(data) == 0 {
-		log.Println("Error: no data found. [a = b] pattern is not found")
+		return nil, fmt.Errorf("no data found")
 	}
 	return data, nil
 }

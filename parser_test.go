@@ -1,6 +1,7 @@
 package fj
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 )
@@ -45,7 +46,7 @@ func TestExtractData(t *testing.T) {
 	tests := []struct {
 		input  string
 		expect map[string]float64
-		err    bool
+		err    error
 	}{
 		{
 			input: `
@@ -62,21 +63,18 @@ Measurement count = 9585
 				"Measurement cost":        10863.00,
 				"Measurement count":       9585,
 			},
-			err: false,
+			err: nil,
 		},
 		{
 			input:  `InvalidData = abc`,
 			expect: nil,
-			err:    true,
+			err:    fmt.Errorf("no data found"),
 		},
 	}
 
 	for _, test := range tests {
 		result, err := extractData(test.input)
-		if (err != nil) != test.err {
-			t.Errorf("For input %q, expected error? %v but got: %v\n", test.input, test.err, err)
-		}
-		if !reflect.DeepEqual(result, test.expect) {
+		if !reflect.DeepEqual(result, test.expect) || (err != nil && test.err != nil && err.Error() != test.err.Error()) {
 			t.Errorf("For input %q, expected %v but got %v\n", test.input, test.expect, result)
 		}
 	}
