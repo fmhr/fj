@@ -24,13 +24,15 @@ RUN apt-get update && apt-get install -y \
 
 COPY . /work
 ###################################################################
-# 必要な言語のコメントアウトをはずしてね
+# 不要な言語のインストールを避けるため、コメントアウトしています。
 ###################################################################
-RUN sh install_go.sh 
-ENV PATH $PATH:/opt/go/bin
+# RUN sh install_go.sh 
+# ENV PATH $PATH:/opt/go/bin
 # RUN sh install_cpp20.sh 
 # RUN sh install_cs.sh
-RUN sh install_java.sh 
+# RUN sh install_java.sh 
+RUN ./install_rust.sh
+
 
 COPY --from=serverbuild /app/server /work
 
