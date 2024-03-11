@@ -65,6 +65,8 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to create binary file", http.StatusInternalServerError)
 		return
 	}
+
+	// ソースファイルをディスクに書き込む
 	srcBytes, err := io.ReadAll(file)
 	if err != nil {
 		msg := fmt.Sprintf("Failed to read the uploaded file: %v", err)
@@ -78,7 +80,7 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// compile
+	// コンパイル
 	cmds := strings.Fields(compileCmd)
 	cmd := exec.Command(cmds[0], cmds[1:]...)
 	msg, err := cmd.CombinedOutput()
