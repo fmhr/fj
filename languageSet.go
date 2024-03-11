@@ -9,8 +9,8 @@ type LanguageSet struct {
 }
 
 var LanguageSets = map[string]LanguageSet{
-	"go": {
-		Language:   "go",
+	"Go": {
+		Language:   "Go",
 		FileName:   "main.go",
 		CompileCmd: "go build -o a.out main.go",
 		BinaryPath: "a.out",
@@ -23,8 +23,8 @@ var LanguageSets = map[string]LanguageSet{
 		BinaryPath: "target/release/main",
 		ExeCmd:     "./target/release/main",
 	},
-	"cpp": {
-		Language:   "cpp",
+	"C++": {
+		Language:   "C++",
 		FileName:   "main.cpp",
 		CompileCmd: "g++-12 -std=gnu++20 -O2 -DONLINE_JUDGE -DATCODER -Wall -Wextra -mtune=native -march=native -fconstexpr-depth=2147483647 -fconstexpr-loop-limit=2147483647 -fconstexpr-ops-limit=2147483647 -I/opt/ac-library -I/opt/boost/gcc/include -L/opt/boost/gcc/lib -o a.out Main.cpp -lgmpxx -lgmp -L/usr/include/eigen3",
 		BinaryPath: "a.out",
@@ -37,8 +37,8 @@ var LanguageSets = map[string]LanguageSet{
 		BinaryPath: "Main.class",
 		ExeCmd:     "java Main",
 	},
-	"cs": {
-		Language:   "cs",
+	"C#": {
+		Language:   "C#",
 		FileName:   "Main.cs",
 		CompileCmd: "export DOTNET_EnableWriteXorExecute=0 && dotnet publish -c Release -o publish -v q --nologo 1>&2",
 		BinaryPath: "publish/Main",
