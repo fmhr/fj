@@ -35,6 +35,10 @@ func checkConfigCloudCompile(config *Config) error {
 //  4. file=ソースファイル, compileCmd=コンパイルコマンド,
 //     srcFile=ソースファイル名, binaryFile=バイナリファイル名
 func CloudCompile(config *Config) error {
+	_, ok := LanguageSets[config.Language]
+	if !ok {
+		return NewStackTraceError(fmt.Sprintf("error: language [%s] is not supported. suported %v", config.Language, languageList()))
+	}
 	log.Println("cloud compiling...")
 	if err := checkConfigCloudCompile(config); err != nil {
 		return err
@@ -56,6 +60,7 @@ func CloudCompile(config *Config) error {
 	if err != nil {
 		return err
 	}
+	writer.WriteField("language", config.Language)
 	writer.WriteField("sourcePath", config.Source)
 	writer.WriteField("compileCmd", config.CompileCmd)
 	writer.WriteField("binaryPath", config.Binary)
