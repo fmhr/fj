@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+
+	"github.com/elliotchance/orderedmap/v2"
 )
 
 func TestExtractKeyValuePairs(t *testing.T) {
@@ -30,7 +32,8 @@ func TestExtractKeyValuePairs(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		result, err := ExtractKeyValuePairs(test.input)
+		result := orderedmap.NewOrderedMap[string, any]()
+		err := ExtractKeyValuePairs(result, test.input)
 		if (err != nil) != test.err {
 			t.Errorf("Expected error %v, but got %v", test.err, err)
 		}

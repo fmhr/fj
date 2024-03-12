@@ -15,17 +15,19 @@ func RunVis(cnf *Config, seed int) (*orderedmap.OrderedMap[string, any], error) 
 // runVis は指定された設定とシードに基づいてコマンドを実行して、
 // その結果をvisに渡して、両方の結果を返す
 // 通常の問題（reactive=false)で使う
-func runVis(cnf *Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
+func runVis(cnf *Config, seed int) (pair *orderedmap.OrderedMap[string, any], err error) {
 	out, _, err := normalRun(cnf, seed)
 	if err != nil {
 		//log.Println("Error: ", err, "\nout:", string(out))
 		err = fmt.Errorf("Error: %v\nout: %s", err, string(out))
 		return nil, WrapError(err)
 	}
+	pair = orderedmap.NewOrderedMap[string, any]()
+	pair.Set("seed", seed)
 
-	pair, err := ExtractKeyValuePairs(string(out))
+	err = ExtractKeyValuePairs(pair, string(out))
 	if err != nil {
-		return &pair, err
+		return pair, err
 	}
 	// vis
 	infile := filepath.Join(cnf.InfilePath, fmt.Sprintf("%04d.txt", seed))
@@ -45,7 +47,7 @@ func runVis(cnf *Config, seed int) (*orderedmap.OrderedMap[string, any], error) 
 		pair.Set(k, v)
 	}
 	pair.Set("seed", seed)
-	return &pair, nil
+	return pair, nil
 }
 
 // vis is a wrapper for vis command

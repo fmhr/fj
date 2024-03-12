@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"slices"
+	"sort"
 	"strconv"
 
 	"github.com/elliotchance/orderedmap/v2"
@@ -21,6 +22,12 @@ func DisplayTable(data []*orderedmap.OrderedMap[string, any]) {
 	//	log.Println(data)
 	headers := extractHeaders(data)
 	table.SetHeader(headers)
+
+	sort.Slice(data, func(i, j int) bool {
+		seedI, _ := data[i].Get("seed")
+		seedJ, _ := data[j].Get("seed")
+		return seedI.(int) < seedJ.(int)
+	})
 
 	for _, rowMap := range data {
 		row := make([]string, 0)

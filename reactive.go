@@ -12,16 +12,18 @@ func ReactiveRun(ctf *Config, seed int) (*orderedmap.OrderedMap[string, any], er
 	return reactiveRun(ctf, seed)
 }
 
-func reactiveRun(ctf *Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
-	err := createDirIfNotExist(ctf.OutfilePath)
+func reactiveRun(ctf *Config, seed int) (pair *orderedmap.OrderedMap[string, any], err error) {
+	err = createDirIfNotExist(ctf.OutfilePath)
 	if err != nil {
-		return &orderedmap.OrderedMap[string, any]{}, err
+		return pair, err
 	}
 	out, result, err := reactiveRunCmd(ctf, seed)
 	if err != nil {
 		log.Fatal(err)
 	}
-	pair, err := ExtractKeyValuePairs(string(out))
+	pair = orderedmap.NewOrderedMap[string, any]()
+	pair.Set("seed", seed)
+	err = ExtractKeyValuePairs(pair, string(out))
 	if err != nil {
 		return &orderedmap.OrderedMap[string, any]{}, fmt.Errorf("failed to extract key-value pairs: %v, source: %s", err, string(out))
 	}
@@ -32,14 +34,13 @@ func reactiveRun(ctf *Config, seed int) (*orderedmap.OrderedMap[string, any], er
 	for k, v := range testerDate {
 		pair.Set(k, v)
 	}
-	pair.Set("seed", seed)
 	pair.Set("stdErr", out)
 	pair.Set("result", result)
 	if result == "TLE" {
 		pair.Set("Score", -1)
 		pair.Set("time", float64(ctf.TimeLimitMS/1000))
 	}
-	return &pair, nil
+	return pair, nil
 }
 
 func reactiveRunCmd(ctf *Config, seed int) ([]byte, string, error) {

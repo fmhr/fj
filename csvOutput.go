@@ -12,6 +12,9 @@ import (
 
 // CsvOutput csvファイルに出力する
 func CsvOutput(datas []*orderedmap.OrderedMap[string, any]) {
+	if _, err := os.Stat("fj/data"); os.IsNotExist(err) {
+		os.Mkdir("fj/data", 0777)
+	}
 	now := time.Now()
 	filename := fmt.Sprintf("fj/data/result_%s.csv", fmt.Sprintf("%04d%02d%02d_%02d%02d%02d", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second()))
 
