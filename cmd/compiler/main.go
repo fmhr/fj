@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"cloud.google.com/go/storage"
+	"github.com/fmhr/fj"
 )
 
 // コンパイルに必要なもの
@@ -41,8 +42,8 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 
 	// コンパイルコマンド
-	compileCmd := r.FormValue("compileCmd")
-	if compileCmd == "" {
+	language := r.FormValue("Language")
+	if language == "" {
 		http.Error(w, "Language not specified", http.StatusBadRequest)
 		return
 	}
@@ -80,6 +81,7 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	compileCmd := fj.LanguageSets[language].CompileCmd
 	// コンパイル
 	cmds := strings.Fields(compileCmd)
 	cmd := exec.Command(cmds[0], cmds[1:]...)

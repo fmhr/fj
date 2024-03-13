@@ -7,7 +7,7 @@ import (
 // RunSelector Cloud mode でなければ、reactiveRun か RunVis を呼び出す
 func RunSelector(config *Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
 	// Cloud mode なら、sendBinaryToWorker を呼び出す
-	if config.Cloud || (cloud != nil && *cloud) {
+	if config.CloudMode || (cloud != nil && *cloud) {
 		rtn, err := requestToWorker(config, seed)
 		if err != nil {
 			return nil, err

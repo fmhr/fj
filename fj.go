@@ -65,7 +65,7 @@ func Fj() {
 		// config を読み込む
 		updateConfig(config)
 		// cloud mode ならソースコードをアップロードしてバイナリを受け取る
-		if config.Cloud {
+		if config.CloudMode {
 			err = CloudCompile(config)
 			if err != nil {
 				log.Fatal("Cloud mode Compile error:", err)
@@ -138,5 +138,5 @@ func updateConfig(config *Config) {
 	if jobs != nil && *jobs > 0 {
 		config.Jobs = *jobs
 	}
-	config.Cloud = config.Cloud || *cloud
+	config.CloudMode = config.CloudMode || *cloud
 }

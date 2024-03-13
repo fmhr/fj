@@ -13,14 +13,14 @@ import (
 )
 
 func checkConfigCloudCompile(config *Config) error {
-	if config.Source == "" {
+	if config.Language == "" {
+		return NewStackTraceError("error: [Language] must not be empty")
+	}
+	if config.SourceFilePath == "" {
 		return NewStackTraceError("error: [SourcePath] must not be empty")
 	}
 	if config.Binary == "" {
 		return NewStackTraceError("error: [BinaryPath] must not be empty")
-	}
-	if config.CompileCmd == "" {
-		return NewStackTraceError("error: [CompileCmd] must not be empty")
 	}
 	if config.CompilerURL == "" {
 		return NewStackTraceError("error: [CompilerURL] must not be empty")
@@ -44,7 +44,7 @@ func CloudCompile(config *Config) error {
 		return err
 	}
 	// ソースファイルを開く
-	file, err := os.Open(config.Source)
+	file, err := os.Open(config.SourceFilePath)
 	if err != nil {
 		return err
 	}
@@ -52,7 +52,7 @@ func CloudCompile(config *Config) error {
 	// マルチパートフォームを作成
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
-	part, err := writer.CreateFormFile("file", filepath.Base(config.Source))
+	part, err := writer.CreateFormFile("file", filepath.Base(config.SourceFilePath))
 	if err != nil {
 		return err
 	}
@@ -61,8 +61,8 @@ func CloudCompile(config *Config) error {
 		return err
 	}
 	writer.WriteField("language", config.Language)
-	writer.WriteField("sourcePath", config.Source)
-	writer.WriteField("compileCmd", config.CompileCmd)
+	writer.WriteField("sourcePath", config.SourceFilePath)
+	writer.WriteField("compileCmd", config.CustomCompileCmd)
 	writer.WriteField("binaryPath", config.Binary)
 	writer.WriteField("bucket", config.Bucket)
 

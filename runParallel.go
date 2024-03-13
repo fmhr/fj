@@ -23,7 +23,7 @@ func RunParallel(cnf *Config, seeds []int) {
 	if cnf.Jobs > 0 {
 		concurrentNum = cnf.Jobs
 	}
-	if cnf.Cloud {
+	if cnf.CloudMode {
 		concurrentNum = max(1, cnf.ConcurrentRequests)
 	}
 	var wg sync.WaitGroup
