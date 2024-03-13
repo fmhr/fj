@@ -33,7 +33,7 @@ type Config struct {
 	InfilePath         string   `toml:"InfilePath"`         // ノンリアクティブ問題の入力ファイル
 	OutfilePath        string   `toml:"OutfilePath"`        // ノンリアクティブ問題の出力ファイル
 	Jobs               int      `toml:"Jobs"`               // ローカル実行時の並列実行数
-	BinaryPath         string   `toml:"Binary"`             // バイナリの保存先
+	BinaryPath         string   `toml:"BinaryPath"`         // バイナリの保存先
 	CloudMode          bool     `toml:"Cloud"`              // デフォルトの実行モード
 	CompilerURL        string   `toml:"CompilerURL"`        // クラウド上のコンパイラのURL
 	SourceFilePath     string   `toml:"Source"`             // クラウドにアップロードするソースファイル

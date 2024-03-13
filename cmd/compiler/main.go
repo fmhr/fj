@@ -42,7 +42,7 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 
 	// コンパイルコマンド
-	language := r.FormValue("Language")
+	language := r.FormValue("language")
 	if language == "" {
 		http.Error(w, "Language not specified", http.StatusBadRequest)
 		return
