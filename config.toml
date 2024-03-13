@@ -1,5 +1,4 @@
 Language = 'Go'
-Cmd = './a.out'
 Args = []
 Reactive = false
 TesterPath = 'tools/target/release/tester'
@@ -13,7 +12,6 @@ CompilerURL = ''
 Source = 'main.go'
 CompileCmd = 'go build -o a.out main.go'
 Binary = 'a.out'
-tmpBinary = ''
 Bucket = ''
 WorkerURL = ''
 ConcurrentRequests = 1000

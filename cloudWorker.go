@@ -82,7 +82,7 @@ func SendBinaryToWorker(config *Config, seed int, binaryNameInBucket string) (*o
 	if config.WorkerURL == "" {
 		return nil, NewStackTraceError("worker URL is not specified")
 	}
-	if config.Binary == "" {
+	if config.BinaryPath == "" {
 		return nil, NewStackTraceError("binary path is not specified")
 	}
 	return requestToWorker(config, seed)

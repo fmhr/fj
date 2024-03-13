@@ -20,22 +20,24 @@ const (
 
 var ErrConfigNotFound = fmt.Errorf("%s not found, please run `fj init`", CONFIG_FILE)
 
+// Config はfjの設定を保持します
+// ソースファイルのパス、バイナリーパスが不正確だと、コンパイルコマンド、実行コマンドが正常に動作しない
 type Config struct {
 	Language           string   `toml:"Language"`
-	Args               []string `toml:"Args"`        // 実行時の引数
-	Reactive           bool     `toml:"Reactive"`    // 問題の種類
-	TimeLimitMS        uint64   `toml:"TimeLimitMS"` // 問題の制限時間
-	TesterPath         string   `toml:"TesterPath"`  // リアクティブ問題のテスター
-	VisPath            string   `toml:"VisPath"`     // ノンリアクティブ問題の可視化プログラム(Score計算用)
-	GenPath            string   `toml:"GenPath"`     // 問題生成プログラム サーバー上で使う
-	InfilePath         string   `toml:"InfilePath"`  // ノンリアクティブ問題の入力ファイル
-	OutfilePath        string   `toml:"OutfilePath"` // ノンリアクティブ問題の出力ファイル
-	Jobs               int      `toml:"Jobs"`        // ローカル実行時の並列実行数
-	Binary             string   `toml:"Binary"`
-	CloudMode          bool     `toml:"Cloud"`
-	CompilerURL        string   `toml:"CompilerURL"` // クラウド上のコンパイラのURL
-	SourceFilePath     string   `toml:"Source"`      // クラウドにアップロードするソースファイル
-	TmpBinary          string   `toml:"tmpBinary"`
+	Args               []string `toml:"Args"`               // 実行時の引数
+	Reactive           bool     `toml:"Reactive"`           // 問題の種類
+	TimeLimitMS        uint64   `toml:"TimeLimitMS"`        // 問題の制限時間
+	TesterPath         string   `toml:"TesterPath"`         // リアクティブ問題のテスター
+	VisPath            string   `toml:"VisPath"`            // ノンリアクティブ問題の可視化プログラム(Score計算用)
+	GenPath            string   `toml:"GenPath"`            // 問題生成プログラム サーバー上で使う
+	InfilePath         string   `toml:"InfilePath"`         // ノンリアクティブ問題の入力ファイル
+	OutfilePath        string   `toml:"OutfilePath"`        // ノンリアクティブ問題の出力ファイル
+	Jobs               int      `toml:"Jobs"`               // ローカル実行時の並列実行数
+	BinaryPath         string   `toml:"Binary"`             // バイナリの保存先
+	CloudMode          bool     `toml:"Cloud"`              // デフォルトの実行モード
+	CompilerURL        string   `toml:"CompilerURL"`        // クラウド上のコンパイラのURL
+	SourceFilePath     string   `toml:"Source"`             // クラウドにアップロードするソースファイル
+	TmpBinary          string   `toml:"tmpBinary"`          // クラウドにアップロードするバイナリファイルのランダム生成された名前
 	Bucket             string   `toml:"Bucket"`             // バイナリの保存先
 	WorkerURL          string   `toml:"WorkerURL"`          // クラウドワーカーのURL ここが多数立ち上がる
 	ConcurrentRequests int      `toml:"ConcurrentRequests"` // クラウドワーカーの並列アクセス数

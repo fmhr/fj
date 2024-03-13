@@ -19,7 +19,7 @@ func checkConfigCloudCompile(config *Config) error {
 	if config.SourceFilePath == "" {
 		return NewStackTraceError("error: [SourcePath] must not be empty")
 	}
-	if config.Binary == "" {
+	if config.BinaryPath == "" {
 		return NewStackTraceError("error: [BinaryPath] must not be empty")
 	}
 	if config.CompilerURL == "" {
@@ -63,7 +63,7 @@ func CloudCompile(config *Config) error {
 	writer.WriteField("language", config.Language)
 	writer.WriteField("sourcePath", config.SourceFilePath)
 	writer.WriteField("compileCmd", config.CustomCompileCmd)
-	writer.WriteField("binaryPath", config.Binary)
+	writer.WriteField("binaryPath", config.BinaryPath)
 	writer.WriteField("bucket", config.Bucket)
 
 	writer.Close()
@@ -98,6 +98,6 @@ func CloudCompile(config *Config) error {
 	}
 	filename := params["filename"]
 	config.TmpBinary = filename
-	log.Println("cloud compile done:", filename)
+	log.Println("cloud compile done: bucket:", filename)
 	return nil
 }

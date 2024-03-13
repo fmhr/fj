@@ -57,7 +57,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "BucketName is empty", http.StatusInternalServerError)
 			return
 		}
-		err = downloadFileFromGoogleCloudStorage(config.Bucket, config.TmpBinary, config.Binary)
+		err = downloadFileFromGoogleCloudStorage(config.Bucket, config.TmpBinary, config.BinaryPath)
 		if err != nil {
 			errmsg := fmt.Sprint("Failed to download binary from Cloud Storage:", err.Error())
 			http.Error(w, errmsg, http.StatusInternalServerError)
@@ -65,7 +65,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// 実行権限を与える
-		err = os.Chmod(config.Binary, 0755)
+		err = os.Chmod(config.BinaryPath, 0755)
 		if err != nil {
 			errmsg := fmt.Sprint("Failed to chmod", err.Error())
 			http.Error(w, errmsg, http.StatusInternalServerError)
@@ -73,7 +73,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		// tmpバイナリをmainに改名
-		err = os.Rename(config.TmpBinary, config.Binary)
+		err = os.Rename(config.TmpBinary, config.BinaryPath)
 		if err != nil {
 			errmsg := fmt.Sprint("Failed to rename binary", err.Error())
 			http.Error(w, errmsg, http.StatusInternalServerError)
@@ -106,7 +106,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonData)
 	// バイナリをtmpネームに改名
-	err = os.Rename(config.Binary, config.TmpBinary)
+	err = os.Rename(config.BinaryPath, config.TmpBinary)
 	if err != nil {
 		errmsg := fmt.Sprint("Failed to rename binary", err.Error())
 		http.Error(w, errmsg, http.StatusInternalServerError)
