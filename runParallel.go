@@ -131,6 +131,7 @@ func RunParallel(cnf *Config, seeds []int) {
 	fmt.Fprintln(os.Stderr, "Errors:", errSeeds, "Zeros:", zeroSeeds, "TLEs:", tleSeeds)
 	// timeがあれば、平均と最大を表示
 	_, exsit := datas[0].Get("time")
+	timeNotFound := 0
 	if exsit {
 		sumTime := 0.0
 		maxTime := 0.0
@@ -141,12 +142,13 @@ func RunParallel(cnf *Config, seeds []int) {
 			}
 			if t, ok := datas[i].Get("time"); !ok {
 				log.Printf("seed:%d time not found", i)
+				timeNotFound++
 			} else {
 				sumTime += t.(float64)
 				maxTime = math.Max(maxTime, t.(float64))
 			}
 		}
-		sumTime /= float64(len(datas) - len(errSeeds))
+		sumTime /= float64(len(datas) - len(errSeeds) - timeNotFound)
 		fmt.Fprintf(os.Stderr, "avarageTime=%.2f  maxTime=%.2f\n", sumTime, maxTime)
 	}
 	avarageScore := sumScore / float64(len(datas)-len(errSeeds))
