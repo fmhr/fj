@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	//log.SetFlags(log.Lshortfile)
+	log.SetFlags(log.Lshortfile)
 }
 
 var (

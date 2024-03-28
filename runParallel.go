@@ -140,7 +140,7 @@ func RunParallel(cnf *Config, seeds []int) {
 				continue
 			}
 			if t, ok := datas[i].Get("time"); !ok {
-				log.Fatal("time is not float64")
+				log.Printf("seed:%d time not found", i)
 			} else {
 				sumTime += t.(float64)
 				maxTime = math.Max(maxTime, t.(float64))
