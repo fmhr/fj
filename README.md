@@ -96,7 +96,7 @@ Cloud Artifact Registry APIの有効化:
 
 コンパイル後の実行ファイルを保存するためのバケットを作成します。
 
-```gcloud storage buckets create gs://YOUR_BUCKET_NAME```
+```gcloud storage buckets create gs://YOUR_BUCKET_NAME --location=asia-northeast1```
 fj/config.tomlのbucketに指定したYOUR_BUCKET_NAMEを設定します。
 
 ### コンパイラコンテナのビルド

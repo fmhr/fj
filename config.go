@@ -25,6 +25,7 @@ var ErrConfigNotFound = fmt.Errorf("%s not found, please run `fj init`", CONFIG_
 type Config struct {
 	Language           string   `toml:"Language"`
 	Args               []string `toml:"Args"`               // 実行時の引数
+	Contest            string   `toml:"Contest"`            // コンテスト名 例: abc123 TODO
 	Reactive           bool     `toml:"Reactive"`           // 問題の種類
 	TimeLimitMS        uint64   `toml:"TimeLimitMS"`        // 問題の制限時間
 	TesterPath         string   `toml:"TesterPath"`         // リアクティブ問題のテスター
@@ -41,8 +42,8 @@ type Config struct {
 	Bucket             string   `toml:"Bucket"`             // バイナリの保存先
 	WorkerURL          string   `toml:"WorkerURL"`          // クラウドワーカーのURL ここが多数立ち上がる
 	ConcurrentRequests int      `toml:"ConcurrentRequests"` // クラウドワーカーの並列アクセス数
-	CustomExeCmd       string   `toml:"CustomExeCmd"`       // 実行コマンドの上書き
-	CustomCompileCmd   string   `toml:"CustomCompileCmd"`   // コンパイルコマンドの上書き
+	CustomExeCmd       string   `toml:"CustomExeCmd"`       // 実行コマンドの上書き TODO
+	CustomCompileCmd   string   `toml:"CustomCompileCmd"`   // コンパイルコマンドの上書き TODO
 }
 
 // generateConfig はfj init コマンドで読み出されて fj/config.tomlを生成する
