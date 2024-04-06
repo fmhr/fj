@@ -43,6 +43,7 @@ func RunParallel(cnf *Config, seeds []int) {
 
 	// Ctrl+Cで中断したときに、現在実行中のseedを表示する
 	go handleSignals(sigCh, &currentlyRunningSeed)
+	// TODO context.Contextを使って、実行中のジョブをキャンセルさせて、孤児プロセスを作らないようにする
 
 	printProgress(int(taskCompleted), totalTask)
 
@@ -141,7 +142,7 @@ func RunParallel(cnf *Config, seeds []int) {
 				continue
 			}
 			if t, ok := datas[i].Get("time"); !ok {
-				log.Printf("seed:%d time not found", i)
+				//log.Printf("seed:%d time not found", i)
 				timeNotFound++
 			} else {
 				sumTime += t.(float64)
