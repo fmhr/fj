@@ -34,6 +34,8 @@ macOS上で開発しています。
 fj inti
 ```
 
+fj/ ディレクトリにfj_config.tomlが生成されるので、エディタで開いて設定を変更してください。
+
 ## サンプル 
 
 テストケース、seed=0を実行
@@ -74,7 +76,7 @@ gcloud Cloud にログインします。
 
 プロジェクトを作成します。
 
-```gcloud projects PROJECT_NAME ``` 
+```gcloud projects create PROJECT_NAME ``` 
 
 プロジェクトを選択します。
 
@@ -94,10 +96,30 @@ Cloud Artifact Registry APIの有効化:
 
 ```gcloud services enable artifactregistry.googleapis.com --project=YOUR_PROJECT_ID```
 
+DockerImageを保存するためのレジストリを作成します。
+
+```gcloud artifacts repositories create REPOSITORY_NAME --repository-format=docker --location=asia-northeast1 --project=YOUR_PROJECT_ID```
+
 コンパイル後の実行ファイルを保存するためのバケットを作成します。
 
 ```gcloud storage buckets create gs://YOUR_BUCKET_NAME --location=asia-northeast1```
-fj/config.tomlのbucketに指定したYOUR_BUCKET_NAMEを設定します。
+
+Cloud Build サービスアカウントに Artifact Registry へのアクセス権限を付与します。 
+
+````
+gcloud projects add-iam-policy-binding PROJECT_ID \
+    --member="serviceAccount:PROJECT_NUMBER@cloudbuild.gserviceaccount.com" \
+    --role="roles/artifactregistry.writer"
+````
+PROJECT_ID: あなたの Google Cloud プロジェクト ID を指定します。
+PROJECT_NUMBER: あなたの Google Cloud プロジェクト番号を指定します。
+
+
+ローカルのfj/config.tomlのbucketに指定したYOUR_BUCKET_NAMEを設定します。
+
+
+## コンテナのビルド
+``` fj setupCloud```を実行すると、fj/compiler/とfj/worker/にDockerfileとgcloudbuild.shが生成されます。
 
 ### コンパイラコンテナのビルド
 1. fj/compiler/gcloudbuild.sh のGCLOUD_PROJECTとIMAGE_NAMEを変更します。
