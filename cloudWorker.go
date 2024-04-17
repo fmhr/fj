@@ -63,6 +63,7 @@ func requestToWorker(config *Config, seed int) (*orderedmap.OrderedMap[string, a
 		return nil, fmt.Errorf("failed to read response body: %v", err)
 	}
 	rtn := orderedmap.NewOrderedMap[string, any]()
+	log.Println("response body:", string(bodyBytes))
 	if err := json.Unmarshal(bodyBytes, (*EncodableOrderedMap)(rtn)); err != nil {
 		return nil, fmt.Errorf("failed to parse response body: %v", err)
 	}

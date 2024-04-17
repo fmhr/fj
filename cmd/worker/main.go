@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -109,7 +110,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	err = os.Rename(config.BinaryPath, config.TmpBinary)
 	if err != nil {
 		errmsg := fmt.Sprint("Failed to rename binary", err.Error())
-		http.Error(w, errmsg, http.StatusInternalServerError)
+		log.Println(errmsg)
+		//http.Error(w, errmsg, http.StatusInternalServerError)
 		return
 	}
 }
