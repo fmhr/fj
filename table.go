@@ -3,6 +3,7 @@ package fj
 import (
 	"log"
 	"os"
+	"reflect"
 	"slices"
 	"sort"
 	"strconv"
@@ -26,7 +27,12 @@ func DisplayTable(data []*orderedmap.OrderedMap[string, any]) {
 	sort.Slice(data, func(i, j int) bool {
 		seedI, _ := data[i].Get("seed")
 		seedJ, _ := data[j].Get("seed")
-		return seedI.(int) < seedJ.(int)
+		if reflect.TypeOf(seedI).Kind() == reflect.Int {
+			return seedI.(int) < seedJ.(int)
+		} else if reflect.TypeOf(seedI).Kind() == reflect.Float64 {
+			return seedI.(float64) < seedJ.(float64)
+		}
+		return seedI.(string) < seedJ.(string)
 	})
 
 	for _, rowMap := range data {

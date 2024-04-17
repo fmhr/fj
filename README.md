@@ -138,7 +138,7 @@ Service URL: https://go-compiler-abcdefghij-an.a.run.app
 ```
 4. Service URLをコピーして、fj/config.tomlのCompilerURLに先ほどのURLの末尾に/compilerを追加して設定します。
 ### ジャッジコンテナのビルド
-1. 公式toolsを回答して、toolsディレクトリをfj/worker/にコピーします。
+1. AtCoderが配布しているローカルtoolsを解答して、toolsディレクトリをfj/worker/にコピーします。
 2. fj/worker/gcloudbuild.sh のGCLOUD_PROJECTとIMAGE_NAMEを変更します。
 3. fj/worker/に移動して gcloudbuild.sh を実行して、コンパイラコンテナ同様 Service URL: をfj/config.tomlのWorkerURLに設定します。
 4. WebブラウザでGoogle Cloud Runのコンソールを開きます。ジャッジコンテナ(worker)を選んで、YAML のタブを開いて、autoscaling.knative.dev/maxScale: '100'　の'100'を'1000'に変更します。(現在設定できる最大値です。)
