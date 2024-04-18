@@ -107,20 +107,20 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 	rdm := generateRandomString(10)
 	newfilename, err := uploarFileToGoogleCloudStorage(bucketName, binaryFileName, rdm)
 	if err != nil {
-		http.Error(w, "Failed to upload binary file to bucket", http.StatusInternalServerError)
+		http.Error(w, "Failed to upload binary file to bucket:"+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	// ソースコードのアップロード
 	_, err = uploarFileToGoogleCloudStorage(bucketName, source, rdm)
 	if err != nil {
-		http.Error(w, "Failed to upload source file to bucket", http.StatusInternalServerError)
+		http.Error(w, "Failed to upload source file to bucket:"+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	// バイナリの読み込み
 	binary, err := os.ReadFile(binaryFileName)
 	if err != nil {
-		http.Error(w, "Failed to read compiled binary", http.StatusInternalServerError)
+		http.Error(w, "Failed to read compiled binary"+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	// ソースファイルとバイナリファイルを削除
