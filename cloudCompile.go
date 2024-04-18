@@ -62,7 +62,7 @@ func CloudCompile(config *Config) error {
 	}
 	writer.WriteField("language", config.Language)
 	writer.WriteField("sourcePath", config.SourceFilePath)
-	writer.WriteField("compileCmd", config.CustomCompileCmd)
+	writer.WriteField("compileCmd", config.CustomCompileCmd) // 不要かも
 	writer.WriteField("binaryPath", config.BinaryPath)
 	writer.WriteField("bucket", config.Bucket)
 

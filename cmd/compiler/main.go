@@ -41,7 +41,7 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	// コンパイルコマンド
+	// language
 	language := r.FormValue("language")
 	if language == "" {
 		http.Error(w, "Language not specified", http.StatusBadRequest)
@@ -55,7 +55,7 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	err = createFileWithDirs(source, nil)
 	if err != nil {
-		http.Error(w, "Failed to create source file", http.StatusInternalServerError)
+		http.Error(w, "Failed to create source file:%s", http.StatusInternalServerError)
 		return
 	}
 
@@ -81,6 +81,12 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if _, ok := fj.LanguageSets[language]; !ok {
+		errmsg := fmt.Sprintf("Language [%s] is not supported.", language)
+		http.Error(w, errmsg, http.StatusBadRequest)
+		return
+	}
+
 	compileCmd := fj.LanguageSets[language].CompileCmd
 	// コンパイル
 	cmds := strings.Fields(compileCmd)
@@ -102,6 +108,7 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to upload binary file to bucket", http.StatusInternalServerError)
 		return
 	}
+	// ソースコードのアップロード
 	_, err = uploarFileToGoogleCloudStorage(bucketName, source, rdm)
 	if err != nil {
 		http.Error(w, "Failed to upload source file to bucket", http.StatusInternalServerError)
