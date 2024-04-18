@@ -28,15 +28,15 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// マルチパートリーダー
-	err := r.ParseMultipartForm(10 << 20) //10MB limit
+	err := r.ParseMultipartForm(50 << 20) //10MB limit
 	if err != nil {
-		http.Error(w, "Failed to parse form", http.StatusBadRequest)
+		http.Error(w, "Failed to parse form:"+err.Error(), http.StatusBadRequest)
 		return
 	}
 	// ソースファイル
 	file, _, err := r.FormFile("file")
 	if err != nil {
-		http.Error(w, "Failed to get the file", http.StatusBadRequest)
+		http.Error(w, "Failed to get the file:"+err.Error(), http.StatusBadRequest)
 		return
 	}
 	defer file.Close()
@@ -44,18 +44,18 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 	// language
 	language := r.FormValue("language")
 	if language == "" {
-		http.Error(w, "Language not specified", http.StatusBadRequest)
+		http.Error(w, "Language not specified:"+err.Error(), http.StatusBadRequest)
 		return
 	}
 	// ソースファイル名
 	source := r.FormValue("sourcePath")
 	if source == "" {
-		http.Error(w, "Source file not specified", http.StatusBadRequest)
+		http.Error(w, "Source file not specified:+"+err.Error(), http.StatusBadRequest)
 		return
 	}
 	err = createFileWithDirs(source, nil)
 	if err != nil {
-		http.Error(w, "Failed to create source file:%s", http.StatusInternalServerError)
+		http.Error(w, "Failed to create source file:"+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -63,7 +63,7 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 	binaryFileName := r.FormValue("binaryPath")
 	err = createFileWithDirs(binaryFileName, nil)
 	if err != nil {
-		http.Error(w, "Failed to create binary file", http.StatusInternalServerError)
+		http.Error(w, "Failed to create binary file:"+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
