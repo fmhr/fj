@@ -44,13 +44,13 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 	// language
 	language := r.FormValue("language")
 	if language == "" {
-		http.Error(w, "Language not specified:"+err.Error(), http.StatusBadRequest)
+		http.Error(w, "Language not specified:", http.StatusBadRequest)
 		return
 	}
 	// ソースファイル名
 	source := r.FormValue("sourcePath")
 	if source == "" {
-		http.Error(w, "Source file not specified:+"+err.Error(), http.StatusBadRequest)
+		http.Error(w, "Source file not specified:", http.StatusBadRequest)
 		return
 	}
 	err = createFileWithDirs(source, nil)
