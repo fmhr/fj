@@ -56,7 +56,7 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// ソースファイル名
-	source := r.FormValue("sourcePath")
+	source := fj.LanguageSets[language].FileName
 	if source == "" {
 		http.Error(w, "Source file not specified:", http.StatusBadRequest)
 		return
@@ -68,7 +68,7 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// バイナリファイル名
-	binaryFileName := r.FormValue("binaryPath")
+	binaryFileName := fj.LanguageSets[language].BinaryPath
 	err = createFileWithDirs(binaryFileName, nil)
 	if err != nil {
 		http.Error(w, "Failed to create binary file:"+err.Error(), http.StatusInternalServerError)
