@@ -61,6 +61,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		err = downloadFileFromGoogleCloudStorage(config.Bucket, config.TmpBinary, config.BinaryPath)
 		if err != nil {
 			errmsg := fmt.Sprint("Failed to download binary from Cloud Storage:", err.Error())
+			errmsg += fmt.Sprint("Bucket:", config.Bucket, " TmpBinary:", config.TmpBinary, " BinaryPath:", config.BinaryPath)
 			http.Error(w, errmsg, http.StatusInternalServerError)
 			return
 		}
