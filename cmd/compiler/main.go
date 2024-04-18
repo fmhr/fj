@@ -33,6 +33,7 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to parse form:"+err.Error(), http.StatusBadRequest)
 		return
 	}
+
 	// ソースファイル
 	file, _, err := r.FormFile("file")
 	if err != nil {
@@ -47,6 +48,13 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Language not specified:", http.StatusBadRequest)
 		return
 	}
+
+	if _, ok := fj.LanguageSets[language]; !ok {
+		errmsg := fmt.Sprintf("Language [%s] is not supported.", language)
+		http.Error(w, errmsg, http.StatusBadRequest)
+		return
+	}
+
 	// ソースファイル名
 	source := r.FormValue("sourcePath")
 	if source == "" {
@@ -78,12 +86,6 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		msg := fmt.Sprintf("Failed to write the uploaded file to disk: %v", err)
 		http.Error(w, msg, http.StatusInternalServerError)
-		return
-	}
-
-	if _, ok := fj.LanguageSets[language]; !ok {
-		errmsg := fmt.Sprintf("Language [%s] is not supported.", language)
-		http.Error(w, errmsg, http.StatusBadRequest)
 		return
 	}
 
