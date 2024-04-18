@@ -169,6 +169,15 @@ func createFileWithDirs(path string, data []byte) error {
 }
 
 func uploarFileToGoogleCloudStorage(bucketName string, file, rdm string) (string, error) {
+	if bucketName == "" {
+		return "", fmt.Errorf("bucket name is not specified")
+	}
+	if file == "" {
+		return "", fmt.Errorf("file name is not specified")
+	}
+	if rdm == "" {
+		return "", fmt.Errorf("random string is not specified")
+	}
 	// ファイルの読み込み
 	f, err := os.ReadFile(file)
 	if err != nil {

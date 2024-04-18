@@ -46,7 +46,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	// すでにバイナリがあるか確認
 	if filepath.Clean(config.TmpBinary) != config.TmpBinary {
-		http.Error(w, "Invalid file path", http.StatusBadRequest)
+		http.Error(w, "Invalid file path:", http.StatusBadRequest)
 		return
 	}
 	tmpBinaryFileName := filepath.Clean(config.TmpBinary)
@@ -54,10 +54,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	if os.IsNotExist(err) {
 		// バイナリをCloud Storageからダウンロード
-		if config.Bucket == "" {
-			http.Error(w, "BucketName is empty", http.StatusInternalServerError)
-			return
-		}
 		err = downloadFileFromGoogleCloudStorage(config.Bucket, config.TmpBinary, config.BinaryPath)
 		if err != nil {
 			errmsg := fmt.Sprint("Failed to download binary from Cloud Storage:", err.Error())
