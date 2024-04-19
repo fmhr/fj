@@ -1,6 +1,10 @@
 package main
 
 import (
+	"log"
+	"os/exec"
+	"strings"
+
 	"github.com/elliotchance/orderedmap/v2"
 	"github.com/fmhr/fj"
 )
@@ -10,6 +14,17 @@ func exexute(config *fj.Config, seed int) (rtn *orderedmap.OrderedMap[string, an
 	err = fj.Gen(config, seed)
 	if err != nil {
 		return nil, err
+	}
+	// javaの場合はコンパイル
+	if config.Language == "java" {
+		compileCmd := fj.LanguageSets[config.Language].CompileCmd
+		cmds := strings.Fields(compileCmd)
+		cmd := exec.Command(cmds[0], cmds[1:]...)
+		msg, err := cmd.CombinedOutput()
+		if err != nil {
+			log.Println(msg)
+			return nil, err
+		}
 	}
 	// RUN
 	rtn, err = run(config, seed)

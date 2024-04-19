@@ -89,8 +89,25 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	compileCmd := fj.LanguageSets[language].CompileCmd
+	// java と　pyhtonの場合はコンパイルせずにソースファイルをアップロードする
+	if language == "java" || language == "python" {
+		defer os.Remove(source)
+		bucketName := r.FormValue("bucket")
+		rdm := generateRandomString(10)
+		// ソースコードのアップロード
+		newfilename, err := uploarFileToGoogleCloudStorage(bucketName, source, rdm)
+		if err != nil {
+			http.Error(w, "Failed to upload source file to bucket:"+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Disposition", "attachment; filename="+newfilename)
+		w.Header().Set("Content-Type", "application/octet-stream")
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
 	// コンパイル
+	compileCmd := fj.LanguageSets[language].CompileCmd
 	cmds := strings.Fields(compileCmd)
 	cmd := exec.Command(cmds[0], cmds[1:]...)
 	msg, err := cmd.CombinedOutput()
@@ -105,6 +122,7 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 
 	// google cloud storageにバイナリとソースファイルをアップロード
 	rdm := generateRandomString(10)
+	// バイナリのアップロード
 	newfilename, err := uploarFileToGoogleCloudStorage(bucketName, binaryFileName, rdm)
 	if err != nil {
 		http.Error(w, "Failed to upload binary file to bucket:"+err.Error(), http.StatusInternalServerError)
@@ -118,11 +136,11 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// バイナリの読み込み
-	binary, err := os.ReadFile(binaryFileName)
-	if err != nil {
-		http.Error(w, "Failed to read compiled binary"+err.Error(), http.StatusInternalServerError)
-		return
-	}
+	//binary, err := os.ReadFile(binaryFileName)
+	//if err != nil {
+	//http.Error(w, "Failed to read compiled binary"+err.Error(), http.StatusInternalServerError)
+	//return
+	//}
 	// ソースファイルとバイナリファイルを削除
 	defer os.Remove(source)
 	defer os.Remove(binaryFileName)
@@ -131,11 +149,11 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Disposition", "attachment; filename="+newfilename)
 	w.Header().Set("Content-Type", "application/octet-stream")
 	w.WriteHeader(http.StatusOK)
-	_, err = w.Write(binary)
-	if err != nil {
-		http.Error(w, "Failed to write binary to response", http.StatusInternalServerError)
-		return
-	}
+	//_, err = w.Write(binary)
+	//if err != nil {
+	//http.Error(w, "Failed to write binary to response", http.StatusInternalServerError)
+	//return
+	//}
 }
 
 func main() {
