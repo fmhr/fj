@@ -8,8 +8,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"cloud.google.com/go/storage"
 	"github.com/fmhr/fj"
@@ -44,38 +46,62 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// すでにバイナリがあるか確認
-	if filepath.Clean(config.TmpBinary) != config.TmpBinary {
-		http.Error(w, "Invalid file path:", http.StatusBadRequest)
-		return
-	}
-	tmpBinaryFileName := filepath.Clean(config.TmpBinary)
-	_, err = os.Stat(tmpBinaryFileName)
-
-	if os.IsNotExist(err) {
-		// バイナリをCloud Storageからダウンロード
-		err = downloadFileFromGoogleCloudStorage(config.Bucket, config.TmpBinary, config.BinaryPath)
+	// javaやpythonではソースフィルをダウンロードする
+	if config.Language == "java" || config.Language == "python" {
+		err = downloadFileFromGoogleCloudStorage(config.Bucket, config.TmpBinary, config.SourceFilePath)
 		if err != nil {
-			errmsg := fmt.Sprint("Failed to download binary from Cloud Storage:", err.Error())
-			errmsg += fmt.Sprint("Bucket:", config.Bucket, " TmpBinary:", config.TmpBinary, " BinaryPath:", config.BinaryPath)
+			errmsg := fmt.Sprint("Failed to download source file from Cloud Storage:", err.Error())
+			errmsg += fmt.Sprint("Bucket:", config.Bucket, " TmpBinary:", config.TmpBinary, " SourceFilePath:", config.SourceFilePath)
 			http.Error(w, errmsg, http.StatusInternalServerError)
 			return
 		}
-
-		// 実行権限を与える
-		err = os.Chmod(config.BinaryPath, 0755)
-		if err != nil {
-			errmsg := fmt.Sprint("Failed to chmod", err.Error())
-			http.Error(w, errmsg, http.StatusInternalServerError)
-			return
+		// javaの場合はコンパイル
+		if config.Language == "java" {
+			compileCmd := fj.LanguageSets[config.Language].CompileCmd
+			cmds := strings.Fields(compileCmd)
+			cmd := exec.Command(cmds[0], cmds[1:]...)
+			msg, err := cmd.CombinedOutput()
+			if err != nil {
+				log.Println(msg)
+				err := fmt.Errorf("failed to compile: [%s]%v msg: %s", cmd.String(), err, string(msg))
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
 		}
 	} else {
-		// tmpバイナリをmainに改名
-		err = os.Rename(config.TmpBinary, config.BinaryPath)
-		if err != nil {
-			errmsg := fmt.Sprint("Failed to rename binary", err.Error())
-			http.Error(w, errmsg, http.StatusInternalServerError)
+		// すでにバイナリがあるか確認
+		if filepath.Clean(config.TmpBinary) != config.TmpBinary {
+			http.Error(w, "Invalid file path:", http.StatusBadRequest)
 			return
+		}
+		tmpBinaryFileName := filepath.Clean(config.TmpBinary)
+		_, err = os.Stat(tmpBinaryFileName)
+
+		if os.IsNotExist(err) {
+			// バイナリをCloud Storageからダウンロード
+			err = downloadFileFromGoogleCloudStorage(config.Bucket, config.TmpBinary, config.BinaryPath)
+			if err != nil {
+				errmsg := fmt.Sprint("Failed to download binary from Cloud Storage:", err.Error())
+				errmsg += fmt.Sprint("Bucket:", config.Bucket, " TmpBinary:", config.TmpBinary, " BinaryPath:", config.BinaryPath)
+				http.Error(w, errmsg, http.StatusInternalServerError)
+				return
+			}
+
+			// 実行権限を与える
+			err = os.Chmod(config.BinaryPath, 0755)
+			if err != nil {
+				errmsg := fmt.Sprint("Failed to chmod", err.Error())
+				http.Error(w, errmsg, http.StatusInternalServerError)
+				return
+			}
+		} else {
+			// tmpバイナリをmainに改名
+			err = os.Rename(config.TmpBinary, config.BinaryPath)
+			if err != nil {
+				errmsg := fmt.Sprint("Failed to rename binary", err.Error())
+				http.Error(w, errmsg, http.StatusInternalServerError)
+				return
+			}
 		}
 	}
 
