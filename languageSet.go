@@ -40,7 +40,7 @@ var LanguageSets = map[string]LanguageSet{
 	"C#": {
 		Language:   "C#",
 		FileName:   "Main.cs",
-		CompileCmd: "sh -c export DOTNET_EnableWriteXorExecute=0 && dotnet publish -c Release -o publish -v q --nologo 1>&2",
+		CompileCmd: "sh -c export DOTNET_EnableWriteXorExecute=0 && dotnet publish -c Release -o publish --self-contained -v q --nologo 1>&2",
 		BinaryPath: "publish/Main",
 		ExeCmd:     "./publish/Main",
 	},
