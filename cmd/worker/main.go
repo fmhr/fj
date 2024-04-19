@@ -140,6 +140,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func downloadFileFromGoogleCloudStorage(bucketName string, objectName string, destination string) error {
+	// ローカルパスのディレクトリを確認し、存在しない場合は作成
+	if err := os.MkdirAll(filepath.Dir(destination), 0755); err != nil {
+		return err
+	}
+
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
