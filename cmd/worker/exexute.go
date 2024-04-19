@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os/exec"
 	"strings"
@@ -23,6 +24,7 @@ func exexute(config *fj.Config, seed int) (rtn *orderedmap.OrderedMap[string, an
 		msg, err := cmd.CombinedOutput()
 		if err != nil {
 			log.Println(msg)
+			err := fmt.Errorf("failed to compile: [%s]%v msg: %s", cmd.String(), err, string(msg))
 			return nil, err
 		}
 	}
