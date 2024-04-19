@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -145,8 +146,9 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 	defer os.Remove(source)
 	defer os.Remove(binaryFileName)
 
-	// バイナリをレスポンスとして返す
-	w.Header().Set("Content-Disposition", "attachment; filename="+newfilename)
+	// バイナリのパスをレスポンスとして返す
+	encodingFilename := url.QueryEscape(newfilename)
+	w.Header().Set("Content-Disposition", "attachment; filename="+encodingFilename)
 	w.Header().Set("Content-Type", "application/octet-stream")
 	w.WriteHeader(http.StatusOK)
 	//_, err = w.Write(binary)

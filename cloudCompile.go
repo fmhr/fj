@@ -8,6 +8,7 @@ import (
 	"mime"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 )
@@ -96,7 +97,11 @@ func CloudCompile(config *Config) error {
 	if err != nil {
 		return err
 	}
-	filename := params["filename"]
+	filename, err := url.QueryUnescape(params["filename"])
+	if err != nil {
+		log.Println("error: failed to unescape filename")
+		return err
+	}
 	config.TmpBinary = filename
 	log.Println("cloud compile done: bucket:", filename)
 	return nil
