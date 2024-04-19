@@ -35,7 +35,7 @@ var LanguageSets = map[string]LanguageSet{
 		FileName:   "Main.java",
 		CompileCmd: "javac -encoding UTF-8 Main.java",
 		BinaryPath: "Main.class",
-		ExeCmd:     "java Main",
+		ExeCmd:     "/usr/bin/java Main",
 	},
 	"C#": {
 		Language:   "C#",
