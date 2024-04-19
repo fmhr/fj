@@ -130,10 +130,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonData)
 	// バイナリをtmpネームに改名
+	// C#はディレクトリ以下にバイナリがあるので、ディレクトリごとつくる
+	if err := os.MkdirAll(filepath.Dir(config.TmpBinary), 0755); err != nil {
+		log.Println(err)
+	}
 	err = os.Rename(config.BinaryPath, config.TmpBinary)
 	if err != nil {
 		errmsg := fmt.Sprint("Failed to rename binary", err.Error())
-		log.Println(errmsg)
+		log.Println(errmsg, config.BinaryPath, config.TmpBinary)
 		//http.Error(w, errmsg, http.StatusInternalServerError)
 		return
 	}
@@ -144,7 +148,6 @@ func downloadFileFromGoogleCloudStorage(bucketName string, objectName string, de
 	if err := os.MkdirAll(filepath.Dir(destination), 0755); err != nil {
 		return err
 	}
-
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
