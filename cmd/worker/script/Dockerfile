@@ -26,6 +26,7 @@ FROM ubuntu:latest
 WORKDIR /judge
 
 RUN apt-get update && apt-get install ca-certificates openssl
+# RUN apt-get install -y openjdk-17-jre
 
 COPY --from=workerbuild /work/worker /judge/worker
 COPY --from=toolsbuilder /work/tools/target/release/* /judge/tools/target/release/

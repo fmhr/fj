@@ -2,6 +2,7 @@ package fj
 
 import (
 	"fmt"
+	"log"
 	"os/exec"
 	"path/filepath"
 
@@ -18,7 +19,7 @@ func RunVis(cnf *Config, seed int) (*orderedmap.OrderedMap[string, any], error) 
 func runVis(cnf *Config, seed int) (pair *orderedmap.OrderedMap[string, any], err error) {
 	out, _, err := normalRun(cnf, seed)
 	if err != nil {
-		//log.Println("Error: ", err, "\nout:", string(out))
+		log.Println("Error: ", err, "\nout:", string(out))
 		err = fmt.Errorf("Error: %v\nout: %s", err, string(out))
 		return nil, WrapError(err)
 	}
