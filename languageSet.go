@@ -33,7 +33,7 @@ var LanguageSets = map[string]LanguageSet{
 	"java": {
 		Language:   "java",
 		FileName:   "Main.java",
-		CompileCmd: "javac Main.java",
+		CompileCmd: "javac -encoding UTF-8 Main.java",
 		BinaryPath: "Main.class",
 		ExeCmd:     "java Main",
 	},
