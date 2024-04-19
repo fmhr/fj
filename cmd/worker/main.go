@@ -47,7 +47,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// javaやpythonではソースフィルをダウンロードする
-	if config.Language == "java" || config.Language == "python" {
+	if config.Language == "java" || config.Language == "C#" {
 		err = downloadFileFromGoogleCloudStorage(config.Bucket, config.TmpBinary, config.SourceFilePath)
 		if err != nil {
 			errmsg := fmt.Sprint("Failed to download source file from Cloud Storage:", err.Error())
@@ -56,7 +56,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		// javaの場合はコンパイル
-		if config.Language == "java" {
+		if config.Language == "java" || config.Language == "C#" {
 			compileCmd := fj.LanguageSets[config.Language].CompileCmd
 			cmds := strings.Fields(compileCmd)
 			cmd := exec.Command(cmds[0], cmds[1:]...)
@@ -66,6 +66,15 @@ func handler(w http.ResponseWriter, r *http.Request) {
 				err := fmt.Errorf("failed to compile: [%s]%v msg: %s", cmd.String(), err, string(msg))
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
+			}
+			if config.Language == "C#" {
+				// 実行権限を与える
+				err = os.Chmod(config.BinaryPath, 0755)
+				if err != nil {
+					errmsg := fmt.Sprint("Failed to chmod", err.Error())
+					http.Error(w, errmsg, http.StatusInternalServerError)
+					return
+				}
 			}
 		}
 	} else {

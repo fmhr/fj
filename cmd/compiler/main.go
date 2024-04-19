@@ -90,8 +90,8 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// java と　pyhtonの場合はコンパイルせずにソースファイルをアップロードする
-	if language == "java" || language == "python" {
+	// javaとpyhtonの場合はコンパイルせずにソースファイルをアップロードする
+	if language == "java" || language == "C#" {
 		defer os.Remove(source)
 		bucketName := r.FormValue("bucket")
 		rdm := generateRandomString(10)
