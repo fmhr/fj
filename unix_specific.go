@@ -37,8 +37,11 @@ func runCommandWithTimeout(cmdStrings []string, cnf *Config) ([]byte, string, er
 		}
 	case err := <-errCh:
 		if err != nil {
+			rtn := make([]byte, 0, len(stdoutBuf.Bytes())+len(stderrBuf.Bytes()))
+			rtn = append(rtn, stdoutBuf.Bytes()...)
+			rtn = append(rtn, stderrBuf.Bytes()...)
 			log.Println("Error: ", err, "command:", cmd.String())
-			return nil, result, fmt.Errorf("cmd.Wait() failed with: %v", err)
+			return rtn, result, fmt.Errorf("cmd.Wait() failed with: %v", err)
 		}
 	}
 
