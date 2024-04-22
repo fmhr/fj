@@ -12,7 +12,9 @@ import (
 	"time"
 )
 
-func runCommandWithTimeout(cmdStrings []string, cnf *Config) ([]byte, string, error) {
+// runCommandWithTimeout はコマンドを実行する　時間内に終わらなかったらSIGKILLを送る
+// cnfから使っているのはTimeLimitMSだけ
+func runCommandWithTimeout(cmdStrings []string, timelimitMS int) ([]byte, string, error) {
 	var result string
 	cmd := exec.Command(cmdStrings[0], cmdStrings[1:]...)
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
@@ -29,7 +31,7 @@ func runCommandWithTimeout(cmdStrings []string, cnf *Config) ([]byte, string, er
 	}()
 	var err error
 	select {
-	case <-time.After(time.Duration(cnf.TimeLimitMS) * time.Millisecond):
+	case <-time.After(time.Duration(timelimitMS) * time.Millisecond):
 		if cmd.Process != nil {
 			syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL) // -pgidで子プロセスもkill
 			//cmd.Process.Kill()
@@ -44,7 +46,6 @@ func runCommandWithTimeout(cmdStrings []string, cnf *Config) ([]byte, string, er
 			return rtn, result, fmt.Errorf("cmd.Wait() failed with: %v", err)
 		}
 	}
-
 	// タイムアウトして、-race をつけたときに、WARNING: DATA RACE がでるのは避けられない
 	// https://github.com/golang/go/issues/22757
 	rtn := make([]byte, 0, len(stdoutBuf.Bytes())+len(stderrBuf.Bytes()))

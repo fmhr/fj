@@ -43,6 +43,7 @@ func reactiveRun(ctf *Config, seed int) (pair *orderedmap.OrderedMap[string, any
 	return pair, nil
 }
 
+// reactiveRunCmd はreactive=trueのときに使う
 func reactiveRunCmd(ctf *Config, seed int) ([]byte, string, error) {
 	cmd := LanguageSets[ctf.Language].ExeCmd
 	infile := ctf.InfilePath + fmt.Sprintf("%04d.txt", seed)
@@ -50,7 +51,7 @@ func reactiveRunCmd(ctf *Config, seed int) ([]byte, string, error) {
 	setsArgs := setArgs(ctf.Args)
 	cmdStr := fmt.Sprintf("%s %s %s < %s > %s", ctf.TesterPath, cmd, setsArgs, infile, outfile)
 	cmdStrings := createCommand(cmdStr)
-	out, result, err := runCommandWithTimeout(cmdStrings, ctf)
+	out, result, err := runCommandWithTimeout(cmdStrings, int(ctf.TimeLimitMS))
 	//ctx, cancel := context.WithTimeout(context.Background(), time.Duration(ctf.TimeLimitMS)*time.Millisecond)
 	//defer cancel()
 	//cmd := exec.CommandContext(ctx, cmdStrings[0], cmdStrings[1:]...)
