@@ -32,7 +32,6 @@ func runCommandWithTimeout(cmdStrings []string, timelimitMS int) ([]byte, string
 	errCh := make(chan error, 1)
 	go func() {
 		errCh <- cmd.Wait()
-		close(errCh)
 	}()
 
 	timedOut := false
@@ -44,12 +43,11 @@ func runCommandWithTimeout(cmdStrings []string, timelimitMS int) ([]byte, string
 		}
 		timedOut = true
 	case err := <-errCh:
+		close(errCh)
 		if err != nil {
-			rtn := make([]byte, 0, len(stdoutBuf.Bytes())+len(stderrBuf.Bytes()))
-			rtn = append(rtn, stdoutBuf.Bytes()...)
-			rtn = append(rtn, stderrBuf.Bytes()...)
-			log.Println("Error: ", err, "command:", cmd.String())
-			return rtn, "", fmt.Errorf("cmd.Wait() failed with: %v", err)
+			output := append(stdoutBuf.Bytes(), stderrBuf.Bytes()...)
+			log.Println("Error: ", err, "command:", cmd.String(), "output:", string(output))
+			return nil, "", fmt.Errorf("cmd.Wait() failed with: %v", err)
 		}
 	}
 	output := append(stdoutBuf.Bytes(), stderrBuf.Bytes()...)
