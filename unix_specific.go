@@ -4,11 +4,10 @@
 package fj
 
 import (
-	"bytes"
+	"context"
 	"fmt"
 	"log"
 	"os/exec"
-	"syscall"
 	"time"
 )
 
@@ -18,43 +17,28 @@ func runCommandWithTimeout(cmdStrings []string, timelimitMS int) ([]byte, string
 		return nil, "", fmt.Errorf("cmdStrings must not be empty")
 	}
 
-	cmd := exec.Command(cmdStrings[0], cmdStrings[1:]...)
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true} // -pgidで子プロセスもkillできるようにする
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timelimitMS)*time.Millisecond)
+	defer cancel()
 
-	var stdoutBuf, stderrBuf bytes.Buffer
-	cmd.Stdout = &stdoutBuf
-	cmd.Stderr = &stderrBuf
+	cmd := exec.CommandContext(ctx, cmdStrings[0], cmdStrings[1:]...)
+	output, err := cmd.CombinedOutput()
 
-	if err := cmd.Start(); err != nil {
-		return nil, "", fmt.Errorf("cmd.Start() failed with: %v", err)
-	}
+	log.Println(cmd.ProcessState.String())
+	log.Println(cmd.ProcessState.Sys())
+	log.Println(cmd.ProcessState.SystemTime())
+	log.Println(cmd.ProcessState.UserTime())
+	log.Println(cmd.ProcessState.ExitCode())
 
-	errCh := make(chan error, 1)
-	go func() {
-		errCh <- cmd.Wait()
-	}()
-
-	timedOut := false
-	select {
-	case <-time.After(time.Duration(timelimitMS) * time.Millisecond):
-		if cmd.Process != nil {
-			syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL) // -pgidで子プロセスもkill
-			//cmd.Process.Kill()
-		}
-		timedOut = true
-	case err := <-errCh:
-		close(errCh)
-		if err != nil {
-			output := append(stdoutBuf.Bytes(), stderrBuf.Bytes()...)
-			log.Println("Error: ", err, "command:", cmd.String(), "output:", string(output))
-			return nil, "", fmt.Errorf("cmd.Wait() failed with: %v", err)
-		}
-	}
-	output := append(stdoutBuf.Bytes(), stderrBuf.Bytes()...)
-
-	if timedOut {
+	// タイムアウトの場合
+	if ctx.Err() == context.DeadlineExceeded {
 		return output, "TLE", nil
 	}
 
-	return output, "Sccess", nil
+	// タイムアウト以外のエラーの場合
+	if err != nil {
+		log.Println("Error: ", err, "command:", cmd.String(), "output:", string(output))
+		return output, "", fmt.Errorf("cmd.CombinedOutput() failed with: %v", err)
+	}
+
+	return output, "Success", nil
 }
