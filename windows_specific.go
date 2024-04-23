@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func runCommandWithTimeout(cmdStrings []string, cnf *Config) ([]byte, string, error) {
+func runCommandWithTimeoutWindows(cmdStrings []string, cnf *Config) ([]byte, string, error) {
 	var result string
 	cmd := exec.Command(cmdStrings[0], cmdStrings[1:]...)
 	var stdoutBuf, stderrBuf bytes.Buffer
