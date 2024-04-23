@@ -12,6 +12,7 @@ import (
 )
 
 // runCommandWithTimeout は指定されたタイムアウトでコマンドを実行し、標準出力と標準エラー出力の結合された内容と結果文字列、およびエラーを返す
+// ここのタイムアウトは強制終了で、問題のTLEとは異なる
 func runCommandWithTimeout(cmdStrings []string, timelimitMS int) ([]byte, string, error) {
 	if len(cmdStrings) == 0 {
 		return nil, "", fmt.Errorf("cmdStrings must not be empty")
@@ -25,7 +26,7 @@ func runCommandWithTimeout(cmdStrings []string, timelimitMS int) ([]byte, string
 	output, err := cmd.CombinedOutput()
 	// タイムアウトの場合
 	if ctx.Err() == context.DeadlineExceeded {
-		return output, "TLE", nil
+		return output, "Timeout", nil
 	}
 
 	// タイムアウト以外のエラーの場合
