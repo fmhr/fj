@@ -2,7 +2,6 @@ package fj
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 )
@@ -31,7 +30,7 @@ func normalRun(cnf *Config, seed int) ([]byte, string, error) {
 
 	out, result, err := runCommandWithTimeout(cmdStrings, int(cnf.TimeLimitMS))
 	if err != nil {
-		log.Println("Error: ", err, "\nout:", string(out))
+		//log.Println("Error: ", err, "\nout:", string(out))
 		return out, result, fmt.Errorf("cmd.Run() for command [%q] failed with: %v out:%s", cmdStrings, err.Error(), out)
 	}
 	return out, result, nil
