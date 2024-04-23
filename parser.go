@@ -12,6 +12,7 @@ import (
 
 // ExtractKeyValuePairs はコマンドから出力を、キーと値のマップで返します。
 func ExtractKeyValuePairs(m *orderedmap.OrderedMap[string, any], msg string) error {
+	// 例: "score=100.0 time=1.0"
 	re := regexp.MustCompile(`(\w+)=([\d.]+)`)
 	matches := re.FindAllStringSubmatch(msg, -1)
 
@@ -29,6 +30,7 @@ func ExtractKeyValuePairs(m *orderedmap.OrderedMap[string, any], msg string) err
 
 // extractScore 公式toolのvisコマンドの出力からスコアを抽出します。
 func extractData(src string) (map[string]float64, error) {
+	// 例: "Score = 100"
 	re := regexp.MustCompile(`([^\n]+) = ([\d.]+)`)
 	matches := re.FindAllStringSubmatch(src, -1)
 	data := make(map[string]float64)

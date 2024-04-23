@@ -24,6 +24,8 @@ func normalRun(cnf *Config, seed int) ([]byte, string, error) {
 		return nil, "", err
 	}
 
+	// コマンドを作成
+	cmd += " " + setArgs(cnf.Args) // カスタム引数を追加
 	cmdStr := fmt.Sprintf("%s < %s > %s", cmd, inputfile, outputfile)
 
 	cmdStrings := createCommand(cmdStr)
@@ -36,6 +38,7 @@ func normalRun(cnf *Config, seed int) ([]byte, string, error) {
 	return out, result, nil
 }
 
+// checkOutputFolder は出力フォルダが存在するか確認し、存在しない場合は作成する
 func checkOutputFolder(dir string) error {
 	stat, err := os.Stat(dir)
 	if err != nil {
