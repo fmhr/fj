@@ -23,7 +23,7 @@ func runCommandWithTimeout(cmdStrings []string, timelimitMS int) ([]byte, string
 	output, err := cmd.CombinedOutput()
 	// タイムアウトの場合
 	if ctx.Err() == context.DeadlineExceeded {
-		return output, "TLE", nil
+		return output, "Timeout", nil
 	}
 
 	// タイムアウト以外のエラーの場合
