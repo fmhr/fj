@@ -23,7 +23,7 @@ func TestRunCommandWithTimeout(t *testing.T) {
 	t.Run("Test empty command slice", func(t *testing.T) {
 		_, _, err := runCommandWithTimeout([]string{}, 1000)
 		if err == nil {
-			t.Error("Expected an error for empty command slice, but got none")
+			t.Error("Expected a:wn error for empty command slice, but got none")
 		}
 	})
 
@@ -33,8 +33,8 @@ func TestRunCommandWithTimeout(t *testing.T) {
 		if err != nil {
 			t.Errorf("Did not expect error: %v", err)
 		}
-		if result != "TLE" {
-			t.Errorf("Expected result 'TLE' for timeout, got '%s'", result)
+		if result != "Timeout" {
+			t.Errorf("Expected result 'Timeout' for timeout, got '%s'", result)
 		}
 	})
 
