@@ -6,6 +6,7 @@ package fj
 import (
 	"context"
 	"fmt"
+	"os"
 	"os/exec"
 	"syscall"
 	"time"
@@ -23,6 +24,10 @@ func runCommandWithTimeout(cmdStrings []string, timelimitMS int) ([]byte, string
 
 	cmd := exec.CommandContext(ctx, cmdStrings[0], cmdStrings[1:]...)
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	cmd.Cancel = func() error {
+		return cmd.Process.Signal(os.Interrupt)
+	}
+	cmd.WaitDelay = 5 * time.Second
 	output, err := cmd.CombinedOutput()
 	// タイムアウトの場合
 	if ctx.Err() == context.DeadlineExceeded {
