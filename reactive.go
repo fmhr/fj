@@ -23,7 +23,8 @@ func reactiveRun(ctf *Config, seed int) (pair *orderedmap.OrderedMap[string, any
 	}
 	pair = orderedmap.NewOrderedMap[string, any]()
 	pair.Set("seed", seed)
-	err = ExtractKeyValuePairs(pair, string(out))
+	keys, err := ExtractKeyValuePairs(pair, string(out))
+	_ = keys // ordermapを消す時に使う
 	if err != nil {
 		return pair, fmt.Errorf("failed to extract key-value pairs: %v, source: %s", err, string(out))
 	}
