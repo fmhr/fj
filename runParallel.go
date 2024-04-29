@@ -1,7 +1,6 @@
 package fj
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"math"
@@ -158,22 +157,9 @@ func RunParallel(cnf *Config, seeds []int) {
 	} else {
 		fmt.Printf("%.2f\n", sumScore)
 	}
+
 	if jsonOutput != nil && *jsonOutput {
-		fileContent, err := json.MarshalIndent(datas, "", " ")
-		if err != nil {
-			log.Fatal("json marshal error:", err)
-		}
-		err = createDirIfNotExist("fj/data/")
-		if err != nil {
-			log.Fatal("create dir error:", err)
-		}
-		now := time.Now()
-		filename := fmt.Sprintf("fj/data/result_%s.json", fmt.Sprintf("%04d%02d%02d_%02d%02d%02d", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second()))
-		err = os.WriteFile(filename, fileContent, 0644)
-		if err != nil {
-			log.Fatal("json write error:", err)
-		}
-		log.Println("save json file:", filename)
+		JsonOutput(datas)
 	}
 	if csvOutput != nil && *csvOutput {
 		CsvOutput(datas)
