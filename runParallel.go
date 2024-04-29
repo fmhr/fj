@@ -40,12 +40,9 @@ func RunParallel(cnf *Config, seeds []int) {
 	var datasMutex sync.Mutex
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
-
-	// Ctrl+Cで中断したときに、現在実行中のseedを表示する
 	go handleSignals(sigCh, &currentlyRunningSeed)
-	// TODO context.Contextを使って、実行中のジョブをキャンセルさせて、孤児プロセスを作らないようにする
 
-	printProgress(int(taskCompleted), totalTask)
+	printProgress(int(taskCompleted), totalTask) // プログレスバーの表示
 
 	for _, seed := range seeds {
 		wg.Add(1)
