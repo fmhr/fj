@@ -1,6 +1,7 @@
 package fj
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"math"
@@ -43,27 +44,37 @@ func RunParallel(cnf *Config, seeds []int) {
 
 	printProgress(int(taskCompleted), totalTask) // プログレスバーの表示
 
+	// エラーが出たらそこで打ち止めにする
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	for _, seed := range seeds {
 		wg.Add(1)
 		sem <- struct{}{}
 		currentlyRunningSeed.Store(seed, true)
 		time.Sleep(5 * time.Millisecond)
 		go func(seed int) {
-			data, err := RunSelector(cnf, seed)
-			if err != nil {
-				errorChan <- fmt.Sprintf("Run error: seed=%d %v\n", seed, err)
-				errorSeedChan <- seed
+			defer wg.Done()
+			defer func() { <-sem }()
+			select {
+			case <-ctx.Done():
+				return // コンテキストがキャンセルされた場合、早期に終了
+			default:
+				data, err := RunSelector(cnf, seed)
+				if err != nil {
+					errorChan <- fmt.Sprintf("Run error: seed=%d %v\n", seed, err)
+					errorSeedChan <- seed
+					cancel() // ここでコンテキストをキャンセルにする
+					return
+				}
+				// 後処理
+				datasMutex.Lock()
+				datas = append(datas, data)                                // 結果を追加
+				currentTaskCompleted := atomic.AddInt32(&taskCompleted, 1) // progressbar
+				currentlyRunningSeed.Delete(seed)
+				datasMutex.Unlock()
+				printProgress(int(currentTaskCompleted), totalTask) // progressbar
 			}
-			// 後処理
-			datasMutex.Lock()
-			datas = append(datas, data)                                // 結果を追加
-			currentTaskCompleted := atomic.AddInt32(&taskCompleted, 1) // progressbar
-			currentlyRunningSeed.Delete(seed)
-			datasMutex.Unlock()
-
-			printProgress(int(currentTaskCompleted), totalTask) // progressbar
-			wg.Done()
-			<-sem
 		}(seed)
 	}
 	wg.Wait()
@@ -194,12 +205,13 @@ func handleSignals(sigCh <-chan os.Signal, curent *sync.Map) {
 			})
 			fmt.Println("\nReceived signal:", sig)
 			fmt.Println("Currently running seeds:", seeds)
-			os.Exit(1)
+			return
 		}
 	}
 
 }
 
+// createDirIfNotExist
 func createDirIfNotExist(dir string) error {
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		if err := os.MkdirAll(dir, 0755); err != nil {
