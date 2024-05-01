@@ -17,6 +17,7 @@ import (
 	"golang.org/x/text/message"
 )
 
+// RunParallel 複数のシードに対して並列にテストを実行する
 func RunParallel(cnf *Config, seeds []int) {
 	// 並列実行数の設定
 	concurrentNum := 1
@@ -179,6 +180,7 @@ func RunParallel(cnf *Config, seeds []int) {
 
 const progressBarWidth = 40
 
+// printProgress 進行度を表示する
 func printProgress(current, total int) {
 	percentage := float64(current) / float64(total)
 	barLength := int(percentage * float64(progressBarWidth))
@@ -193,6 +195,7 @@ func printProgress(current, total int) {
 	fmt.Fprintf(os.Stderr, "\r[%d/%d] [%s] %.2f%%", current, total, string(progressBar), percentage*100)
 }
 
+// hanldleSingals Ctrl-Dでプログラムが終了したとき、実行中のシードを表示する
 func handleSignals(sigCh <-chan os.Signal, curent *sync.Map) {
 	for {
 		sig := <-sigCh
@@ -211,7 +214,7 @@ func handleSignals(sigCh <-chan os.Signal, curent *sync.Map) {
 
 }
 
-// createDirIfNotExist
+// createDirIfNotExist 使用するディレクトリが存在しない時に作成する
 func createDirIfNotExist(dir string) error {
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		if err := os.MkdirAll(dir, 0755); err != nil {
