@@ -1,7 +1,7 @@
 package fj
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
 	"log"
 	"math"
@@ -17,6 +17,7 @@ import (
 	"golang.org/x/text/message"
 )
 
+// RunParallel 複数のシードに対して並列にテストを実行する
 func RunParallel(cnf *Config, seeds []int) {
 	// 並列実行数の設定
 	concurrentNum := 1
@@ -40,12 +41,13 @@ func RunParallel(cnf *Config, seeds []int) {
 	var datasMutex sync.Mutex
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
-
-	// Ctrl+Cで中断したときに、現在実行中のseedを表示する
 	go handleSignals(sigCh, &currentlyRunningSeed)
-	// TODO context.Contextを使って、実行中のジョブをキャンセルさせて、孤児プロセスを作らないようにする
 
-	printProgress(int(taskCompleted), totalTask)
+	printProgress(int(taskCompleted), totalTask) // プログレスバーの表示
+
+	// エラーが出たらそこで打ち止めにする
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	for _, seed := range seeds {
 		wg.Add(1)
@@ -53,21 +55,27 @@ func RunParallel(cnf *Config, seeds []int) {
 		currentlyRunningSeed.Store(seed, true)
 		time.Sleep(5 * time.Millisecond)
 		go func(seed int) {
-			data, err := RunSelector(cnf, seed)
-			if err != nil {
-				errorChan <- fmt.Sprintf("Run error: seed=%d %v\n", seed, err)
-				errorSeedChan <- seed
+			defer wg.Done()
+			defer func() { <-sem }()
+			select {
+			case <-ctx.Done():
+				return // コンテキストがキャンセルされた場合、早期に終了
+			default:
+				data, err := RunSelector(cnf, seed)
+				if err != nil {
+					errorChan <- fmt.Sprintf("Run error: seed=%d %v\n", seed, err)
+					errorSeedChan <- seed
+					cancel() // ここでコンテキストをキャンセルにする
+					return
+				}
+				// 後処理
+				datasMutex.Lock()
+				datas = append(datas, data)                                // 結果を追加
+				currentTaskCompleted := atomic.AddInt32(&taskCompleted, 1) // progressbar
+				currentlyRunningSeed.Delete(seed)
+				datasMutex.Unlock()
+				printProgress(int(currentTaskCompleted), totalTask) // progressbar
 			}
-			// 後処理
-			datasMutex.Lock()
-			datas = append(datas, data)                                // 結果を追加
-			currentTaskCompleted := atomic.AddInt32(&taskCompleted, 1) // progressbar
-			currentlyRunningSeed.Delete(seed)
-			datasMutex.Unlock()
-
-			printProgress(int(currentTaskCompleted), totalTask) // progressbar
-			wg.Done()
-			<-sem
 		}(seed)
 	}
 	wg.Wait()
@@ -161,22 +169,9 @@ func RunParallel(cnf *Config, seeds []int) {
 	} else {
 		fmt.Printf("%.2f\n", sumScore)
 	}
+
 	if jsonOutput != nil && *jsonOutput {
-		fileContent, err := json.MarshalIndent(datas, "", " ")
-		if err != nil {
-			log.Fatal("json marshal error:", err)
-		}
-		err = createDirIfNotExist("fj/data/")
-		if err != nil {
-			log.Fatal("create dir error:", err)
-		}
-		now := time.Now()
-		filename := fmt.Sprintf("fj/data/result_%s.json", fmt.Sprintf("%04d%02d%02d_%02d%02d%02d", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second()))
-		err = os.WriteFile(filename, fileContent, 0644)
-		if err != nil {
-			log.Fatal("json write error:", err)
-		}
-		log.Println("save json file:", filename)
+		JsonOutput(datas)
 	}
 	if csvOutput != nil && *csvOutput {
 		CsvOutput(datas)
@@ -185,6 +180,7 @@ func RunParallel(cnf *Config, seeds []int) {
 
 const progressBarWidth = 40
 
+// printProgress 進行度を表示する
 func printProgress(current, total int) {
 	percentage := float64(current) / float64(total)
 	barLength := int(percentage * float64(progressBarWidth))
@@ -199,6 +195,7 @@ func printProgress(current, total int) {
 	fmt.Fprintf(os.Stderr, "\r[%d/%d] [%s] %.2f%%", current, total, string(progressBar), percentage*100)
 }
 
+// hanldleSingals Ctrl-Dでプログラムが終了したとき、実行中のシードを表示する
 func handleSignals(sigCh <-chan os.Signal, curent *sync.Map) {
 	for {
 		sig := <-sigCh
@@ -211,12 +208,13 @@ func handleSignals(sigCh <-chan os.Signal, curent *sync.Map) {
 			})
 			fmt.Println("\nReceived signal:", sig)
 			fmt.Println("Currently running seeds:", seeds)
-			os.Exit(1)
+			return
 		}
 	}
 
 }
 
+// createDirIfNotExist 使用するディレクトリが存在しない時に作成する
 func createDirIfNotExist(dir string) error {
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		if err := os.MkdirAll(dir, 0755); err != nil {

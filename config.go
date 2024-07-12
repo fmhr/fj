@@ -24,15 +24,15 @@ var ErrConfigNotFound = fmt.Errorf("%s not found, please run `fj init`", CONFIG_
 // ソースファイルのパス、バイナリーパスが不正確だと、コンパイルコマンド、実行コマンドが正常に動作しない
 type Config struct {
 	Language           string   `toml:"Language"`
-	Args               []string `toml:"Args"`               // 実行時の引数
-	Contest            string   `toml:"Contest"`            // コンテスト名 例: abc123 TODO
+	Args               []string `toml:"Args"`               // 実行コマンドのオプション
+	Contest            string   `toml:"Contest"`            // コンテスト名
 	Reactive           bool     `toml:"Reactive"`           // 問題の種類
-	TimeLimitMS        uint64   `toml:"TimeLimitMS"`        // 問題の制限時間
-	TesterPath         string   `toml:"TesterPath"`         // リアクティブ問題のテスター
+	TimeLimitMS        uint64   `toml:"TimeLimitMS"`        // 問題の制限時間　または強制終了するまでの時間
+	TesterPath         string   `toml:"TesterPath"`         // リアクティブ問題のテスターのパス
 	VisPath            string   `toml:"VisPath"`            // ノンリアクティブ問題の可視化プログラム(Score計算用)
 	GenPath            string   `toml:"GenPath"`            // 問題生成プログラム サーバー上で使う
-	InfilePath         string   `toml:"InfilePath"`         // ノンリアクティブ問題の入力ファイル
-	OutfilePath        string   `toml:"OutfilePath"`        // ノンリアクティブ問題の出力ファイル
+	InfilePath         string   `toml:"InfilePath"`         // 問題の入力ファイル
+	OutfilePath        string   `toml:"OutfilePath"`        // 問題の出力ファイル
 	Jobs               int      `toml:"Jobs"`               // ローカル実行時の並列実行数
 	BinaryPath         string   `toml:"BinaryPath"`         // コンテナ内のバイナリの保存先
 	CloudMode          bool     `toml:"Cloud"`              // デフォルトの実行モード
@@ -40,10 +40,8 @@ type Config struct {
 	SourceFilePath     string   `toml:"Source"`             // クラウドにアップロードするソースファイル
 	TmpBinary          string   `toml:"tmpBinary"`          // クラウドにアップロードするバイナリファイルのランダム生成された名前
 	Bucket             string   `toml:"Bucket"`             // バイナリの保存先
-	WorkerURL          string   `toml:"WorkerURL"`          // クラウドワーカーのURL ここが多数立ち上がる
-	ConcurrentRequests int      `toml:"ConcurrentRequests"` // クラウドワーカーの並列アクセス数
-	CustomExeCmd       string   `toml:"CustomExeCmd"`       // 実行コマンドの上書き TODO
-	CustomCompileCmd   string   `toml:"CustomCompileCmd"`   // コンパイルコマンドの上書き TODO
+	WorkerURL          string   `toml:"WorkerURL"`          // クラウドジャッジコンテナのURL ここが多数立ち上がる
+	ConcurrentRequests int      `toml:"ConcurrentRequests"` // クラウドジャッジコンテナの並列アクセス数
 }
 
 // generateConfig はfj init コマンドで読み出されて fj/config.tomlを生成する

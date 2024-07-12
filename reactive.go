@@ -13,17 +13,21 @@ func ReactiveRun(ctf *Config, seed int) (*orderedmap.OrderedMap[string, any], er
 }
 
 func reactiveRun(ctf *Config, seed int) (pair *orderedmap.OrderedMap[string, any], err error) {
+	// 出力フォルダがない場合、作成
 	err = createDirIfNotExist(ctf.OutfilePath)
 	if err != nil {
 		return pair, err
 	}
+	// 実行
 	out, result, err := reactiveRunCmd(ctf, seed)
 	if err != nil {
 		log.Println(err)
 	}
+	// 出力のパース
 	pair = orderedmap.NewOrderedMap[string, any]()
 	pair.Set("seed", seed)
-	err = ExtractKeyValuePairs(pair, string(out))
+	keys, err := ExtractKeyValuePairs(pair, string(out))
+	_ = keys // ordermapを消す時に使う
 	if err != nil {
 		return pair, fmt.Errorf("failed to extract key-value pairs: %v, source: %s", err, string(out))
 	}
@@ -48,21 +52,17 @@ func reactiveRunCmd(ctf *Config, seed int) ([]byte, string, error) {
 	cmd := LanguageSets[ctf.Language].ExeCmd
 	infile := ctf.InfilePath + fmt.Sprintf("%04d.txt", seed)
 	outfile := ctf.OutfilePath + fmt.Sprintf("%04d.txt", seed)
-	setsArgs := setArgs(ctf.Args)
+	setsArgs := setArgs(ctf.Args) // コマンドオプションの追加
 	cmdStr := fmt.Sprintf("%s %s %s < %s > %s", ctf.TesterPath, cmd, setsArgs, infile, outfile)
 	cmdStrings := createCommand(cmdStr)
 	out, result, err := runCommandWithTimeout(cmdStrings, int(ctf.TimeLimitMS))
-	//ctx, cancel := context.WithTimeout(context.Background(), time.Duration(ctf.TimeLimitMS)*time.Millisecond)
-	//defer cancel()
-	//cmd := exec.CommandContext(ctx, cmdStrings[0], cmdStrings[1:]...)
-	//out, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Println("Error: ", err, "command:", cmdStr)
-		//return nil, fmt.Errorf("command [%q] failed with: %v out: %v", cmd, err, out)
 	}
 	return out, result, err
 }
 
+// setArgs return string
 func setArgs(args []string) string {
 	var str string
 	for _, v := range args {

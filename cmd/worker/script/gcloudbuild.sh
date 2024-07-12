@@ -1,7 +1,7 @@
 #!/bin/sh
 
 GCLOUD_PROJECT="ahc-contests"
-REPOSITORY="my-app-images"
+REPOSITORY="images"
 IMAGE_NAME="ahc023-tester"
 REGION="asia-northeast1"
 

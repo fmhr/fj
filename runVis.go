@@ -26,10 +26,11 @@ func runVis(cnf *Config, seed int) (pair *orderedmap.OrderedMap[string, any], er
 	pair = orderedmap.NewOrderedMap[string, any]()
 	pair.Set("seed", seed)
 
-	err = ExtractKeyValuePairs(pair, string(out))
+	keys, err := ExtractKeyValuePairs(pair, string(out))
 	if err != nil {
 		return pair, err
 	}
+	_ = keys // Ordermapを消す時に使う
 	// vis
 	infile := filepath.Join(cnf.InfilePath, fmt.Sprintf("%04d.txt", seed))
 	outfile := filepath.Join(cnf.OutfilePath, fmt.Sprintf("%04d.txt", seed))

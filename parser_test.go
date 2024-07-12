@@ -33,7 +33,7 @@ func TestExtractKeyValuePairs(t *testing.T) {
 
 	for _, test := range tests {
 		result := orderedmap.NewOrderedMap[string, any]()
-		err := ExtractKeyValuePairs(result, test.input)
+		keys, err := ExtractKeyValuePairs(result, test.input)
 		if (err != nil) != test.err {
 			t.Errorf("Expected error %v, but got %v", test.err, err)
 		}
@@ -42,6 +42,9 @@ func TestExtractKeyValuePairs(t *testing.T) {
 			if value != v {
 				t.Errorf("For key %s, expected %f but got %f", key, value, v)
 			}
+		}
+		if len(keys) == 0 {
+			t.Errorf("no keys")
 		}
 	}
 }

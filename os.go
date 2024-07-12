@@ -4,7 +4,7 @@ import (
 	"runtime"
 )
 
-// OS別のコマンド実行
+// OS別にコマンドを変更
 func createCommand(cmdStr string) (strs []string) {
 	if runtime.GOOS == "windows" {
 		strs = []string{"cmd", "/C", cmdStr}

@@ -11,21 +11,21 @@ import (
 )
 
 // ExtractKeyValuePairs はコマンドから出力を、キーと値のマップで返します。
-func ExtractKeyValuePairs(m *orderedmap.OrderedMap[string, any], msg string) error {
+func ExtractKeyValuePairs(m *orderedmap.OrderedMap[string, any], msg string) (keys []string, err error) {
 	// 例: "score=100.0 time=1.0"
 	re := regexp.MustCompile(`(\w+)=([\d.]+)`)
 	matches := re.FindAllStringSubmatch(msg, -1)
-
 	for _, match := range matches {
 		key := match[1]
 		value, err := strconv.ParseFloat(match[2], 64)
 		if err != nil {
 			log.Println("Error: ", err, "key:", key, "from:", match[2])
-			return fmt.Errorf("failed to convert %s to number: %s", match[2], err)
+			return keys, fmt.Errorf("failed to convert %s to number: %s", match[2], err)
 		}
 		m.Set(key, value)
+		keys = append(keys, key)
 	}
-	return nil
+	return keys, nil
 }
 
 // extractScore 公式toolのvisコマンドの出力からスコアを抽出します。
