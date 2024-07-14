@@ -41,6 +41,11 @@ var (
 	// download tester file from URL
 	download  = fj.Command("download", "Download tester file from URL.").Alias("d")
 	testerURL = download.Arg("url", "Tester file URL.").Required().String()
+	// login to atcoder
+	login    = fj.Command("login", "Login to fj.").Alias("l")
+	username = login.Flag("username", "Username.").Required().Short('u').String()
+	password = login.Flag("password", "Password.").Required().Short('p').String()
+	loginurl = login.Arg("url", "URL.").Default("https://atcoder.jp/login?").String()
 )
 
 // fj is main function
@@ -129,6 +134,8 @@ func Fj() {
 		}
 	case download.FullCommand():
 		Download(*testerURL)
+	case login.FullCommand():
+		Login(*loginurl, *username, *password)
 	}
 
 }
