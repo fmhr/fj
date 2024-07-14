@@ -37,6 +37,10 @@ var (
 	jobs         = tests.Flag("jobs", "Number of parallel jobs.").Int()
 	displayTable = tests.Flag("table", "Output table format.").Default("true").Bool()
 	Logscore     = tests.Flag("logscore", "Output score log.").Default("false").Bool()
+
+	// download tester file from URL
+	download  = fj.Command("download", "Download tester file from URL.").Alias("d")
+	testerURL = download.Arg("url", "Tester file URL.").Required().String()
 )
 
 // fj is main function
@@ -123,6 +127,8 @@ func Fj() {
 			}
 			RunParallel(config, seeds)
 		}
+	case download.FullCommand():
+		Download(*testerURL)
 	}
 
 }
