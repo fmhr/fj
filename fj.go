@@ -37,6 +37,11 @@ var (
 	jobs         = tests.Flag("jobs", "Number of parallel jobs.").Int()
 	displayTable = tests.Flag("table", "Output table format.").Default("true").Bool()
 	Logscore     = tests.Flag("logscore", "Output score log.").Default("false").Bool()
+
+	login    = fj.Command("login", "Login to fj.").Alias("l")
+	username = login.Flag("username", "Username.").Required().Short('u').String()
+	password = login.Flag("password", "Password.").Required().Short('p').String()
+	loginurl = login.Arg("url", "URL.").Default("https://atcoder.jp/login?").String()
 )
 
 // fj is main function
@@ -123,6 +128,8 @@ func Fj() {
 			}
 			RunParallel(config, seeds)
 		}
+	case login.FullCommand():
+		Login(*loginurl, *username, *password)
 	}
 
 }
