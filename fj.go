@@ -38,6 +38,10 @@ var (
 	displayTable = tests.Flag("table", "Output table format.").Default("true").Bool()
 	Logscore     = tests.Flag("logscore", "Output score log.").Default("false").Bool()
 
+	// download tester file from URL
+	download  = fj.Command("download", "Download tester file from URL.").Alias("d")
+	testerURL = download.Arg("url", "Tester file URL.").Required().String()
+	// login to atcoder
 	login    = fj.Command("login", "Login to fj.").Alias("l")
 	username = login.Flag("username", "Username.").Required().Short('u').String()
 	password = login.Flag("password", "Password.").Required().Short('p').String()
@@ -128,6 +132,8 @@ func Fj() {
 			}
 			RunParallel(config, seeds)
 		}
+	case download.FullCommand():
+		Download(*testerURL)
 	case login.FullCommand():
 		Login(*loginurl, *username, *password)
 	}
