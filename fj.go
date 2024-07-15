@@ -46,6 +46,8 @@ var (
 	username = login.Flag("username", "Username.").Required().Short('u').String()
 	password = login.Flag("password", "Password.").Required().Short('p').String()
 	loginurl = login.Arg("url", "URL.").Default("https://atcoder.jp/login?").String()
+	// check reactive 開発テスト用
+	checkReactive = fj.Command("checkReactive", "Check if tester is reactive.").Alias("cr")
 )
 
 // fj is main function
@@ -136,8 +138,9 @@ func Fj() {
 		Download(*testerURL)
 	case login.FullCommand():
 		Login(*loginurl, *username, *password)
+	case checkReactive.FullCommand():
+		fmt.Println("isReactive:", isReactive())
 	}
-
 }
 
 // updateConfig はコマンドライン引数でconfigを更新する
