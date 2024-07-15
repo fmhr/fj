@@ -3,6 +3,7 @@ package fj
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"regexp"
@@ -27,6 +28,12 @@ func Download(url string) {
 		return
 	}
 	fmt.Println("Downloaded loacatester.zip")
+	if err := unzip("loacatester.zip", ""); err != nil {
+		log.Println(err.Error())
+		fmt.Println("Failed to unzip loacatester.zip")
+		return
+	}
+	fmt.Println("Unzipped loacatester.zip")
 }
 
 func DownloadLoacaTesterZip(client *http.Client, url string) error {
