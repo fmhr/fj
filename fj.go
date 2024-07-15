@@ -47,7 +47,7 @@ var (
 	password = login.Flag("password", "Password.").Required().Short('p').String()
 	loginurl = login.Arg("url", "URL.").Default("https://atcoder.jp/login?").String()
 	// check reactive 開発テスト用
-	checkReactive = fj.Command("checkReactive", "Check if tester is reactive.").Alias("cr")
+	checkReactive = fj.Command("checkReactive", "Check if tester is reactive.")
 )
 
 // fj is main function
