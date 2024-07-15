@@ -1,13 +1,16 @@
 package fj
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 )
 
 // Download tester file from URL.
@@ -34,6 +37,7 @@ func Download(url string) {
 		return
 	}
 	fmt.Println("Unzipped loacatester.zip")
+	downloadLogging(url) // ダウンロード履歴をログに記録
 }
 
 func DownloadLoacaTesterZip(client *http.Client, url string) error {
@@ -78,4 +82,71 @@ func DownloadLoacaTesterZip(client *http.Client, url string) error {
 	fmt.Println("Downloaded zip file")
 
 	return nil
+}
+
+type DownloadLogging struct {
+	TimeStamp time.Time `json:"time_stamp"`
+	Directory string    `json:"directory"`
+	Url       string    `json:"url"`
+}
+
+func downloadLogging(url string) {
+	dlog := DownloadLogging{
+		TimeStamp: time.Now(),
+		Directory: "",
+		Url:       url,
+	}
+	// カレントディレクトリを取得
+	dir, err := os.Getwd()
+	if err != nil {
+		log.Println("Failed to get current directory, ", err)
+		return
+	}
+	dlog.Directory = dir
+
+	appName := "fmhr-judge-tools"
+	cacheDir, err := os.UserCacheDir()
+	if err != nil {
+		log.Println("Failed to get user cache directory, ", err)
+		return
+	}
+	// キャッシュディレクトリを作成
+	cacheDir = filepath.Join(cacheDir, appName)
+	if err := os.MkdirAll(cacheDir, 0755); err != nil {
+		log.Println("Failed to create cache directory, ", err)
+		return
+	}
+	// jsonファイルのパス
+	jsonFile := filepath.Join(cacheDir, "download-history.json")
+
+	// 既存のダウンロード履歴を読み込む
+	var dlogs []DownloadLogging
+	if _, err := os.Stat(jsonFile); err == nil {
+		// ファイルがすでにあるとき
+		file, err := os.ReadFile(jsonFile)
+		if err != nil {
+			log.Println("Failed to read download history, ", err)
+			return
+		}
+		// dlogsにfileの内容を読み込む
+		if err := json.Unmarshal(file, &dlogs); err != nil {
+			log.Println("Failed to unmarshal download history, ", err)
+			return
+		}
+	}
+
+	// dlogsにdlogを追加
+	dlogs = append(dlogs, dlog)
+
+	jsonData, err := json.MarshalIndent(dlogs, "", "  ")
+	if err != nil {
+		log.Println("Failed to marshal download logging, ", err)
+		return
+	}
+	// ファイルに書き込む
+	if err := os.WriteFile(jsonFile, jsonData, 0644); err != nil {
+		log.Println("Failed to write download logging to json file, ", err)
+		return
+	}
+	fmt.Println("Wrote download logging to json file")
 }
