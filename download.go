@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 )
@@ -31,6 +32,11 @@ func Download(url string) {
 		return
 	}
 	fmt.Println("Downloaded loacatester.zip")
+	defer func() {
+		if err := os.Remove("loacatester.zip"); err != nil {
+			log.Println("Failed to remove loacatester.zip")
+		}
+	}()
 	if err := unzip("loacatester.zip", ""); err != nil {
 		log.Println(err.Error())
 		fmt.Println("Failed to unzip loacatester.zip")
@@ -79,8 +85,6 @@ func DownloadLoacaTesterZip(client *http.Client, url string) error {
 	if err != nil {
 		return fmt.Errorf("failed to save zip file:%v", err)
 	}
-	fmt.Println("Downloaded zip file")
-
 	return nil
 }
 
@@ -88,6 +92,7 @@ type DownloadLogging struct {
 	TimeStamp time.Time `json:"time_stamp"`
 	Directory string    `json:"directory"`
 	Url       string    `json:"url"`
+	Reactive  bool      `json:"reactive"`
 }
 
 func downloadLogging(url string) {
@@ -134,9 +139,19 @@ func downloadLogging(url string) {
 			return
 		}
 	}
+	// isReactiveはtools/README.mdを読んで確認する
+	reactibe := isReactive()
+	dlog.Reactive = reactibe
+	if reactibe {
+		fmt.Println("Reactive Problem")
+	} else {
+		fmt.Println("Not Reactive Problem")
+	}
 
 	// dlogsにdlogを追加
 	dlogs = append(dlogs, dlog)
+	// 重複を消す
+	dlogs = removeOldDownloadLogs(dlogs)
 
 	jsonData, err := json.MarshalIndent(dlogs, "", "  ")
 	if err != nil {
@@ -149,4 +164,20 @@ func downloadLogging(url string) {
 		return
 	}
 	fmt.Println("Wrote download logging to json file")
+}
+
+// removeOldDownloadLogsは、dlogsを並べ替えて、ディレクトリが同じものを探して、最も新しい記録以外を消す
+func removeOldDownloadLogs(dlogs []DownloadLogging) []DownloadLogging {
+	sort.Slice(dlogs, func(i, j int) bool {
+		return dlogs[i].TimeStamp.After(dlogs[j].TimeStamp)
+	})
+	newDlogs := make([]DownloadLogging, 0)
+	directoryMap := make(map[string]bool)
+	for _, dlog := range dlogs {
+		if _, ok := directoryMap[dlog.Directory]; !ok {
+			newDlogs = append(newDlogs, dlog)
+			directoryMap[dlog.Directory] = true
+		}
+	}
+	return newDlogs
 }
