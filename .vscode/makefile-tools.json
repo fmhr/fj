@@ -1,0 +1,80 @@
+{
+    "default":{
+        "makefile":"Makefile",
+        "target":["build", "clean"],
+        "build": "build",
+        "clean": "clean",
+        "configureOnOpen": true,
+        "configureOnEdit": true,
+        "forceBuildBeforeLaunch": true
+    },
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "make",
+            "args": ["build"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "clean",
+            "type": "shell",
+            "command": "make",
+            "args": ["clean"],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "deps",
+            "type": "shell",
+            "command": "make",
+            "args": ["deps"],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "test",
+            "type": "shell",
+            "command": "make",
+            "args": ["test"],
+            "group": {
+                "kind": "test",
+                "isDefault": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "worker",
+            "type": "shell",
+            "command": "make",
+            "args": ["worker"],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "compiler",
+            "type": "shell",
+            "command": "make",
+            "args": ["compiler"],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": []
+        }
+    ]
+}

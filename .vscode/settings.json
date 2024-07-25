@@ -1,0 +1,7 @@
+{
+    "makefile.makePath": "Makefile", 
+    "makefile.configureOnOpen": true,
+    "makefile.configureOnEdit": true,
+    "makefile.buildBeforeLaunch": true,
+    "makefile.clearOutputBeforeBuild": true,
+}
