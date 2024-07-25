@@ -164,6 +164,9 @@ func downloadLogging(url string) {
 		return
 	}
 	fmt.Println("Wrote download logging to json file")
+
+	// tools内のgen, vis, tester をbuild
+	buildTools()
 }
 
 // removeOldDownloadLogsは、dlogsを並べ替えて、ディレクトリが同じものを探して、最も新しい記録以外を消す
