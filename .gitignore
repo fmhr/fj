@@ -8,11 +8,9 @@
 *.log
 
 # Tooling and build directories
-tools/
 build/
 sample/
-bin/*
-testdata/
+bin/
 
 # Output files and directories
 out/*
