@@ -1,9 +1,17 @@
+#vscode
+.vscode/setting.json
+.vscode/launch.json
+.vscde/*.code-workspace
+.vscode/extensions.json
+
+# log
+*.log
+
 # Tooling and build directories
 tools/
 build/
 sample/
 bin/*
-.vscode/
 testdata/
 
 # Output files and directories
