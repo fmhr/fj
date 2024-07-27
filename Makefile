@@ -4,7 +4,7 @@ GOBIN:=$(GOPATH)/bin
 BINARY_NAME=fj
 BUILD_DIR=$(GOBIN)
 BINARIES=$(BUILD_DIR)/$(BINARY_NAME)
-CMD_DIR=./cmd/fj
+CMD_DIR=./
 GO_FILES:= $(shell find . -name '*.go' -type f)
 
 COMPILER_BINARY=fj-compiler
