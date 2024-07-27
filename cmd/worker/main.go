@@ -130,7 +130,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// json
-	jsonData, err := json.Marshal((*fj.EncodableOrderedMap)(out))
+	jsonData, err := json.Marshal((*cmd.EncodableOrderedMap)(out))
 	if err != nil {
 		errmsg := fmt.Sprint("Failed to marshal", err.Error())
 		http.Error(w, errmsg, http.StatusInternalServerError)
