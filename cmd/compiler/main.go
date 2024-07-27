@@ -50,14 +50,14 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, ok := fj.LanguageSets[language]; !ok {
+	if _, ok := cmd.LanguageSets[language]; !ok {
 		errmsg := fmt.Sprintf("Language [%s] is not supported.", language)
 		http.Error(w, errmsg, http.StatusBadRequest)
 		return
 	}
 
 	// ソースファイル名
-	source := fj.LanguageSets[language].FileName
+	source := cmd.LanguageSets[language].FileName
 	if source == "" {
 		http.Error(w, "Source file not specified:", http.StatusBadRequest)
 		return
@@ -69,7 +69,7 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// バイナリファイル名
-	binaryFileName := fj.LanguageSets[language].BinaryPath
+	binaryFileName := cmd.LanguageSets[language].BinaryPath
 	err = createFileWithDirs(binaryFileName, nil)
 	if err != nil {
 		http.Error(w, "Failed to create binary file:"+err.Error(), http.StatusInternalServerError)
@@ -108,7 +108,7 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// コンパイル
-	compileCmd := fj.LanguageSets[language].CompileCmd
+	compileCmd := cmd.LanguageSets[language].CompileCmd
 	cmds := strings.Fields(compileCmd)
 	cmd := exec.Command(cmds[0], cmds[1:]...)
 	msg, err := cmd.CombinedOutput()

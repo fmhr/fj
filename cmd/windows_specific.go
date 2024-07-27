@@ -1,7 +1,7 @@
 //go:build windows
 // +build windows
 
-package fj
+package cmd
 
 import (
 	"context"

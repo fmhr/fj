@@ -1,4 +1,4 @@
-package fj
+package cmd
 
 import (
 	"log"

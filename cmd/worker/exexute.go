@@ -5,9 +5,9 @@ import (
 	"github.com/fmhr/fj/cmd"
 )
 
-func exexute(config *fj.Config, seed int) (rtn *orderedmap.OrderedMap[string, any], err error) {
+func exexute(config *cmd.Config, seed int) (rtn *orderedmap.OrderedMap[string, any], err error) {
 	// GEN
-	err = fj.Gen(config, seed)
+	err = cmd.Gen(config, seed)
 	if err != nil {
 		return nil, err
 	}
@@ -20,10 +20,10 @@ func exexute(config *fj.Config, seed int) (rtn *orderedmap.OrderedMap[string, an
 	return rtn, nil
 }
 
-func run(config *fj.Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
+func run(config *cmd.Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
 	if config.Reactive {
-		return fj.ReactiveRun(config, seed)
+		return cmd.ReactiveRun(config, seed)
 	} else {
-		return fj.RunVis(config, seed)
+		return cmd.RunVis(config, seed)
 	}
 }

@@ -38,7 +38,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	// Configの受け取り
 	configPart := r.FormValue("config")
-	var config fj.Config
+	var config cmd.Config
 	err = json.Unmarshal([]byte(configPart), &config)
 	if err != nil {
 		errmsg := fmt.Sprint("Failed to unmarshal config:", err.Error())
@@ -57,7 +57,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 		// javaの場合はコンパイル
 		if config.Language == "java" || config.Language == "C#" {
-			compileCmd := fj.LanguageSets[config.Language].CompileCmd
+			compileCmd := cmd.LanguageSets[config.Language].CompileCmd
 			cmds := strings.Fields(compileCmd)
 			cmd := exec.Command(cmds[0], cmds[1:]...)
 			msg, err := cmd.CombinedOutput()
