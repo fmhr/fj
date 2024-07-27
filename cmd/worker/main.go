@@ -15,6 +15,7 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/fmhr/fj/cmd"
+	"github.com/fmhr/fj/cmd/setup"
 )
 
 func main() {
@@ -38,7 +39,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	// Configの受け取り
 	configPart := r.FormValue("config")
-	var config cmd.Config
+	var config setup.Config
 	err = json.Unmarshal([]byte(configPart), &config)
 	if err != nil {
 		errmsg := fmt.Sprint("Failed to unmarshal config:", err.Error())
@@ -57,7 +58,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 		// javaの場合はコンパイル
 		if config.Language == "java" || config.Language == "C#" {
-			compileCmd := cmd.LanguageSets[config.Language].CompileCmd
+			compileCmd := setup.LanguageSets[config.Language].CompileCmd
 			cmds := strings.Fields(compileCmd)
 			cmd := exec.Command(cmds[0], cmds[1:]...)
 			msg, err := cmd.CombinedOutput()

@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/fmhr/fj/cmd/setup"
 )
 
 // normalRun は指定された設定とシードに基づいてコマンドを実行する
 // normal モード用
-func normalRun(cnf *Config, seed int) ([]byte, string, error) {
-	cmd := LanguageSets[cnf.Language].ExeCmd
+func normalRun(cnf *setup.Config, seed int) ([]byte, string, error) {
+	cmd := setup.LanguageSets[cnf.Language].ExeCmd
 	if cmd == "" {
 		return nil, "", NewStackTraceError(fmt.Sprintf("error: LanguageSets[%s].ExecCmd must not be empty", cnf.Language))
 	}

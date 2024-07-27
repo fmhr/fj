@@ -10,6 +10,7 @@ import (
 	"golang.org/x/text/message"
 
 	"github.com/fmhr/fj/cmd/download"
+	"github.com/fmhr/fj/cmd/setup"
 )
 
 func init() {
@@ -23,7 +24,7 @@ var (
 	jsonOutput = fj.Flag("json", "Output json format.").Default("false").Bool()
 	csvOutput  = fj.Flag("csv", "Output csv format.").Default("false").Bool()
 
-	setup = fj.Command("init", "Generate config file.")
+	setupCmd = fj.Command("init", "Generate config file.")
 
 	setupcloud = fj.Command("setupCloud", "Generate Dockerfile and gcloud build files for cloud mode.")
 
@@ -60,8 +61,8 @@ func Execute() {
 	result := kingpin.MustParse(fj.Parse(os.Args[1:]))
 	switch result {
 	// Setup generate config file
-	case setup.FullCommand():
-		err := generateConfig()
+	case setupCmd.FullCommand():
+		err := setup.GenerateConfig()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -70,7 +71,7 @@ func Execute() {
 		mkDirWorkerBase()
 	// Test run test case
 	case test.FullCommand(), tests.FullCommand():
-		config, err := setConfig()
+		config, err := setup.SetConfig()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -145,7 +146,7 @@ func Execute() {
 }
 
 // updateConfig はコマンドライン引数でconfigを更新する
-func updateConfig(config *Config) {
+func updateConfig(config *setup.Config) {
 	if *args1 != nil && len(*args1) > 0 {
 		config.Args = *args1
 	}

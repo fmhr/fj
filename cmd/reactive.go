@@ -5,14 +5,15 @@ import (
 	"log"
 
 	"github.com/elliotchance/orderedmap/v2"
+	"github.com/fmhr/fj/cmd/setup"
 )
 
 // ReactiveRun はreactive=trueのときに使う
-func ReactiveRun(ctf *Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
+func ReactiveRun(ctf *setup.Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
 	return reactiveRun(ctf, seed)
 }
 
-func reactiveRun(ctf *Config, seed int) (pair *orderedmap.OrderedMap[string, any], err error) {
+func reactiveRun(ctf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, any], err error) {
 	// 出力フォルダがない場合、作成
 	err = createDirIfNotExist(ctf.OutfilePath)
 	if err != nil {
@@ -48,8 +49,8 @@ func reactiveRun(ctf *Config, seed int) (pair *orderedmap.OrderedMap[string, any
 }
 
 // reactiveRunCmd はreactive=trueのときに使う
-func reactiveRunCmd(ctf *Config, seed int) ([]byte, string, error) {
-	cmd := LanguageSets[ctf.Language].ExeCmd
+func reactiveRunCmd(ctf *setup.Config, seed int) ([]byte, string, error) {
+	cmd := setup.LanguageSets[ctf.Language].ExeCmd
 	infile := ctf.InfilePath + fmt.Sprintf("%04d.txt", seed)
 	outfile := ctf.OutfilePath + fmt.Sprintf("%04d.txt", seed)
 	setsArgs := setArgs(ctf.Args) // コマンドオプションの追加

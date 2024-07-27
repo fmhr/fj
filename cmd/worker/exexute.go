@@ -3,9 +3,10 @@ package main
 import (
 	"github.com/elliotchance/orderedmap/v2"
 	"github.com/fmhr/fj/cmd"
+	"github.com/fmhr/fj/cmd/setup"
 )
 
-func exexute(config *cmd.Config, seed int) (rtn *orderedmap.OrderedMap[string, any], err error) {
+func exexute(config *setup.Config, seed int) (rtn *orderedmap.OrderedMap[string, any], err error) {
 	// GEN
 	err = cmd.Gen(config, seed)
 	if err != nil {
@@ -20,7 +21,7 @@ func exexute(config *cmd.Config, seed int) (rtn *orderedmap.OrderedMap[string, a
 	return rtn, nil
 }
 
-func run(config *cmd.Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
+func run(config *setup.Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
 	if config.Reactive {
 		return cmd.ReactiveRun(config, seed)
 	} else {

@@ -1,4 +1,4 @@
-package cmd
+package setup
 
 import (
 	"embed"
@@ -44,8 +44,8 @@ type Config struct {
 	ConcurrentRequests int      `toml:"ConcurrentRequests"` // クラウドジャッジコンテナの並列アクセス数
 }
 
-// generateConfig はfj init コマンドで読み出されて fj/config.tomlを生成する
-func generateConfig() error {
+// GenerateConfig はfj init コマンドで読み出されて fj/config.tomlを生成する
+func GenerateConfig() error {
 	// fj ディレクトリを作成
 	if _, err := os.Stat(FJ_DIRECTORY); os.IsNotExist(err) {
 		if err := os.Mkdir(FJ_DIRECTORY, 0755); err != nil {
@@ -75,8 +75,8 @@ func generateConfig() error {
 	return nil
 }
 
-// setConfig はconfig.tomlを読み込む
-func setConfig() (*Config, error) {
+// SetConfig はconfig.tomlを読み込む
+func SetConfig() (*Config, error) {
 	if !configExists() {
 		return &Config{}, ErrConfigNotFound
 	}

@@ -7,16 +7,17 @@ import (
 	"path/filepath"
 
 	"github.com/elliotchance/orderedmap/v2"
+	"github.com/fmhr/fj/cmd/setup"
 )
 
-func RunVis(cnf *Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
+func RunVis(cnf *setup.Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
 	return runVis(cnf, seed)
 }
 
 // runVis は指定された設定とシードに基づいてコマンドを実行して、
 // その結果をvisに渡して、両方の結果を返す
 // 通常の問題（reactive=false)で使う
-func runVis(cnf *Config, seed int) (pair *orderedmap.OrderedMap[string, any], err error) {
+func runVis(cnf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, any], err error) {
 	out, _, err := normalRun(cnf, seed)
 	if err != nil {
 		log.Println("Error: ", err, "\nout:", string(out))
@@ -53,7 +54,7 @@ func runVis(cnf *Config, seed int) (pair *orderedmap.OrderedMap[string, any], er
 }
 
 // vis is a wrapper for vis command
-func vis(cnf *Config, infile, outfile string) ([]byte, error) {
+func vis(cnf *setup.Config, infile, outfile string) ([]byte, error) {
 	cmdStr := fmt.Sprintf(cnf.VisPath+" %s %s", infile, outfile)
 	cmdStrings := createCommand(cmdStr)
 	cmd := exec.Command(cmdStrings[0], cmdStrings[1:]...)

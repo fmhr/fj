@@ -13,12 +13,13 @@ import (
 	"time"
 
 	"github.com/elliotchance/orderedmap/v2"
+	"github.com/fmhr/fj/cmd/setup"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
 
 // RunParallel 複数のシードに対して並列にテストを実行する
-func RunParallel(cnf *Config, seeds []int) {
+func RunParallel(cnf *setup.Config, seeds []int) {
 	// 並列実行数の設定
 	concurrentNum := 1
 	if cnf.Jobs > 0 {

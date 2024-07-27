@@ -11,10 +11,11 @@ import (
 	"time"
 
 	"github.com/elliotchance/orderedmap/v2"
+	"github.com/fmhr/fj/cmd/setup"
 )
 
 // requestToWorker はバイナリをワーカーに送信する
-func requestToWorker(config *Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
+func requestToWorker(config *setup.Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
 	start := time.Now()
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
@@ -78,7 +79,7 @@ func requestToWorker(config *Config, seed int) (*orderedmap.OrderedMap[string, a
 	return rtn, nil
 }
 
-func SendBinaryToWorker(config *Config, seed int, binaryNameInBucket string) (*orderedmap.OrderedMap[string, any], error) {
+func SendBinaryToWorker(config *setup.Config, seed int, binaryNameInBucket string) (*orderedmap.OrderedMap[string, any], error) {
 	if config.WorkerURL == "" {
 		return nil, NewStackTraceError("worker URL is not specified")
 	}

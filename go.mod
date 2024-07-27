@@ -2,7 +2,7 @@ module github.com/fmhr/fj
 
 go 1.22.4
 
-replace gihub.com/fmhr/fj => ./cmd
+replace gihub.com/fmhr/fj/cmd => ./cmd
 
 require (
 	cloud.google.com/go/storage v1.43.0

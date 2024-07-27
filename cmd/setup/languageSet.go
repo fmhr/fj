@@ -1,4 +1,4 @@
-package cmd
+package setup
 
 type LanguageSet struct {
 	Language   string
@@ -46,7 +46,7 @@ var LanguageSets = map[string]LanguageSet{
 	},
 }
 
-func languageList() (langs []string) {
+func LanguageList() (langs []string) {
 	for _, lang := range LanguageSets {
 		langs = append(langs, lang.Language)
 	}

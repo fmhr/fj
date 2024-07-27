@@ -11,9 +11,11 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+
+	"github.com/fmhr/fj/cmd/setup"
 )
 
-func checkConfigCloudCompile(config *Config) error {
+func checkConfigCloudCompile(config *setup.Config) error {
 	if config.Language == "" {
 		return NewStackTraceError("error: [Language] must not be empty")
 	}
@@ -35,10 +37,10 @@ func checkConfigCloudCompile(config *Config) error {
 //  3. コンパイルコマンド
 //  4. file=ソースファイル, compileCmd=コンパイルコマンド,
 //     srcFile=ソースファイル名, binaryFile=バイナリファイル名
-func CloudCompile(config *Config) error {
-	_, ok := LanguageSets[config.Language]
+func CloudCompile(config *setup.Config) error {
+	_, ok := setup.LanguageSets[config.Language]
 	if !ok {
-		return NewStackTraceError(fmt.Sprintf("error: language [%s] is not supported. suported %v", config.Language, languageList()))
+		return NewStackTraceError(fmt.Sprintf("error: language [%s] is not supported. suported %v", config.Language, setup.LanguageList()))
 	}
 	log.Println("cloud compiling...")
 	if err := checkConfigCloudCompile(config); err != nil {

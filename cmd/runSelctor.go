@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"github.com/elliotchance/orderedmap/v2"
+	"github.com/fmhr/fj/cmd/setup"
 )
 
 // RunSelector Cloud mode でなければ、reactiveRun か RunVis を呼び出す
-func RunSelector(config *Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
+func RunSelector(config *setup.Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
 	// Cloud mode なら、sendBinaryToWorker を呼び出す
 	if config.CloudMode || (cloud != nil && *cloud) {
 		rtn, err := requestToWorker(config, seed)
