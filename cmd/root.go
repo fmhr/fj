@@ -8,6 +8,8 @@ import (
 	"github.com/alecthomas/kingpin/v2"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
+
+	"github.com/fmhr/fj/cmd/download"
 )
 
 func init() {
@@ -38,9 +40,9 @@ var (
 	displayTable = tests.Flag("table", "Output table format.").Default("true").Bool()
 	Logscore     = tests.Flag("logscore", "Output score log.").Default("false").Bool()
 
-	// download tester file from URL
-	download  = fj.Command("download", "Download tester file from URL.").Alias("d")
-	testerURL = download.Arg("url", "Tester file URL.").Required().String()
+	// downloadcmd tester file from URL
+	downloadcmd = fj.Command("download", "Download tester file from URL.").Alias("d")
+	testerURL   = downloadcmd.Arg("url", "Tester file URL.").Required().String()
 	// login to atcoder
 	login    = fj.Command("login", "Login to fj.").Alias("l")
 	username = login.Flag("username", "Username.").Required().Short('u').String()
@@ -133,12 +135,12 @@ func Execute() {
 			}
 			RunParallel(config, seeds)
 		}
-	case download.FullCommand():
-		Download(*testerURL)
+	case downloadcmd.FullCommand():
+		download.Download(*testerURL)
 	case login.FullCommand():
-		Login(*loginurl, *username, *password)
+		download.Login(*loginurl, *username, *password)
 	case checkReactive.FullCommand():
-		fmt.Println("isReactive:", isReactive())
+		fmt.Println("isReactive:", download.IsReactive())
 	}
 }
 
