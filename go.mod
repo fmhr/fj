@@ -17,4 +17,5 @@ require (
 	golang.org/x/text v0.16.0 // indirect
 )
 
+// TODO go/srcで開発することでここは消す
 replace github.com/fmhr/fj => ./cmd
