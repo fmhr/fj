@@ -14,7 +14,7 @@ import (
 	"strings"
 
 	"cloud.google.com/go/storage"
-	"github.com/fmhr/fj"
+	"github.com/fmhr/fj/cmd"
 )
 
 func main() {

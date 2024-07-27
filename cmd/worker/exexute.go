@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/elliotchance/orderedmap/v2"
-	"github.com/fmhr/fj"
+	"github.com/fmhr/fj/cmd"
 )
 
 func exexute(config *fj.Config, seed int) (rtn *orderedmap.OrderedMap[string, any], err error) {
