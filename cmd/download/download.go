@@ -28,6 +28,7 @@ func Download(url string) {
 		return
 	}
 	if err := DownloadLoacaTesterZip(ac.Client, url); err != nil {
+		fmt.Println(err.Error())
 		fmt.Println("Failed to download loacatester.zip")
 		return
 	}
@@ -59,7 +60,7 @@ func DownloadLoacaTesterZip(client *http.Client, url string) error {
 	}
 
 	// リンクを抽出するための正規表現
-	re := regexp.MustCompile(`<a href="(https://img\.atcoder\.jp/[^"]+\.zip)">(ローカル版|Local version)</a>`)
+	re := regexp.MustCompile(`<a href="(https://img\.atcoder\.jp/[^"]+\.zip)">.*?(ローカル版|Local version).*?</a>`)
 	match := re.FindSubmatch(body)
 	if match == nil {
 		return fmt.Errorf("failed to find download link")
