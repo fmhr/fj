@@ -7,12 +7,12 @@ import (
 func TestRunCommandWithTimeout(t *testing.T) {
 	t.Run("Test successful command execution", func(t *testing.T) {
 		cmd := []string{"echo", "hello"}
-		output, result, err := runCommandWithTimeout(cmd, 5000)
+		output, timeout, err := runCommandWithTimeout(cmd, 5000)
 		if err != nil {
 			t.Errorf("Unexpected error: %v", err)
 		}
-		if result != "Success" {
-			t.Errorf("Expected result 'Success', got '%s'", result)
+		if timeout {
+			t.Errorf("Expected result timeout is'false', got %v", timeout)
 		}
 		expectedOutput := "hello\n"
 		if string(output) != expectedOutput {
@@ -33,8 +33,8 @@ func TestRunCommandWithTimeout(t *testing.T) {
 		if err != nil {
 			t.Errorf("Did not expect error: %v", err)
 		}
-		if result != "Timeout" {
-			t.Errorf("Expected result 'Timeout' for timeout, got '%s'", result)
+		if result == false {
+			t.Errorf("Expected result 'Timeout' for timeout, got %v", result)
 		}
 	})
 

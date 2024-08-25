@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os/exec"
 	"path/filepath"
 
@@ -20,7 +19,6 @@ func RunVis(cnf *setup.Config, seed int) (*orderedmap.OrderedMap[string, any], e
 func runVis(cnf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, any], err error) {
 	out, _, err := normalRun(cnf, seed)
 	if err != nil {
-		log.Println("Error: ", err, "\nout:", string(out))
 		err = fmt.Errorf("Error: %v\nout: %s", err, string(out))
 		return nil, WrapError(err)
 	}
@@ -60,7 +58,7 @@ func vis(cnf *setup.Config, infile, outfile string) ([]byte, error) {
 	cmd := exec.Command(cmdStrings[0], cmdStrings[1:]...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return nil, WrapError(fmt.Errorf("failed: %v\nout: %s", err, string(out)))
+		return nil, WrapError(fmt.Errorf("failed: %v\nout: %s cmd: %s", err, string(out), cmdStrings))
 	}
 	return out, nil
 }

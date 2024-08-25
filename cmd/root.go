@@ -29,7 +29,8 @@ var (
 	setupcloud = fj.Command("setupCloud", "Generate Dockerfile and gcloud build files for cloud mode.")
 
 	test  = fj.Command("test", "Run test case.")
-	seed  = test.Arg("seed", "Seed value.").Default("0").Int()
+	cmd   = test.Arg("cmd", "Exe Cmd.").String()
+	seed  = test.Flag("seed", "Set Seed. default : 0.").Default("0").Int()
 	args1 = test.Flag("args", "Command line arguments.").Strings()
 
 	tests        = fj.Command("tests", "Run test cases.")
@@ -70,8 +71,10 @@ func Execute() {
 		mkDirCompilerBase()
 		mkDirWorkerBase()
 	// Test run test case
+	// test と　tests 時の共通処理
 	case test.FullCommand(), tests.FullCommand():
 		config, err := setup.SetConfig()
+		config.ExecuteCmd = *cmd
 		if err != nil {
 			log.Fatal(err)
 		}
