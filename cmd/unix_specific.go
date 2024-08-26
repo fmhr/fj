@@ -16,6 +16,9 @@ import (
 // ここのタイムアウトは強制終了で、問題のTLEとは異なる
 // return output, timeout error
 func runCommandWithTimeout(cmdStrings []string, timelimitMS int) ([]byte, bool, error) {
+	if timelimitMS == 0 {
+		panic("timelimitMS==0")
+	}
 	if len(cmdStrings) == 0 {
 		return nil, false, fmt.Errorf("cmdStrings must not be empty")
 	}

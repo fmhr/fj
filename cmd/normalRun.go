@@ -32,11 +32,7 @@ func normalRun(cnf *setup.Config, seed int) ([]byte, bool, error) {
 	cmdStr := fmt.Sprintf("%s < %s > %s", cmd, inputfile, outputfile)
 
 	cmdStrings := createCommand(cmdStr)
-	log.Println(cmdStrings)
 	out, timeout, err := runCommandWithTimeout(cmdStrings, int(cnf.TimeLimitMS))
-	log.Println(out)
-	log.Println(timeout)
-	log.Println(err)
 	if err != nil || timeout {
 		//log.Println("Error: ", err, "\nout:", string(out))
 		log.Println("TIMEOUT")
