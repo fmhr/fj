@@ -119,6 +119,7 @@ func newConfig() (c Config) {
 	c.VisPath = "tools/target/release/vis"
 	c.GenPath = "tools/target/release/gen"
 	c.InfilePath = "tools/in/"
+	c.OutfilePath = "out/"
 	c.TimeLimitMS = 3000
 	return c
 }
