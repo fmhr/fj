@@ -34,7 +34,8 @@ var (
 	args1 = test.Flag("args", "Command line arguments.").Strings()
 
 	tests        = fj.Command("tests", "Run test cases.")
-	seed2        = tests.Arg("seed", "Seed value.").Int()
+	cmd2         = tests.Arg("cmd", "Execute command").String()
+	seed2        = tests.Flag("seed", "Seed Value.").Int()
 	args2        = tests.Flag("args", "Command line arguments.").Strings()
 	start        = tests.Flag("start", "Start seed value.").Default("0").Short('s').Int()
 	end          = tests.Flag("end", "End seed value.").Default("10").Short('e').Int()
@@ -73,6 +74,9 @@ func Execute() {
 	// Test run test case
 	// test と　tests 時の共通処理
 	case test.FullCommand(), tests.FullCommand():
+		if *cmd2 != "" {
+			*cmd = *cmd2
+		}
 		config, err := setup.SetConfig()
 		config.ExecuteCmd = *cmd
 		if err != nil {
