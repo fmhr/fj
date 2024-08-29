@@ -30,13 +30,15 @@ func normalRun(cnf *setup.Config, seed int) ([]byte, bool, error) {
 	// コマンドを作成
 	cmd += " " + setArgs(cnf.Args) // カスタム引数を追加
 	cmdStr := fmt.Sprintf("%s < %s > %s", cmd, inputfile, outputfile)
-
 	cmdStrings := createCommand(cmdStr)
 	out, timeout, err := runCommandWithTimeout(cmdStrings, int(cnf.TimeLimitMS))
-	if err != nil || timeout {
-		//log.Println("Error: ", err, "\nout:", string(out))
-		log.Println("TIMEOUT")
-		return out, timeout, fmt.Errorf("cmd.Run() for command [%q] failed with: %v out:%s", cmdStrings, err.Error(), out)
+	if err != nil {
+		log.Println("Error: ", err, "\nout:", string(out))
+		return out, timeout, fmt.Errorf("cmd.Run() for command [%q] failed with: %w out:%s", cmdStrings, err, out)
+	}
+	if timeout {
+		log.Printf("処理が制限時間%dmsを超えたためタイムアウトしました", int(cnf.TimeLimitMS))
+		return out, timeout, fmt.Errorf("TIMEOUT %dms", int(cnf.TimeLimitMS))
 	}
 	return out, timeout, nil
 }

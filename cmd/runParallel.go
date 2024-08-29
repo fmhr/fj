@@ -66,7 +66,8 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 				if err != nil {
 					errorChan <- fmt.Sprintf("Run error: seed=%d %v\n", seed, err)
 					errorSeedChan <- seed
-					cancel() // ここでコンテキストをキャンセルにする
+					log.Printf("seed=%d has Error %v\n", seed, err)
+					//cancel() // ここでコンテキストをキャンセルにする(すべてのごるーちんの停止)
 					return
 				}
 				// 後処理
@@ -94,6 +95,15 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 	logScore := 0.0
 	zeroSeeds := make([]int, 0)
 	tleSeeds := make([]int, 0)
+	// datasのチェック
+	//	for i, data := range datas {
+	////data := datas[i]
+	//keys := data.Keys()
+	//for _, key := range keys {
+	//v, ok := data.Get(key)
+	//log.Println(i, key, v, ok)
+	//}
+	//}
 	for i := 0; i < len(datas); i++ {
 		seed, ok := datas[i].Get("seed")
 		if !ok {

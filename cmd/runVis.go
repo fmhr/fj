@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os/exec"
 	"path/filepath"
 
@@ -19,8 +20,8 @@ func RunVis(cnf *setup.Config, seed int) (*orderedmap.OrderedMap[string, any], e
 func runVis(cnf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, any], err error) {
 	out, _, err := normalRun(cnf, seed)
 	if err != nil {
-		err = fmt.Errorf("Error: %v\nout: %s", err, string(out))
-		return nil, WrapError(err)
+		log.Println("normalRun error:", err)
+		return nil, WrapError(fmt.Errorf("%w\nout: %s", err, string(out)))
 	}
 	pair = orderedmap.NewOrderedMap[string, any]()
 	pair.Set("seed", seed)
@@ -36,7 +37,7 @@ func runVis(cnf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, an
 
 	outVis, err := vis(cnf, infile, outfile)
 	if err != nil {
-		//return nil, TraceMsg(fmt.Errorf("failed: %v", err).Error())
+		log.Println("vis error:", err)
 		return nil, err
 	}
 	sc, err := extractData(string(outVis))
@@ -58,6 +59,7 @@ func vis(cnf *setup.Config, infile, outfile string) ([]byte, error) {
 	cmd := exec.Command(cmdStrings[0], cmdStrings[1:]...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
+		log.Printf("failed: %v\nout: %s cmd: %s\n", err, string(out), cmdStrings)
 		return nil, WrapError(fmt.Errorf("failed: %v\nout: %s cmd: %s", err, string(out), cmdStrings))
 	}
 	return out, nil
