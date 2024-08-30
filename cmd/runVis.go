@@ -45,6 +45,11 @@ func runVis(cnf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, an
 		return nil, err
 	}
 
+	// Score=0の場合は出力を表示
+	if sc["Score"] == 0 {
+		log.Println("Score=0 out:", string(outVis))
+	}
+
 	for k, v := range sc {
 		pair.Set(k, v)
 	}
