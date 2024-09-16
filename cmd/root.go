@@ -34,7 +34,7 @@ var (
 	args1 = test.Flag("args", "Command line arguments.").Strings()
 
 	tests        = fj.Command("tests", "Run test cases.")
-	cmd2         = tests.Arg("cmd", "Execute command").String()
+	cmd2         = tests.Arg("cmd", "Execute command").Required().String()
 	seed2        = tests.Flag("seed", "Seed Value.").Int()
 	args2        = tests.Flag("args", "Command line arguments.").Strings()
 	start        = tests.Flag("start", "Start seed value.").Default("0").Short('s').Int()
