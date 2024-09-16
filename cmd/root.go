@@ -14,7 +14,7 @@ import (
 )
 
 func init() {
-	log.SetFlags(log.Lshortfile)
+	//log.SetFlags(log.Lshortfile)
 }
 
 var (
@@ -29,7 +29,7 @@ var (
 	setupcloud = fj.Command("setupCloud", "Generate Dockerfile and gcloud build files for cloud mode.")
 
 	test  = fj.Command("test", "Run test case.")
-	cmd   = test.Arg("cmd", "Exe Cmd.").String()
+	cmd   = test.Arg("cmd", "Exe Cmd.").Required().String()
 	seed  = test.Flag("seed", "Set Seed. default : 0.").Short('s').Default("0").Int()
 	args1 = test.Flag("args", "Command line arguments.").Strings()
 
@@ -77,6 +77,7 @@ func Execute() {
 		if *cmd2 != "" {
 			*cmd = *cmd2
 		}
+
 		config, err := setup.SetConfig()
 		config.ExecuteCmd = *cmd
 		if err != nil {
