@@ -18,7 +18,7 @@ func init() {
 }
 
 var (
-	fj         = kingpin.New("fj", "fj is a command line tool for competitive programming.")
+	fj         = kingpin.New("fj", "fj is a command line tool for AtCoder Heuristic Contest.")
 	debug      = fj.Flag("debug", "Enable debug mode.").Default("false").Bool()
 	cloud      = fj.Flag("cloud", "Enable cloud mode.").Default("false").Bool()
 	jsonOutput = fj.Flag("json", "Output json format.").Default("false").Bool()
@@ -28,12 +28,12 @@ var (
 
 	setupcloud = fj.Command("setupCloud", "Generate Dockerfile and gcloud build files for cloud mode.")
 
-	test  = fj.Command("test", "Run test case.")
+	test  = fj.Command("test", "Run test case.").Alias("t")
 	cmd   = test.Arg("cmd", "Exe Cmd.").Required().String()
 	seed  = test.Flag("seed", "Set Seed. default : 0.").Short('s').Default("0").Int()
 	args1 = test.Flag("args", "Command line arguments.").Strings()
 
-	tests        = fj.Command("tests", "Run test cases.")
+	tests        = fj.Command("tests", "Run test cases.").Alias("tt")
 	cmd2         = tests.Arg("cmd", "Execute command").Required().String()
 	seed2        = tests.Flag("seed", "Seed Value.").Int()
 	args2        = tests.Flag("args", "Command line arguments.").Strings()
@@ -125,7 +125,7 @@ func Execute() {
 			}
 			fmt.Fprintln(os.Stderr, "")
 			Score, _ := rtn.Get("Score")
-			fmt.Println(Score)
+			fmt.Printf("%.0f\n", Score)
 			stderr, ok := rtn.Get("stdErr")
 			if ok {
 				log.Print("StdErr:------->\n", string(stderr.([]byte)))

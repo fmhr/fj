@@ -148,7 +148,15 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 		}
 		DisplayTable(datas)
 	}
-	fmt.Fprintln(os.Stderr, "Errors:", errSeeds, "Zeros:", zeroSeeds, "TLEs:", tleSeeds)
+	if len(errSeeds) > 0 {
+		fmt.Fprintln(os.Stderr, "Errors:", errSeeds)
+	}
+	if len(zeroSeeds) > 0 {
+		fmt.Fprintln(os.Stderr, "Zeros:", zeroSeeds)
+	}
+	if len(tleSeeds) > 0 {
+		fmt.Fprintln(os.Stderr, "TLEs:", tleSeeds)
+	}
 	// timeがあれば、平均と最大を表示
 	_, exsit := datas[0].Get("time")
 	timeNotFound := 0
@@ -169,11 +177,11 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 			}
 		}
 		sumTime /= float64(len(datas) - len(errSeeds) - timeNotFound)
-		fmt.Fprintf(os.Stderr, "avarageTime=%.2f  maxTime=%.2f\n", sumTime, maxTime)
+		fmt.Fprintf(os.Stderr, "(Time)avarage:%.2f  max:%.2f\n", sumTime, maxTime)
 	}
 	avarageScore := sumScore / float64(len(datas)-len(errSeeds))
 	p := message.NewPrinter(language.English)
-	p.Fprintf(os.Stderr, "(Score)sum=%.2f avarage=%.2f log=%.2f\n", sumScore, avarageScore, logScore)
+	p.Fprintf(os.Stderr, "(Score)avarage:%.2f sum:%.2f\n", avarageScore, sumScore)
 
 	if Logscore != nil && *Logscore {
 		fmt.Printf("%.4f\n", logScore)
