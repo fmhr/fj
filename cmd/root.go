@@ -55,7 +55,7 @@ var (
 	checkReactive = fj.Command("checkReactive", "Check if tester is reactive.")
 )
 
-func Execute() {
+func Execute() error {
 	if debug != nil && *debug {
 		log.Println("debug mode")
 	}
@@ -66,7 +66,7 @@ func Execute() {
 	case setupCmd.FullCommand():
 		err := setup.GenerateConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 	case setupcloud.FullCommand():
 		mkDirCompilerBase()
@@ -81,7 +81,7 @@ func Execute() {
 		config, err := setup.SetConfig()
 		config.ExecuteCmd = *cmd
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		// config を読み込む
 		updateConfig(config)
@@ -89,7 +89,8 @@ func Execute() {
 		if config.CloudMode {
 			err = CloudCompile(config)
 			if err != nil {
-				log.Fatal("Cloud mode Compile error:", err)
+				log.Println("Cloud mode Compile error:", err)
+				return err
 			}
 		}
 		// select run
@@ -97,7 +98,7 @@ func Execute() {
 		case test.FullCommand():
 			rtn, err := RunSelector(config, *seed)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 			r, ok := rtn.Get("result")
 			if ok {
@@ -151,6 +152,7 @@ func Execute() {
 	case checkReactive.FullCommand():
 		fmt.Println("isReactive:", download.IsReactive())
 	}
+	return nil
 }
 
 // updateConfig はコマンドライン引数でconfigを更新する
