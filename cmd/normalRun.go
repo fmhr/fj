@@ -33,7 +33,10 @@ func normalRun(cnf *setup.Config, seed int) ([]byte, bool, error) {
 	cmdStrings := createCommand(cmdStr)
 	out, timeout, err := runCommandWithTimeout(cmdStrings, int(cnf.TimeLimitMS))
 	if err != nil {
-		log.Println("Error: ", err, "\nout:", string(out))
+		log.Println("Error: ", err)
+		if len(out) > 0 {
+			log.Println("out:", string(out))
+		}
 		return out, timeout, fmt.Errorf("cmd.Run() for command [%q] failed with: %w out:%s", cmdStrings, err, out)
 	}
 	if timeout {

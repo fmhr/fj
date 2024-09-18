@@ -21,7 +21,10 @@ func runVis(cnf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, an
 	out, _, err := normalRun(cnf, seed)
 	if err != nil {
 		log.Println("normalRun error:", err)
-		return nil, WrapError(fmt.Errorf("%w\nout: %s", err, string(out)))
+		if len(out) > 0 {
+			log.Println("out:", string(out))
+		}
+		return nil, WrapError(fmt.Errorf("%w", err))
 	}
 	pair = orderedmap.NewOrderedMap[string, any]()
 	pair.Set("seed", seed)
