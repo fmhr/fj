@@ -20,7 +20,7 @@ func RunVis(cnf *setup.Config, seed int) (*orderedmap.OrderedMap[string, any], e
 func runVis(cnf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, any], err error) {
 	out, _, err := normalRun(cnf, seed)
 	if err != nil {
-		log.Println("normalRun error:", err)
+		//log.Println("Error: ", err)
 		if len(out) > 0 {
 			log.Println("out:", string(out))
 		}

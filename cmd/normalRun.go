@@ -20,6 +20,9 @@ func normalRun(cnf *setup.Config, seed int) ([]byte, bool, error) {
 	outputfile := filepath.Join(cnf.OutfilePath, fmt.Sprintf("%04d.txt", seed))
 
 	if _, err := os.Stat(inputfile); err != nil {
+		if os.IsNotExist(err) {
+			return nil, false, fmt.Errorf("input file not found: %s", inputfile)
+		}
 		return nil, false, err
 	}
 
