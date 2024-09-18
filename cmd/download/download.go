@@ -42,8 +42,7 @@ func Download(urlStr string) error {
 		return fmt.Errorf("failed to unzip loacatester.zip:%v", err)
 	}
 	fmt.Println("Unzipped loacatester.zip")
-	downloadLogging(urlStr) // ダウンロード履歴をログに記録
-	return nil
+	return downloadLogging(urlStr) // ダウンロード履歴をログに記録
 }
 
 func DownloadLoacaTesterZip(client *http.Client, url string) error {
@@ -159,8 +158,7 @@ func downloadLogging(url string) error {
 	fmt.Println("Wrote download logging to json file")
 
 	// tools内のgen, vis, tester をbuild
-	buildTools()
-	return nil
+	return buildTools()
 }
 
 // removeOldDownloadLogsは、dlogsを並べ替えて、ディレクトリが同じものを探して、最も新しい記録以外を消す
