@@ -28,19 +28,12 @@ var (
 
 	setupcloud = fj.Command("setupCloud", "Generate Dockerfile and gcloud build files for cloud mode.")
 
-	test = fj.Command("test", "Run test case.").Alias("t")
-	cmd  = test.Arg("cmd", "Exe Cmd.").Required().String()
-	seed = test.Flag("seed", "Set Seed. default : 0.").Short('s').Default("0").Int()
-
-	tests        = fj.Command("tests", "Run test cases.").Alias("tt")
-	cmd2         = tests.Arg("cmd", "Execute command").Required().String()
-	seed2        = tests.Flag("seed", "Seed Value.").Int()
-	args2        = tests.Flag("args", "Command line arguments.").Strings()
-	start        = tests.Flag("start", "Start seed value.").Default("0").Short('s').Int()
-	end          = tests.Flag("end", "End seed value.").Default("10").Short('e').Int()
-	jobs         = tests.Flag("jobs", "Number of parallel jobs.").Int()
-	displayTable = tests.Flag("table", "Output table format.").Default("true").Bool()
-	Logscore     = tests.Flag("logscore", "Output score log.").Default("false").Bool()
+	// test command
+	test     = fj.Command("test", "Run test case.").Alias("t")
+	cmd      = test.Arg("cmd", "Exe Cmd.").Required().String()
+	seed     = test.Flag("seed", "Set Seed. default : 0.").Short('s').Default("0").Int()
+	count    = test.Flag("count", "Number of test cases.").Short('n').Default("1").Int()
+	parallel = test.Flag("parallel", "Number of parallel jobs.").Short('p').Default("1").Int()
 
 	// downloadcmd tester file from URL
 	downloadcmd = fj.Command("download", "Download tester file from URL.").Alias("d")
@@ -81,11 +74,7 @@ func Execute() error {
 		}
 	// Test run test case
 	// test と　tests 時の共通処理
-	case test.FullCommand(), tests.FullCommand():
-		if *cmd2 != "" {
-			*cmd = *cmd2
-		}
-
+	case test.FullCommand():
 		config, err := setup.SetConfig()
 		config.ExecuteCmd = *cmd
 		if err != nil {
@@ -101,9 +90,7 @@ func Execute() error {
 				return err
 			}
 		}
-		// select run
-		switch result {
-		case test.FullCommand():
+		if *count == 1 {
 			rtn, err := RunSelector(config, *seed)
 			if err != nil {
 				return err
@@ -140,16 +127,12 @@ func Execute() error {
 				log.Print("StdErr:------->\n", string(stderr.([]byte)))
 				log.Println("ここまで<-----")
 			}
-		case tests.FullCommand():
-			// seed2 が指定されていれば end=seed2
-			if seed2 != nil && *seed2 != 0 {
-				*start = 0
-				*end = *seed2
-			}
-			// start, endが指定されていれば、その範囲のシードを並列実行
-			seeds := make([]int, *end-*start)
-			for i := *start; i < *end; i++ {
-				seeds[i-*start] = i
+		} else {
+			startSeed := *seed
+			config.Jobs = *parallel
+			seeds := make([]int, *count)
+			for i := startSeed; i < startSeed+*count; i++ {
+				seeds[i-startSeed] = i
 			}
 			RunParallel(config, seeds)
 		}
@@ -165,11 +148,5 @@ func Execute() error {
 
 // updateConfig はコマンドライン引数でconfigを更新する
 func updateConfig(config *setup.Config) {
-	if args2 != nil && len(*args2) > 0 {
-		config.Args = *args2
-	}
-	if jobs != nil && *jobs > 0 {
-		config.Jobs = *jobs
-	}
 	config.CloudMode = config.CloudMode || *cloud
 }

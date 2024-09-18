@@ -139,7 +139,8 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 			}
 		}
 	}
-	if displayTable != nil && *displayTable {
+	// テーブル表示 代替を考えるまでtrue
+	if true {
 		// delete stdErr
 		for i := 0; i < len(datas); i++ {
 			if datas[i] != nil {
@@ -186,12 +187,6 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 	avarageScore := sumScore / float64(len(datas)-len(errSeeds))
 	p := message.NewPrinter(language.English)
 	p.Fprintf(os.Stderr, "(Score)avarage:%.2f sum:%.2f\n", avarageScore, sumScore)
-
-	if Logscore != nil && *Logscore {
-		fmt.Printf("%.4f\n", logScore)
-	} else {
-		fmt.Printf("%.2f\n", sumScore)
-	}
 
 	if jsonOutput != nil && *jsonOutput {
 		err := JsonOutput(datas)
