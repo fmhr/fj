@@ -95,7 +95,7 @@ type DownloadLogging struct {
 	Reactive  bool      `json:"reactive"`
 }
 
-func downloadLogging(url string) {
+func downloadLogging(url string) error {
 	dlog := DownloadLogging{
 		TimeStamp: time.Now(),
 		Directory: "",
@@ -104,22 +104,19 @@ func downloadLogging(url string) {
 	// カレントディレクトリを取得
 	dir, err := os.Getwd()
 	if err != nil {
-		log.Println("Failed to get current directory, ", err)
-		return
+		return fmt.Errorf("failed to get current directory: %v", err)
 	}
 	dlog.Directory = dir
 
 	appName := "fmhr-judge-tools"
 	cacheDir, err := os.UserCacheDir()
 	if err != nil {
-		log.Println("Failed to get user cache directory, ", err)
-		return
+		return fmt.Errorf("failed to get user cache directory: %v", err)
 	}
 	// キャッシュディレクトリを作成
 	cacheDir = filepath.Join(cacheDir, appName)
 	if err := os.MkdirAll(cacheDir, 0755); err != nil {
-		log.Println("Failed to create cache directory, ", err)
-		return
+		return fmt.Errorf("failed to create cache directory: %v", err)
 	}
 	// jsonファイルのパス
 	jsonFile := filepath.Join(cacheDir, "download-history.json")
@@ -130,13 +127,11 @@ func downloadLogging(url string) {
 		// ファイルがすでにあるとき
 		file, err := os.ReadFile(jsonFile)
 		if err != nil {
-			log.Println("Failed to read download history, ", err)
-			return
+			return fmt.Errorf("failed to read download history: %v", err)
 		}
 		// dlogsにfileの内容を読み込む
 		if err := json.Unmarshal(file, &dlogs); err != nil {
-			log.Println("Failed to unmarshal download history, ", err)
-			return
+			return fmt.Errorf("failed to unmarshal download history: %v", err)
 		}
 	}
 	// isReactiveはtools/README.mdを読んで確認する
@@ -155,18 +150,17 @@ func downloadLogging(url string) {
 
 	jsonData, err := json.MarshalIndent(dlogs, "", "  ")
 	if err != nil {
-		log.Println("Failed to marshal download logging, ", err)
-		return
+		return fmt.Errorf("failed to marshal download logging: %v", err)
 	}
 	// ファイルに書き込む
 	if err := os.WriteFile(jsonFile, jsonData, 0644); err != nil {
-		log.Println("Failed to write download logging to json file, ", err)
-		return
+		return fmt.Errorf("failed to write download logging to json file: %v", err)
 	}
 	fmt.Println("Wrote download logging to json file")
 
 	// tools内のgen, vis, tester をbuild
 	buildTools()
+	return nil
 }
 
 // removeOldDownloadLogsは、dlogsを並べ替えて、ディレクトリが同じものを探して、最も新しい記録以外を消す
