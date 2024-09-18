@@ -69,8 +69,14 @@ func Execute() error {
 			return err
 		}
 	case setupcloud.FullCommand():
-		mkDirCompilerBase()
-		mkDirWorkerBase()
+		err := mkDirCompilerBase()
+		if err != nil {
+			return err
+		}
+		err = mkDirWorkerBase()
+		if err != nil {
+			return err
+		}
 	// Test run test case
 	// test と　tests 時の共通処理
 	case test.FullCommand(), tests.FullCommand():

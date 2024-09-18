@@ -146,7 +146,11 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 				datas[i].Delete("stdErr")
 			}
 		}
-		DisplayTable(datas)
+		err := DisplayTable(datas)
+		if err != nil {
+			log.Println("Error DisplayTable:", err)
+			// 表示できないけど、結果は出力したいので、続行
+		}
 	}
 	if len(errSeeds) > 0 {
 		fmt.Fprintln(os.Stderr, "Errors:", errSeeds)
@@ -190,10 +194,16 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 	}
 
 	if jsonOutput != nil && *jsonOutput {
-		JsonOutput(datas)
+		err := JsonOutput(datas)
+		if err != nil {
+			log.Println("Error JsonOutput:", err)
+		}
 	}
 	if csvOutput != nil && *csvOutput {
-		CsvOutput(datas)
+		err := CsvOutput(datas)
+		if err != nil {
+			log.Println("Error CsvOutput:", err)
+		}
 	}
 }
 

@@ -32,7 +32,7 @@ func extractEmbeddedFiles(embeddedFS embed.FS, sourcdDir, targetDir string) erro
 		}
 	}
 	// embeddedFSからファイルを取得
-	fs.WalkDir(embeddedFS, sourcdDir, func(path string, d fs.DirEntry, err error) error {
+	err := fs.WalkDir(embeddedFS, sourcdDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -59,5 +59,5 @@ func extractEmbeddedFiles(embeddedFS embed.FS, sourcdDir, targetDir string) erro
 		}
 		return nil
 	})
-	return nil
+	return err
 }
