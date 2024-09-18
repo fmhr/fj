@@ -14,7 +14,7 @@ import (
 )
 
 func init() {
-	log.SetFlags(log.Lshortfile)
+	// flagのパース前にinitが実行されることに注意
 }
 
 var (
@@ -28,10 +28,9 @@ var (
 
 	setupcloud = fj.Command("setupCloud", "Generate Dockerfile and gcloud build files for cloud mode.")
 
-	test  = fj.Command("test", "Run test case.").Alias("t")
-	cmd   = test.Arg("cmd", "Exe Cmd.").Required().String()
-	seed  = test.Flag("seed", "Set Seed. default : 0.").Short('s').Default("0").Int()
-	args1 = test.Flag("args", "Command line arguments.").Strings()
+	test = fj.Command("test", "Run test case.").Alias("t")
+	cmd  = test.Arg("cmd", "Exe Cmd.").Required().String()
+	seed = test.Flag("seed", "Set Seed. default : 0.").Short('s').Default("0").Int()
 
 	tests        = fj.Command("tests", "Run test cases.").Alias("tt")
 	cmd2         = tests.Arg("cmd", "Execute command").Required().String()
@@ -56,11 +55,14 @@ var (
 )
 
 func Execute() error {
+	// Parse command line arguments
+	result := kingpin.MustParse(fj.Parse(os.Args[1:]))
+
 	if debug != nil && *debug {
 		log.Println("debug mode")
+		log.SetFlags(log.Lshortfile)
 	}
 
-	result := kingpin.MustParse(fj.Parse(os.Args[1:]))
 	switch result {
 	// Setup generate config file
 	case setupCmd.FullCommand():
@@ -163,9 +165,6 @@ func Execute() error {
 
 // updateConfig はコマンドライン引数でconfigを更新する
 func updateConfig(config *setup.Config) {
-	if *args1 != nil && len(*args1) > 0 {
-		config.Args = *args1
-	}
 	if args2 != nil && len(*args2) > 0 {
 		config.Args = *args2
 	}
