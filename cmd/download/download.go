@@ -32,7 +32,7 @@ func Download(urlStr string) error {
 	if err := DownloadLoacaTesterZip(ac.Client, urlStr); err != nil {
 		return fmt.Errorf("failed to download loacatester.zip:%v", err)
 	}
-	fmt.Println("Downloaded loacatester.zip")
+	fmt.Println("[SUCCESS]Download loacatester.zip")
 	defer func() {
 		if err := os.Remove("loacatester.zip"); err != nil {
 			log.Println("Failed to remove loacatester.zip")
