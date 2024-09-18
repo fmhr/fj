@@ -5,21 +5,24 @@ import (
 	"runtime"
 )
 
-// stackTraceEntry はスタックトレースの構造体
+// stackTraceEntry
 type StackTraceEntry struct {
 	File string `json:"file"`
 	Line int    `json:"line"`
 	Func string `json:"func"`
 }
 
-// StackTraceError はスタックトレースを含むエラー
+// StackTraceError
 type StackTraceError struct {
 	Message    string            `json:"message"`
 	StackTrace []StackTraceEntry `json:"stackTrace"`
 }
 
-// Error はエラーを文字列に変換する
+// Error エラーを文字列に変換する
 func (e *StackTraceError) Error() string {
+	if debug == nil || !*debug {
+		return e.Message
+	}
 	starckTraceStr := ""
 	for _, entry := range e.StackTrace {
 		starckTraceStr += fmt.Sprintf("File: %s, Line: %d,  Func:%s\n", entry.File, entry.Line, entry.Func)
@@ -31,7 +34,7 @@ func (e *StackTraceError) Error() string {
 // 2. 既存のエラーにスタックトレースを追加する NewStackTraceError2(err, "")
 //     errorが既にスタックトレースを含んでいる場合は追加しない message = err.Error()
 
-// NewStackTraceError はスタックトレースを含むエラーを生成する
+// NewStackTraceError スタックトレースを含むエラーを生成する
 func NewStackTraceError(msg string) error {
 	pc := make([]uintptr, 50)
 	n := runtime.Callers(2, pc) // runtimeとNewStackTraceErrorをスキップ
