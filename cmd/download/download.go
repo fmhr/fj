@@ -6,31 +6,31 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
 	"sort"
-	"strings"
 	"time"
 )
 
 // Download tester file from URL.
-func Download(url string) {
+func Download(urlStr string) error {
 	// check if url is valid
-	if !strings.HasPrefix(url, "http") {
-		fmt.Println("Invalid URL")
-		return
+	u, err := url.Parse(urlStr)
+	if err != nil || u.Scheme == "" || u.Host == "" {
+		return fmt.Errorf("invalid URL: %s", urlStr)
 	}
+	u.RawQuery = ""
+	urlStr = u.String()
+
 	ac := NewAtCoderClient("", "")
 	// login to atcoder
 	if err := ac.Login(); err != nil {
-		fmt.Println("Failed to login")
-		return
+		return fmt.Errorf("failed to login:%v", err)
 	}
-	if err := DownloadLoacaTesterZip(ac.Client, url); err != nil {
-		fmt.Println(err.Error())
-		fmt.Println("Failed to download loacatester.zip")
-		return
+	if err := DownloadLoacaTesterZip(ac.Client, urlStr); err != nil {
+		return fmt.Errorf("failed to download loacatester.zip:%v", err)
 	}
 	fmt.Println("Downloaded loacatester.zip")
 	defer func() {
@@ -39,12 +39,11 @@ func Download(url string) {
 		}
 	}()
 	if err := unzip("loacatester.zip", ""); err != nil {
-		log.Println(err.Error())
-		fmt.Println("Failed to unzip loacatester.zip")
-		return
+		return fmt.Errorf("failed to unzip loacatester.zip:%v", err)
 	}
 	fmt.Println("Unzipped loacatester.zip")
-	downloadLogging(url) // ダウンロード履歴をログに記録
+	downloadLogging(urlStr) // ダウンロード履歴をログに記録
+	return nil
 }
 
 func DownloadLoacaTesterZip(client *http.Client, url string) error {

@@ -137,7 +137,7 @@ func Execute() error {
 			RunParallel(config, seeds)
 		}
 	case downloadcmd.FullCommand():
-		download.Download(*testerURL)
+		return download.Download(*testerURL)
 	case login.FullCommand():
 		download.Login(*loginurl, *username, *password)
 	case checkReactive.FullCommand():
