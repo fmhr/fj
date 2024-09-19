@@ -29,7 +29,6 @@ func buildTools() error {
 func runCmd(cmds string) error {
 	cmd := exec.Command("sh", "-c", cmds)
 	output, err := cmd.CombinedOutput()
-	fmt.Println("Cmd:", "sh -c", cmds)
 	if err != nil {
 		log.Println("CMD:", "sh -c", cmds)
 		log.Println("Output:", string(output))
