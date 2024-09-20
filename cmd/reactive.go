@@ -9,11 +9,7 @@ import (
 )
 
 // ReactiveRun はreactive=trueのときに使う
-func ReactiveRun(ctf *setup.Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
-	return reactiveRun(ctf, seed)
-}
-
-func reactiveRun(ctf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, any], err error) {
+func ReactiveRun(ctf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, any], err error) {
 	// 出力フォルダがない場合、作成
 	err = createDirIfNotExist(ctf.OutfilePath)
 	if err != nil {
@@ -39,8 +35,8 @@ func reactiveRun(ctf *setup.Config, seed int) (pair *orderedmap.OrderedMap[strin
 	for k, v := range testerDate {
 		pair.Set(k, v)
 	}
-	pair.Set("stdErr", out)
-	pair.Set("result", timeout)
+	//pair.Set("stdErr", out)
+	//pair.Set("result", timeout)
 	if timeout {
 		pair.Set("Score", 0)
 		pair.Set("time", float64(ctf.TimeLimitMS/1000))
@@ -50,7 +46,7 @@ func reactiveRun(ctf *setup.Config, seed int) (pair *orderedmap.OrderedMap[strin
 
 // reactiveRunCmd はreactive=trueのときに使う
 func reactiveRunCmd(ctf *setup.Config, seed int) ([]byte, bool, error) {
-	cmd := setup.LanguageSets[ctf.Language].ExeCmd
+	cmd := ctf.ExecuteCmd
 	infile := ctf.InfilePath + fmt.Sprintf("%04d.txt", seed)
 	outfile := ctf.OutfilePath + fmt.Sprintf("%04d.txt", seed)
 	setsArgs := setArgs(ctf.Args) // コマンドオプションの追加
