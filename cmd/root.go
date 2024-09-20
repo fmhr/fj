@@ -39,12 +39,12 @@ var (
 	downloadcmd = fj.Command("download", "Download tester file from URL.").Alias("d")
 	testerURL   = downloadcmd.Arg("url", "Tester file URL.").Required().String()
 	// login to atcoder
-	login    = fj.Command("login", "Login to fj.").Alias("l")
+	login    = fj.Command("login", "Log in to AtCoder.").Alias("l")
 	username = login.Flag("username", "Username.").Required().Short('u').String()
 	password = login.Flag("password", "Password.").Required().Short('p').String()
 	loginurl = login.Arg("url", "URL.").Default("https://atcoder.jp/login?").String()
 	// logout
-	logout = fj.Command("logout", "Logout from fj.")
+	logout = fj.Command("logout", "Log out from AtCoder.")
 	// check reactive 開発テスト用
 	checkReactive = fj.Command("checkReactive", "Check if tester is reactive.")
 )
@@ -137,7 +137,7 @@ func Execute() error {
 	case downloadcmd.FullCommand():
 		return download.Download(*testerURL)
 	case login.FullCommand():
-		download.Login(*loginurl, *username, *password)
+		return download.Login(*loginurl, *username, *password)
 	case logout.FullCommand():
 		download.Logout()
 	case checkReactive.FullCommand():
