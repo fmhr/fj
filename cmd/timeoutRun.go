@@ -11,7 +11,7 @@ import (
 
 // runCommandWithTimeout は指定されたタイムアウトでコマンドを実行し、標準出力と標準エラー出力の結合された内容と結果文字列、およびエラーを返す
 // ここのタイムアウトは強制終了で、問題のTLEとは異なる
-// return output, timeout error
+// windowsの場合、にいくつか差異がある
 func runCommandWithTimeout(cmdStrings []string, timelimitMS int) ([]byte, bool, error) {
 	if timelimitMS == 0 {
 		return nil, false, fmt.Errorf("timelimitMS must be greater than 0")
