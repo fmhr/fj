@@ -14,7 +14,10 @@ func TestFormatFloat(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		result := formatFloat(test.input)
+		result, err := formatFloat(test.input)
+		if err != nil {
+			t.Errorf("Error: %s", err)
+		}
 		if result != test.expected {
 			t.Errorf("Expected %s for input %f, but got %s", test.expected, test.input, result)
 		}

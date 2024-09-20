@@ -66,7 +66,8 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 				if err != nil {
 					errorChan <- fmt.Sprintf("Run error: seed=%d %v\n", seed, err)
 					errorSeedChan <- seed
-					cancel() // ここでコンテキストをキャンセルにする
+					log.Printf("seed=%d has Error %v\n", seed, err)
+					//cancel() // ここでコンテキストをキャンセルにする(すべてのごるーちんの停止)
 					return
 				}
 				// 後処理
@@ -94,6 +95,15 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 	logScore := 0.0
 	zeroSeeds := make([]int, 0)
 	tleSeeds := make([]int, 0)
+	// datasのチェック
+	//	for i, data := range datas {
+	////data := datas[i]
+	//keys := data.Keys()
+	//for _, key := range keys {
+	//v, ok := data.Get(key)
+	//log.Println(i, key, v, ok)
+	//}
+	//}
 	for i := 0; i < len(datas); i++ {
 		seed, ok := datas[i].Get("seed")
 		if !ok {
@@ -129,16 +139,29 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 			}
 		}
 	}
-	if displayTable != nil && *displayTable {
+	// テーブル表示 代替を考えるまでtrue
+	if true {
 		// delete stdErr
 		for i := 0; i < len(datas); i++ {
 			if datas[i] != nil {
 				datas[i].Delete("stdErr")
 			}
 		}
-		DisplayTable(datas)
+		err := DisplayTable(datas)
+		if err != nil {
+			log.Println("Error DisplayTable:", err)
+			// 表示できないけど、結果は出力したいので、続行
+		}
 	}
-	fmt.Fprintln(os.Stderr, "Errors:", errSeeds, "Zeros:", zeroSeeds, "TLEs:", tleSeeds)
+	if len(errSeeds) > 0 {
+		fmt.Fprintln(os.Stderr, "Errors:", errSeeds)
+	}
+	if len(zeroSeeds) > 0 {
+		fmt.Fprintln(os.Stderr, "Zeros:", zeroSeeds)
+	}
+	if len(tleSeeds) > 0 {
+		fmt.Fprintln(os.Stderr, "TLEs:", tleSeeds)
+	}
 	// timeがあれば、平均と最大を表示
 	_, exsit := datas[0].Get("time")
 	timeNotFound := 0
@@ -159,23 +182,23 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 			}
 		}
 		sumTime /= float64(len(datas) - len(errSeeds) - timeNotFound)
-		fmt.Fprintf(os.Stderr, "avarageTime=%.2f  maxTime=%.2f\n", sumTime, maxTime)
+		fmt.Fprintf(os.Stderr, "(Time)avarage:%.2f  max:%.2f\n", sumTime, maxTime)
 	}
 	avarageScore := sumScore / float64(len(datas)-len(errSeeds))
 	p := message.NewPrinter(language.English)
-	p.Fprintf(os.Stderr, "(Score)sum=%.2f avarage=%.2f log=%.2f\n", sumScore, avarageScore, logScore)
-
-	if Logscore != nil && *Logscore {
-		fmt.Printf("%.4f\n", logScore)
-	} else {
-		fmt.Printf("%.2f\n", sumScore)
-	}
+	p.Fprintf(os.Stderr, "(Score)avarage:%.2f sum:%.2f\n", avarageScore, sumScore)
 
 	if jsonOutput != nil && *jsonOutput {
-		JsonOutput(datas)
+		err := JsonOutput(datas)
+		if err != nil {
+			log.Println("Error JsonOutput:", err)
+		}
 	}
 	if csvOutput != nil && *csvOutput {
-		CsvOutput(datas)
+		err := CsvOutput(datas)
+		if err != nil {
+			log.Println("Error CsvOutput:", err)
+		}
 	}
 }
 

@@ -14,11 +14,11 @@ import (
 )
 
 func init() {
-	log.SetFlags(log.Lshortfile)
+	// flagのパース前にinitが実行されることに注意
 }
 
 var (
-	fj         = kingpin.New("fj", "fj is a command line tool for competitive programming.")
+	fj         = kingpin.New("fj", "fj is a command line tool for AtCoder Heuristic Contest.")
 	debug      = fj.Flag("debug", "Enable debug mode.").Default("false").Bool()
 	cloud      = fj.Flag("cloud", "Enable cloud mode.").Default("false").Bool()
 	jsonOutput = fj.Flag("json", "Output json format.").Default("false").Bool()
@@ -28,52 +28,60 @@ var (
 
 	setupcloud = fj.Command("setupCloud", "Generate Dockerfile and gcloud build files for cloud mode.")
 
-	test  = fj.Command("test", "Run test case.")
-	seed  = test.Arg("seed", "Seed value.").Default("0").Int()
-	args1 = test.Flag("args", "Command line arguments.").Strings()
-
-	tests        = fj.Command("tests", "Run test cases.")
-	seed2        = tests.Arg("seed", "Seed value.").Int()
-	args2        = tests.Flag("args", "Command line arguments.").Strings()
-	start        = tests.Flag("start", "Start seed value.").Default("0").Short('s').Int()
-	end          = tests.Flag("end", "End seed value.").Default("10").Short('e').Int()
-	jobs         = tests.Flag("jobs", "Number of parallel jobs.").Int()
-	displayTable = tests.Flag("table", "Output table format.").Default("true").Bool()
-	Logscore     = tests.Flag("logscore", "Output score log.").Default("false").Bool()
+	// test command
+	test     = fj.Command("test", "Run test case.").Alias("t")
+	cmd      = test.Arg("cmd", "Exe Cmd.").Required().String()
+	seed     = test.Flag("seed", "Set Seed. default : 0.").Short('s').Default("0").Int()
+	count    = test.Flag("count", "Number of test cases.").Short('n').Default("1").Int()
+	parallel = test.Flag("parallel", "Number of parallel jobs.").Short('p').Default("1").Int()
 
 	// downloadcmd tester file from URL
 	downloadcmd = fj.Command("download", "Download tester file from URL.").Alias("d")
 	testerURL   = downloadcmd.Arg("url", "Tester file URL.").Required().String()
 	// login to atcoder
-	login    = fj.Command("login", "Login to fj.").Alias("l")
+	login    = fj.Command("login", "Log in to AtCoder.").Alias("l")
 	username = login.Flag("username", "Username.").Required().Short('u').String()
 	password = login.Flag("password", "Password.").Required().Short('p').String()
 	loginurl = login.Arg("url", "URL.").Default("https://atcoder.jp/login?").String()
+	// logout
+	logout = fj.Command("logout", "Log out from AtCoder.")
 	// check reactive 開発テスト用
 	checkReactive = fj.Command("checkReactive", "Check if tester is reactive.")
 )
 
-func Execute() {
+func Execute() error {
+	// Parse command line arguments
+	result := kingpin.MustParse(fj.Parse(os.Args[1:]))
+
 	if debug != nil && *debug {
 		log.Println("debug mode")
+		log.SetFlags(log.Lshortfile)
+	} else {
+		log.SetFlags(0)
 	}
 
-	result := kingpin.MustParse(fj.Parse(os.Args[1:]))
 	switch result {
 	// Setup generate config file
 	case setupCmd.FullCommand():
 		err := setup.GenerateConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 	case setupcloud.FullCommand():
-		mkDirCompilerBase()
-		mkDirWorkerBase()
+		err := mkDirCompilerBase()
+		if err != nil {
+			return err
+		}
+		err = mkDirWorkerBase()
+		if err != nil {
+			return err
+		}
 	// Test run test case
-	case test.FullCommand(), tests.FullCommand():
+	// test と　tests 時の共通処理
+	case test.FullCommand():
 		config, err := setup.SetConfig()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		// config を読み込む
 		updateConfig(config)
@@ -81,15 +89,14 @@ func Execute() {
 		if config.CloudMode {
 			err = CloudCompile(config)
 			if err != nil {
-				log.Fatal("Cloud mode Compile error:", err)
+				log.Println("Cloud mode Compile error:", err)
+				return err
 			}
 		}
-		// select run
-		switch result {
-		case test.FullCommand():
+		if *count == 1 {
 			rtn, err := RunSelector(config, *seed)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 			r, ok := rtn.Get("result")
 			if ok {
@@ -117,44 +124,30 @@ func Execute() {
 			}
 			fmt.Fprintln(os.Stderr, "")
 			Score, _ := rtn.Get("Score")
-			fmt.Println(Score)
-			stderr, ok := rtn.Get("stdErr")
-			if ok {
-				log.Print("StdErr:------->\n", string(stderr.([]byte)))
-				log.Println("ここまで<-----")
-			}
-		case tests.FullCommand():
-			// seed2 が指定されていれば end=seed2
-			if seed2 != nil && *seed2 != 0 {
-				*start = 0
-				*end = *seed2
-			}
-			// start, endが指定されていれば、その範囲のシードを並列実行
-			seeds := make([]int, *end-*start)
-			for i := *start; i < *end; i++ {
-				seeds[i-*start] = i
+			fmt.Printf("%.0f\n", Score)
+		} else {
+			startSeed := *seed
+			config.Jobs = *parallel
+			seeds := make([]int, *count)
+			for i := startSeed; i < startSeed+*count; i++ {
+				seeds[i-startSeed] = i
 			}
 			RunParallel(config, seeds)
 		}
 	case downloadcmd.FullCommand():
-		download.Download(*testerURL)
+		return download.Download(*testerURL)
 	case login.FullCommand():
-		download.Login(*loginurl, *username, *password)
+		return download.Login(*loginurl, *username, *password)
+	case logout.FullCommand():
+		download.Logout()
 	case checkReactive.FullCommand():
 		fmt.Println("isReactive:", download.IsReactive())
 	}
+	return nil
 }
 
 // updateConfig はコマンドライン引数でconfigを更新する
 func updateConfig(config *setup.Config) {
-	if *args1 != nil && len(*args1) > 0 {
-		config.Args = *args1
-	}
-	if args2 != nil && len(*args2) > 0 {
-		config.Args = *args2
-	}
-	if jobs != nil && *jobs > 0 {
-		config.Jobs = *jobs
-	}
 	config.CloudMode = config.CloudMode || *cloud
+	config.ExecuteCmd = *cmd
 }

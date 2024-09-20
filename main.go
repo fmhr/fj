@@ -1,7 +1,16 @@
 package main
 
-import "github.com/fmhr/fj/cmd"
+import (
+	"fmt"
+	"os"
+
+	"github.com/fmhr/fj/cmd"
+)
 
 func main() {
-	cmd.Execute()
+	err := cmd.Execute()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 }

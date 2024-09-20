@@ -6,45 +6,43 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
 	"sort"
-	"strings"
 	"time"
 )
 
 // Download tester file from URL.
-func Download(url string) {
+func Download(urlStr string) error {
 	// check if url is valid
-	if !strings.HasPrefix(url, "http") {
-		fmt.Println("Invalid URL")
-		return
+	u, err := url.Parse(urlStr)
+	if err != nil || u.Scheme == "" || u.Host == "" {
+		return fmt.Errorf("invalid URL: %s", urlStr)
 	}
+	u.RawQuery = ""
+	urlStr = u.String()
+
 	ac := NewAtCoderClient("", "")
 	// login to atcoder
 	if err := ac.Login(); err != nil {
-		fmt.Println("Failed to login")
-		return
+		return fmt.Errorf("failed to login:%v", err)
 	}
-	if err := DownloadLoacaTesterZip(ac.Client, url); err != nil {
-		fmt.Println(err.Error())
-		fmt.Println("Failed to download loacatester.zip")
-		return
+	if err := DownloadLoacaTesterZip(ac.Client, urlStr); err != nil {
+		return fmt.Errorf("failed to download loacatester.zip:%v", err)
 	}
-	fmt.Println("Downloaded loacatester.zip")
+	fmt.Println("[SUCCESS]Download loacatester.zip")
 	defer func() {
 		if err := os.Remove("loacatester.zip"); err != nil {
 			log.Println("Failed to remove loacatester.zip")
 		}
 	}()
 	if err := unzip("loacatester.zip", ""); err != nil {
-		log.Println(err.Error())
-		fmt.Println("Failed to unzip loacatester.zip")
-		return
+		return fmt.Errorf("failed to unzip loacatester.zip:%v", err)
 	}
 	fmt.Println("Unzipped loacatester.zip")
-	downloadLogging(url) // ダウンロード履歴をログに記録
+	return downloadLogging(urlStr) // ダウンロード履歴をログに記録
 }
 
 func DownloadLoacaTesterZip(client *http.Client, url string) error {
@@ -96,7 +94,7 @@ type DownloadLogging struct {
 	Reactive  bool      `json:"reactive"`
 }
 
-func downloadLogging(url string) {
+func downloadLogging(url string) error {
 	dlog := DownloadLogging{
 		TimeStamp: time.Now(),
 		Directory: "",
@@ -105,22 +103,19 @@ func downloadLogging(url string) {
 	// カレントディレクトリを取得
 	dir, err := os.Getwd()
 	if err != nil {
-		log.Println("Failed to get current directory, ", err)
-		return
+		return fmt.Errorf("failed to get current directory: %v", err)
 	}
 	dlog.Directory = dir
 
 	appName := "fmhr-judge-tools"
 	cacheDir, err := os.UserCacheDir()
 	if err != nil {
-		log.Println("Failed to get user cache directory, ", err)
-		return
+		return fmt.Errorf("failed to get user cache directory: %v", err)
 	}
 	// キャッシュディレクトリを作成
 	cacheDir = filepath.Join(cacheDir, appName)
 	if err := os.MkdirAll(cacheDir, 0755); err != nil {
-		log.Println("Failed to create cache directory, ", err)
-		return
+		return fmt.Errorf("failed to create cache directory: %v", err)
 	}
 	// jsonファイルのパス
 	jsonFile := filepath.Join(cacheDir, "download-history.json")
@@ -131,13 +126,11 @@ func downloadLogging(url string) {
 		// ファイルがすでにあるとき
 		file, err := os.ReadFile(jsonFile)
 		if err != nil {
-			log.Println("Failed to read download history, ", err)
-			return
+			return fmt.Errorf("failed to read download history: %v", err)
 		}
 		// dlogsにfileの内容を読み込む
 		if err := json.Unmarshal(file, &dlogs); err != nil {
-			log.Println("Failed to unmarshal download history, ", err)
-			return
+			return fmt.Errorf("failed to unmarshal download history: %v", err)
 		}
 	}
 	// isReactiveはtools/README.mdを読んで確認する
@@ -156,18 +149,16 @@ func downloadLogging(url string) {
 
 	jsonData, err := json.MarshalIndent(dlogs, "", "  ")
 	if err != nil {
-		log.Println("Failed to marshal download logging, ", err)
-		return
+		return fmt.Errorf("failed to marshal download logging: %v", err)
 	}
 	// ファイルに書き込む
 	if err := os.WriteFile(jsonFile, jsonData, 0644); err != nil {
-		log.Println("Failed to write download logging to json file, ", err)
-		return
+		return fmt.Errorf("failed to write download logging to json file: %v", err)
 	}
 	fmt.Println("Wrote download logging to json file")
 
 	// tools内のgen, vis, tester をbuild
-	buildTools()
+	return buildTools()
 }
 
 // removeOldDownloadLogsは、dlogsを並べ替えて、ディレクトリが同じものを探して、最も新しい記録以外を消す

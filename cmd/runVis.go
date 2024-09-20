@@ -20,9 +20,11 @@ func RunVis(cnf *setup.Config, seed int) (*orderedmap.OrderedMap[string, any], e
 func runVis(cnf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, any], err error) {
 	out, _, err := normalRun(cnf, seed)
 	if err != nil {
-		log.Println("Error: ", err, "\nout:", string(out))
-		err = fmt.Errorf("Error: %v\nout: %s", err, string(out))
-		return nil, WrapError(err)
+		//log.Println("Error: ", err)
+		if len(out) > 0 {
+			log.Println("out:", string(out))
+		}
+		return nil, WrapError(fmt.Errorf("%w", err))
 	}
 	pair = orderedmap.NewOrderedMap[string, any]()
 	pair.Set("seed", seed)
@@ -38,12 +40,17 @@ func runVis(cnf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, an
 
 	outVis, err := vis(cnf, infile, outfile)
 	if err != nil {
-		//return nil, TraceMsg(fmt.Errorf("failed: %v", err).Error())
+		log.Println("vis error:", err)
 		return nil, err
 	}
 	sc, err := extractData(string(outVis))
 	if err != nil {
 		return nil, err
+	}
+
+	// Score=0の場合は出力を表示
+	if sc["Score"] == 0 {
+		log.Println("Score=0 out:", string(outVis))
 	}
 
 	for k, v := range sc {
@@ -60,7 +67,8 @@ func vis(cnf *setup.Config, infile, outfile string) ([]byte, error) {
 	cmd := exec.Command(cmdStrings[0], cmdStrings[1:]...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return nil, WrapError(fmt.Errorf("failed: %v\nout: %s", err, string(out)))
+		log.Printf("failed: %v\nout: %s cmd: %s\n", err, string(out), cmdStrings)
+		return nil, WrapError(fmt.Errorf("failed: %v\nout: %s cmd: %s", err, string(out), cmdStrings))
 	}
 	return out, nil
 }

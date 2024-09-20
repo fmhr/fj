@@ -16,19 +16,30 @@ import (
 	"golang.org/x/net/publicsuffix"
 )
 
-func Login(url string, username string, password string) {
+func Logout() {
+	dir, err := getConfigDir()
+	if err != nil {
+		log.Println("failed to get config dir:", err)
+		return
+	}
+	cookieFile := filepath.Join(dir, "cookies.json")
+	log.Println("remove cookies:", cookieFile)
+	if err := os.Remove(cookieFile); err != nil {
+		log.Println("failed to remove cookies:", err)
+		return
+	}
+	fmt.Println("success")
+}
+
+func Login(url string, username string, password string) error {
 	// すでにログインしているかどうか
 	client := NewAtCoderClient(username, password)
 	// ログインしていない場合はログイン
 	if err := client.Login(); err != nil {
-		log.Printf("failed to login:%v", err)
-		return
-	}
-	if !client.IsLoggedIn() {
-		fmt.Println("failed to login")
-		return
+		return err
 	}
 	fmt.Println("success")
+	return nil
 }
 
 const (
@@ -220,6 +231,7 @@ func saveCookies(jar *cookiejar.Jar) error {
 		return fmt.Errorf("failed to create file:%v", err)
 	}
 	defer file.Close()
+	log.Println("save cookies:", cookieFile)
 	encoder := json.NewEncoder(file)
 	encoder.SetIndent("", "  ")
 	baseURL, _ := url.Parse("https://atcoder.jp")

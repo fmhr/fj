@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"reflect"
@@ -13,9 +14,9 @@ import (
 )
 
 // DisplayTable はデータをテーブル形式で表示する
-func DisplayTable(data []*orderedmap.OrderedMap[string, any]) {
+func DisplayTable(data []*orderedmap.OrderedMap[string, any]) error {
 	if len(data) == 0 {
-		return
+		return nil
 	}
 
 	table := tablewriter.NewWriter(os.Stderr)
@@ -49,11 +50,17 @@ func DisplayTable(data []*orderedmap.OrderedMap[string, any]) {
 				//continue
 				value = -1
 			}
-			row = append(row, formatFloat(value))
+			v, err := formatFloat(value)
+			if err != nil {
+				log.Println("Error formatFloat:", err)
+				return err
+			}
+			row = append(row, v)
 		}
 		table.Append(row)
 	}
 	table.Render()
+	return nil
 }
 
 // extractHeaders はデータからヘッダーを抽出する
@@ -67,20 +74,19 @@ func extractHeaders(data []*orderedmap.OrderedMap[string, any]) []string {
 	return headers
 }
 
-func formatFloat(value any) string {
+func formatFloat(value any) (string, error) {
 	switch v := value.(type) {
 	case int:
-		return strconv.Itoa(v)
+		return strconv.Itoa(v), nil
 	case float64:
 		// 小数点以下が0の場合は整数に変換
 		if v == float64(int(v)) {
-			return strconv.Itoa(int(v))
+			return strconv.Itoa(int(v)), nil
 		}
-		return strconv.FormatFloat(v, 'f', 3, 64)
+		return strconv.FormatFloat(v, 'f', 3, 64), nil
 	case string:
-		return v
-	default:
-		log.Fatal("invalid type")
+		return v, nil
 	}
-	return ""
+	log.Println("invalid type")
+	return "", fmt.Errorf("invalid type")
 }

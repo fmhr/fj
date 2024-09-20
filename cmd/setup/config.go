@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/fmhr/fj/cmd/download"
 	"github.com/pelletier/go-toml/v2"
 )
 
@@ -24,6 +25,7 @@ var ErrConfigNotFound = fmt.Errorf("%s not found, please run `fj init`", CONFIG_
 // ソースファイルのパス、バイナリーパスが不正確だと、コンパイルコマンド、実行コマンドが正常に動作しない
 type Config struct {
 	Language           string   `toml:"Language"`
+	ExecuteCmd         string   `toml:"ExecuteCmd"`         // 実行コマンド
 	Args               []string `toml:"Args"`               // 実行コマンドのオプション
 	Contest            string   `toml:"Contest"`            // コンテスト名
 	Reactive           bool     `toml:"Reactive"`           // 問題の種類
@@ -78,7 +80,10 @@ func GenerateConfig() error {
 // SetConfig はconfig.tomlを読み込む
 func SetConfig() (*Config, error) {
 	if !configExists() {
-		return &Config{}, ErrConfigNotFound
+		// configファイルがない場合(*これがv2のデフォルト)
+		// 最小限にする
+		conf := newConfig()
+		return &conf, nil
 	}
 	conf := &Config{}
 	file, err := os.Open(FJ_DIRECTORY + CONFIG_FILE)
@@ -106,4 +111,15 @@ func overWrite(config *Config) error {
 func configExists() bool {
 	_, err := os.Stat("fj/" + CONFIG_FILE)
 	return err == nil
+}
+
+func newConfig() (c Config) {
+	c.Reactive = download.IsReactive()
+	c.TesterPath = "tools/target/release/tester"
+	c.VisPath = "tools/target/release/vis"
+	c.GenPath = "tools/target/release/gen"
+	c.InfilePath = "tools/in/"
+	c.OutfilePath = "out/"
+	c.TimeLimitMS = 3000
+	return c
 }

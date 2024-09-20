@@ -14,24 +14,25 @@ var compilerFiles embed.FS
 //go:embed"../worker/script/*""
 var workerFiles embed.FS
 
-func mkDirCompilerBase() {
+func mkDirCompilerBase() error {
 	targetDir := "./fj/compiler/"
-	extractEmbeddedFiles(compilerFiles, "cmd/compiler/script", targetDir)
+	return extractEmbeddedFiles(compilerFiles, "cmd/compiler/script", targetDir)
 }
 
-func mkDirWorkerBase() {
+func mkDirWorkerBase() error {
 	targetDir := "./fj/worker/"
-	extractEmbeddedFiles(workerFiles, "cmd/worker/script", targetDir)
+	return extractEmbeddedFiles(workerFiles, "cmd/worker/script", targetDir)
 }
 
-func extractEmbeddedFiles(embeddedFS embed.FS, sourcdDir, targetDir string) {
+func extractEmbeddedFiles(embeddedFS embed.FS, sourcdDir, targetDir string) error {
 	if _, err := os.Stat(targetDir); os.IsNotExist(err) {
 		if err := os.MkdirAll(targetDir, 0777); err != nil {
-			log.Fatalf("Failed to create directory: %v", err)
+			log.Println("Failed to create directory")
+			return err
 		}
 	}
 	// embeddedFSからファイルを取得
-	fs.WalkDir(embeddedFS, sourcdDir, func(path string, d fs.DirEntry, err error) error {
+	err := fs.WalkDir(embeddedFS, sourcdDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -53,9 +54,10 @@ func extractEmbeddedFiles(embeddedFS embed.FS, sourcdDir, targetDir string) {
 
 		// ファイルを作成
 		if err := os.WriteFile(targetPath, content, 0644); err != nil {
-			log.Fatalf("failed to create file: %v", err)
+			log.Println("Failed to create file")
+			return err
 		}
 		return nil
 	})
-
+	return err
 }

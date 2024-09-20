@@ -11,7 +11,7 @@ import (
 )
 
 // CsvOutput csvファイルに出力する
-func CsvOutput(datas []*orderedmap.OrderedMap[string, any]) {
+func CsvOutput(datas []*orderedmap.OrderedMap[string, any]) error {
 	if _, err := os.Stat("fj/data"); os.IsNotExist(err) {
 		os.Mkdir("fj/data", 0777)
 	}
@@ -20,7 +20,7 @@ func CsvOutput(datas []*orderedmap.OrderedMap[string, any]) {
 
 	file, err := os.Create(filename)
 	if err != nil {
-		log.Fatal(":", err)
+		return err
 	}
 	defer file.Close()
 
@@ -30,7 +30,7 @@ func CsvOutput(datas []*orderedmap.OrderedMap[string, any]) {
 
 	heagders := append([]string{}, datas[0].Keys()...)
 	if err := writer.Write(heagders); err != nil {
-		log.Fatal(":", err)
+		return err
 	}
 
 	for _, data := range datas {
@@ -44,10 +44,11 @@ func CsvOutput(datas []*orderedmap.OrderedMap[string, any]) {
 			values = append(values, numToString(v))
 		}
 		if err := writer.Write(values); err != nil {
-			log.Fatal(":", err)
+			return err
 		}
 	}
 	log.Println("save csv file:", filename)
+	return nil
 }
 
 func numToString(num any) string {

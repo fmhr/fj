@@ -9,18 +9,14 @@ import (
 )
 
 // ReactiveRun はreactive=trueのときに使う
-func ReactiveRun(ctf *setup.Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
-	return reactiveRun(ctf, seed)
-}
-
-func reactiveRun(ctf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, any], err error) {
+func ReactiveRun(ctf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, any], err error) {
 	// 出力フォルダがない場合、作成
 	err = createDirIfNotExist(ctf.OutfilePath)
 	if err != nil {
 		return pair, err
 	}
 	// 実行
-	out, result, err := reactiveRunCmd(ctf, seed)
+	out, timeout, err := reactiveRunCmd(ctf, seed)
 	if err != nil {
 		log.Println(err)
 	}
@@ -39,9 +35,9 @@ func reactiveRun(ctf *setup.Config, seed int) (pair *orderedmap.OrderedMap[strin
 	for k, v := range testerDate {
 		pair.Set(k, v)
 	}
-	pair.Set("stdErr", out)
-	pair.Set("result", result)
-	if result == "TLE" {
+	//pair.Set("stdErr", out)
+	//pair.Set("result", timeout)
+	if timeout {
 		pair.Set("Score", 0)
 		pair.Set("time", float64(ctf.TimeLimitMS/1000))
 	}
@@ -49,18 +45,18 @@ func reactiveRun(ctf *setup.Config, seed int) (pair *orderedmap.OrderedMap[strin
 }
 
 // reactiveRunCmd はreactive=trueのときに使う
-func reactiveRunCmd(ctf *setup.Config, seed int) ([]byte, string, error) {
-	cmd := setup.LanguageSets[ctf.Language].ExeCmd
+func reactiveRunCmd(ctf *setup.Config, seed int) ([]byte, bool, error) {
+	cmd := ctf.ExecuteCmd
 	infile := ctf.InfilePath + fmt.Sprintf("%04d.txt", seed)
 	outfile := ctf.OutfilePath + fmt.Sprintf("%04d.txt", seed)
 	setsArgs := setArgs(ctf.Args) // コマンドオプションの追加
 	cmdStr := fmt.Sprintf("%s %s %s < %s > %s", ctf.TesterPath, cmd, setsArgs, infile, outfile)
 	cmdStrings := createCommand(cmdStr)
-	out, result, err := runCommandWithTimeout(cmdStrings, int(ctf.TimeLimitMS))
+	out, timeout, err := runCommandWithTimeout(cmdStrings, int(ctf.TimeLimitMS))
 	if err != nil {
 		log.Println("Error: ", err, "command:", cmdStr)
 	}
-	return out, result, err
+	return out, timeout, err
 }
 
 // setArgs return string
