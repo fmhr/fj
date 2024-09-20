@@ -6,7 +6,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 	"os/exec"
 	"syscall"
 	"time"
@@ -17,10 +16,10 @@ import (
 // return output, timeout error
 func runCommandWithTimeout(cmdStrings []string, timelimitMS int) ([]byte, bool, error) {
 	if timelimitMS == 0 {
-		panic("timelimitMS==0")
+		return nil, false, fmt.Errorf("timelimitMS must be greater than 0")
 	}
 	if len(cmdStrings) == 0 {
-		return nil, false, fmt.Errorf("cmdStrings must not be empty")
+		return nil, false, fmt.Errorf("empty command string is not allowed")
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timelimitMS)*time.Millisecond)
@@ -29,7 +28,7 @@ func runCommandWithTimeout(cmdStrings []string, timelimitMS int) ([]byte, bool, 
 	cmd := exec.CommandContext(ctx, cmdStrings[0], cmdStrings[1:]...)
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	cmd.Cancel = func() error {
-		return cmd.Process.Signal(os.Interrupt)
+		return syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
 	}
 	cmd.WaitDelay = 5 * time.Second
 	output, err := cmd.CombinedOutput()
@@ -40,7 +39,6 @@ func runCommandWithTimeout(cmdStrings []string, timelimitMS int) ([]byte, bool, 
 
 	// タイムアウト以外のエラーの場合
 	if err != nil {
-		//log.Println("command:", cmd.String(), "output:", string(output))
 		return output, false, fmt.Errorf("cmd.CombinedOutput() failed with: %v", err)
 	}
 	return output, false, nil
