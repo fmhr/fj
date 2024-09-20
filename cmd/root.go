@@ -43,6 +43,8 @@ var (
 	username = login.Flag("username", "Username.").Required().Short('u').String()
 	password = login.Flag("password", "Password.").Required().Short('p').String()
 	loginurl = login.Arg("url", "URL.").Default("https://atcoder.jp/login?").String()
+	// logout
+	logout = fj.Command("logout", "Logout from fj.")
 	// check reactive 開発テスト用
 	checkReactive = fj.Command("checkReactive", "Check if tester is reactive.")
 )
@@ -136,6 +138,8 @@ func Execute() error {
 		return download.Download(*testerURL)
 	case login.FullCommand():
 		download.Login(*loginurl, *username, *password)
+	case logout.FullCommand():
+		download.Logout()
 	case checkReactive.FullCommand():
 		fmt.Println("isReactive:", download.IsReactive())
 	}

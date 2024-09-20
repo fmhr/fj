@@ -16,6 +16,21 @@ import (
 	"golang.org/x/net/publicsuffix"
 )
 
+func Logout() {
+	dir, err := getConfigDir()
+	if err != nil {
+		log.Println("failed to get config dir:", err)
+		return
+	}
+	cookieFile := filepath.Join(dir, "cookies.json")
+	log.Println("remove cookies:", cookieFile)
+	if err := os.Remove(cookieFile); err != nil {
+		log.Println("failed to remove cookies:", err)
+		return
+	}
+	fmt.Println("success")
+}
+
 func Login(url string, username string, password string) {
 	// すでにログインしているかどうか
 	client := NewAtCoderClient(username, password)
