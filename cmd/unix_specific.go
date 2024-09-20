@@ -1,12 +1,10 @@
-//go:build linux || darwin
-// +build linux darwin
-
 package cmd
 
 import (
 	"context"
 	"fmt"
 	"os/exec"
+	"runtime"
 	"syscall"
 	"time"
 )
@@ -26,10 +24,18 @@ func runCommandWithTimeout(cmdStrings []string, timelimitMS int) ([]byte, bool, 
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, cmdStrings[0], cmdStrings[1:]...)
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+
+	if runtime.GOOS != "windows" {
+		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	}
+
 	cmd.Cancel = func() error {
+		if runtime.GOOS == "windows" {
+			return cmd.Process.Kill()
+		}
 		return syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
 	}
+
 	cmd.WaitDelay = 5 * time.Second
 	output, err := cmd.CombinedOutput()
 	// タイムアウトの場合
