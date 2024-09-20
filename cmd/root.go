@@ -54,6 +54,8 @@ func Execute() error {
 	if debug != nil && *debug {
 		log.Println("debug mode")
 		log.SetFlags(log.Lshortfile)
+	} else {
+		log.SetFlags(0)
 	}
 
 	switch result {
@@ -76,7 +78,6 @@ func Execute() error {
 	// test と　tests 時の共通処理
 	case test.FullCommand():
 		config, err := setup.SetConfig()
-		config.ExecuteCmd = *cmd
 		if err != nil {
 			return err
 		}
@@ -122,11 +123,6 @@ func Execute() error {
 			fmt.Fprintln(os.Stderr, "")
 			Score, _ := rtn.Get("Score")
 			fmt.Printf("%.0f\n", Score)
-			stderr, ok := rtn.Get("stdErr")
-			if ok {
-				log.Print("StdErr:------->\n", string(stderr.([]byte)))
-				log.Println("ここまで<-----")
-			}
 		} else {
 			startSeed := *seed
 			config.Jobs = *parallel
@@ -149,4 +145,5 @@ func Execute() error {
 // updateConfig はコマンドライン引数でconfigを更新する
 func updateConfig(config *setup.Config) {
 	config.CloudMode = config.CloudMode || *cloud
+	config.ExecuteCmd = *cmd
 }
