@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
-	"runtime"
-	"syscall"
 	"time"
 )
 
@@ -22,18 +20,14 @@ func runCommandWithTimeout(cmdStrings []string, timelimitMS int) ([]byte, bool, 
 
 	cmd := exec.CommandContext(ctx, cmdStrings[0], cmdStrings[1:]...)
 
-	if runtime.GOOS != "windows" {
-		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	// OS-specific setup
+	err := cmdCustom(cmd)
+
+	if err != nil {
+		return nil, false, fmt.Errorf("failed to set up command: %v", err)
 	}
 
-	cmd.Cancel = func() error {
-		if runtime.GOOS == "windows" {
-			return cmd.Process.Kill()
-		}
-		return syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
-	}
-
-	cmd.WaitDelay = 5 * time.Second
+	cmd.WaitDelay = 5 * time.Second // Wait 5 seconds before sending SIGKILL　子プロセスとのIOの完了を待つ
 	output, err := cmd.CombinedOutput()
 
 	if ctx.Err() == context.DeadlineExceeded {

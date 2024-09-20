@@ -30,11 +30,14 @@ func TestRunCommandWithTimeout(t *testing.T) {
 	t.Run("Test command timeout", func(t *testing.T) {
 		cmd := []string{"sleep", "2"}
 		_, result, err := runCommandWithTimeout(cmd, 500) // 500 ms
-		if err != nil {
-			t.Errorf("Did not expect error: %v", err)
-		}
+		//	if err != nil {
+		//	t.Errorf("Did not expect error: %v", err)
+		//}
 		if result == false {
 			t.Errorf("Expected result 'Timeout' for timeout, got %v", result)
+		}
+		if err == nil {
+			t.Error("Expected an error for timeout, but got none")
 		}
 	})
 
