@@ -1,1 +1,4 @@
-fj コマンドはあなたを助けません。
+# install
+```bash
+go install github.com/fmhr/fj@latest
+```
