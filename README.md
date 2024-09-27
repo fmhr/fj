@@ -74,10 +74,10 @@ gcloud Cloud にログインします。
 
 ```gcloud auth login```
 
-# 1. プロジェクトを作成して選択
+## 1. プロジェクトを作成して選択
 ```gcloud projects create PROJECT_NAME && gcloud config set project PROJECT_NAME```
 
-# 2. APIを有効化 (プロジェクト指定不要)
+## 2. APIを有効化
 
 ```
 gcloud services enable \
@@ -88,15 +88,15 @@ gcloud services enable \
 
 必要に応じてGoogle Cloud　のコンソールページから作成したプロジェクトを選択して、メニューの「お支払い」から「請求先アカウントにリンク」を選択します。
 
-DockerImageを保存するためのレジストリを作成
+## 3. DockerImageを保存するためのレジストリを作成
 
 ```gcloud artifacts repositories create REPOSITORY_NAME --repository-format=docker --location=asia-northeast1```
 
-コンパイル後の実行ファイルを保存するためのバケットを作成
+## 4. コンパイル後の実行ファイルを保存するためのバケットを作成
 
 ```gcloud storage buckets create gs://YOUR_BUCKET_NAME --location=asia-northeast1```
 
-Cloud Build サービスアカウントに Artifact Registry へのアクセス権限を付与 
+## 5. Cloud Build サービスアカウントに Artifact Registry へのアクセス権限を付与 
 
 ````
 gcloud projects add-iam-policy-binding PROJECT_ID \
