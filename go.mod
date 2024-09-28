@@ -3,7 +3,7 @@ module github.com/fmhr/fj
 go 1.23.1
 
 // これは開発用
-//replace gihub.com/fmhr/fj/cmd => ./cmd
+replace gihub.com/fmhr/fj/cmd => ./cmd
 
 require (
 	cloud.google.com/go/storage v1.43.0

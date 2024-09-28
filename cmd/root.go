@@ -45,8 +45,8 @@ var (
 	loginurl = login.Arg("url", "URL.").Default("https://atcoder.jp/login?").String()
 	// logout
 	logout = fj.Command("logout", "Log out from AtCoder.")
-	// check reactive 開発テスト用
-	checkReactive = fj.Command("checkReactive", "Check if tester is reactive.")
+	// info
+	info = fj.Command("info", "Show info.")
 )
 
 func Execute() error {
@@ -140,8 +140,10 @@ func Execute() error {
 		return download.Login(*loginurl, *username, *password)
 	case logout.FullCommand():
 		download.Logout()
-	case checkReactive.FullCommand():
+	case info.FullCommand():
 		fmt.Println("isReactive:", download.IsReactive())
+		cDir, _ := os.UserCacheDir()
+		fmt.Println("cacheDirectory:", cDir+"/fmhr-judge-tools")
 	}
 	return nil
 }
