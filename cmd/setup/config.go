@@ -120,6 +120,6 @@ func newConfig() (c Config) {
 	c.GenPath = "tools/target/release/gen"
 	c.InfilePath = "tools/in/"
 	c.OutfilePath = "out/"
-	c.TimeLimitMS = 3000
+	c.TimeLimitMS = 5000
 	return c
 }
