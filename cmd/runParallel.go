@@ -50,18 +50,25 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	go func() {
+		<-sigCh
+		fmt.Println("Received signal, cancelling all tasks")
+		cancel()
+	}()
+
 	for _, seed := range seeds {
-		wg.Add(1)
-		sem <- struct{}{}
-		currentlyRunningSeed.Store(seed, true)
-		time.Sleep(5 * time.Millisecond)
-		go func(seed int) {
-			defer wg.Done()
-			defer func() { <-sem }()
-			select {
-			case <-ctx.Done():
-				return // コンテキストがキャンセルされた場合、早期に終了
-			default:
+		select {
+		case <-ctx.Done():
+			fmt.Println("Cancelling all tasks")
+			return
+		default:
+			wg.Add(1)
+			sem <- struct{}{}
+			currentlyRunningSeed.Store(seed, true)
+			time.Sleep(5 * time.Millisecond)
+			go func(seed int) {
+				defer wg.Done()
+				defer func() { <-sem }()
 				data, err := RunSelector(cnf, seed)
 				if err != nil {
 					errorChan <- fmt.Sprintf("Run error: seed=%d %v\n", seed, err)
@@ -77,8 +84,8 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 				currentlyRunningSeed.Delete(seed)
 				datasMutex.Unlock()
 				printProgress(int(currentTaskCompleted), totalTask) // progressbar
-			}
-		}(seed)
+			}(seed)
+		}
 	}
 	wg.Wait()
 	fmt.Fprintf(os.Stderr, "\n") // Newline after progress bar
