@@ -26,8 +26,8 @@ func Download(urlStr string) error {
 
 	ac := NewAtCoderClient("", "")
 	// login to atcoder
-	if err := ac.Login(); err != nil {
-		return fmt.Errorf("failed to login:%v", err)
+	if !ac.IsLoggedIn() {
+		return fmt.Errorf("not logged in")
 	}
 	if err := DownloadLoacaTesterZip(ac.Client, urlStr); err != nil {
 		return fmt.Errorf("failed to download loacatester.zip:%v", err)
@@ -58,7 +58,8 @@ func DownloadLoacaTesterZip(client *http.Client, url string) error {
 	}
 
 	// リンクを抽出するための正規表現
-	re := regexp.MustCompile(`<a href="(https://img\.atcoder\.jp/[^"]+\.zip)">.*?(ローカル版|Local version).*?</a>`)
+	re := regexp.MustCompile(`<a href="(https://img\.atcoder\.jp/[^"]+\.zip(?:\?[^"]*)?)">.*?(ローカル版|Local version).*?</a>`)
+
 	match := re.FindSubmatch(body)
 	if match == nil {
 		return fmt.Errorf("failed to find download link")

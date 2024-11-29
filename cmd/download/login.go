@@ -132,7 +132,9 @@ func (c *AtCoderClient) Login() error {
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("failed to login:%d", resp.StatusCode)
 	}
-
+	if !c.IsLoggedIn() {
+		return fmt.Errorf("failed to login. please check your username and password")
+	}
 	return saveCookies(c.Client.Jar.(*cookiejar.Jar))
 }
 
