@@ -13,6 +13,10 @@ import (
 	"github.com/fmhr/fj/cmd/setup"
 )
 
+const (
+	FJ_DIRECTORY = "fj/"
+)
+
 func init() {
 	// flagのパース前にinitが実行されることに注意
 }
@@ -24,7 +28,9 @@ var (
 	jsonOutput = fj.Flag("json", "Output json format.").Default("false").Bool()
 	csvOutput  = fj.Flag("csv", "Output csv format.").Default("false").Bool()
 
+	// init command
 	setupCmd = fj.Command("init", "Generate config file.")
+	minimax  = setupCmd.Flag("minimax", "BestScore is mini or max").Default("max").String()
 
 	setupcloud = fj.Command("setupCloud", "Generate Dockerfile and gcloud build files for cloud mode.")
 
@@ -63,10 +69,24 @@ func Execute() error {
 	switch result {
 	// Setup generate config file
 	case setupCmd.FullCommand():
-		err := setup.GenerateConfig()
-		if err != nil {
-			return err
+		// fj ディレクトリを作成
+		if _, err := os.Stat(FJ_DIRECTORY); os.IsNotExist(err) {
+			if err := os.Mkdir(FJ_DIRECTORY, 0755); err != nil {
+				return err
+			}
 		}
+		if *minimax == "min" {
+			err := createNewBestScorejson(-1)
+			if err != nil {
+				return err
+			}
+		} else {
+			err := createNewBestScorejson(1)
+			if err != nil {
+				return err
+			}
+		}
+
 	case setupcloud.FullCommand():
 		err := mkDirCompilerBase()
 		if err != nil {

@@ -1,18 +1,13 @@
 package setup
 
 import (
-	"embed"
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 
 	"github.com/fmhr/fj/cmd/download"
 	"github.com/pelletier/go-toml/v2"
 )
-
-//go:embed"../config.toml"
-var configContent embed.FS
 
 const (
 	CONFIG_FILE  = "config.toml"
@@ -53,25 +48,6 @@ func GenerateConfig() error {
 		if err := os.Mkdir(FJ_DIRECTORY, 0755); err != nil {
 			return err
 		}
-	}
-
-	// config.tomlの内容を所得
-	configBytes, err := configContent.ReadFile("config.toml")
-	if err != nil {
-		return err
-	}
-
-	// config.tomlを作成
-	filePath := filepath.Join(FJ_DIRECTORY, CONFIG_FILE)
-	file, err := os.Create(filePath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	// config.tomlに書き込む
-	if _, err := file.Write(configBytes); err != nil {
-		return err
 	}
 
 	return nil
