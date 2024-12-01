@@ -207,6 +207,23 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 			log.Println("Error CsvOutput:", err)
 		}
 	}
+	// update best score
+	for i := 0; i < len(datas); i++ {
+		if datas[i] == nil {
+			continue
+		}
+		score, ok := datas[i].Get("Score")
+		if !ok {
+			log.Println("Score not found")
+			continue
+		}
+		seed, ok := datas[i].Get("seed")
+		if !ok {
+			log.Println("seed not found")
+			continue
+		}
+		UpdateBestScore(seed.(int), int(score.(float64)))
+	}
 }
 
 const progressBarWidth = 40

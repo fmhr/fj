@@ -75,6 +75,7 @@ func Execute() error {
 				return err
 			}
 		}
+		// fj/best_score.json の作成
 		if *minimax == "min" {
 			err := createNewBestScorejson(-1)
 			if err != nil {
@@ -124,7 +125,6 @@ func Execute() error {
 					log.Println("TLE")
 				}
 			}
-			//fmt.Fprintln(os.Stdout, rtn)
 			for _, k := range rtn.Keys() {
 				v, ok := rtn.Get(k)
 				if !ok {
@@ -145,6 +145,7 @@ func Execute() error {
 			fmt.Fprintln(os.Stderr, "")
 			Score, _ := rtn.Get("Score")
 			fmt.Printf("%.0f\n", Score)
+			UpdateBestScore(*seed, int(Score.(float64)))
 		} else {
 			startSeed := *seed
 			config.Jobs = *parallel

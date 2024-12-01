@@ -40,7 +40,7 @@ func createNewBestScorejson(minimax int) error {
 		Scores:  []ScoreEntry{},
 	}
 
-	data, err := json.MarshalIndent(jsonData, "", "  ")
+	data, err := json.MarshalIndent(jsonData, "", "")
 	if err != nil {
 		return fmt.Errorf("failed to marshal best score data: %v", err)
 	}
@@ -100,6 +100,9 @@ func GetBestScore(seed int) (int, error) {
 
 // UpdateBestScore は指定されたseedのベストスコアを設定する
 func UpdateBestScore(seed, score int) error {
+	if score <= 0 {
+		return nil
+	}
 	mutex.Lock()
 	defer mutex.Unlock()
 
@@ -107,7 +110,6 @@ func UpdateBestScore(seed, score int) error {
 	if err != nil {
 		return err
 	}
-
 	for i, s := range data.Scores {
 		if s.Seed == seed {
 			if data.MiniMax == 1 {
