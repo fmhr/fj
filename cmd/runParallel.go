@@ -7,6 +7,7 @@ import (
 	"math"
 	"os"
 	"os/signal"
+	"reflect"
 	"sync"
 	"sync/atomic"
 	"syscall"
@@ -148,13 +149,33 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 	}
 	// テーブル表示 代替を考えるまでtrue
 	if true {
+		bestScores, err := GetBestScores()
+		if err != nil {
+			log.Println("Error GetBestScores:", err)
+		}
 		// delete stdErr
 		for i := 0; i < len(datas); i++ {
 			if datas[i] != nil {
 				datas[i].Delete("stdErr")
 			}
+			seed, ok := datas[i].Get("seed")
+			if !ok {
+				log.Println("seed not found")
+				continue
+			}
+			if bestScore, ok := bestScores[seed.(int)]; ok {
+				datas[i].Set("Best", bestScore)
+				if score, ok := datas[i].Get("Score"); ok {
+					datas[i].Set("Score", int(score.(float64)))
+					if score.(float64) >= 0 && bestScore >= 0 {
+						ratio := score.(float64) / float64(bestScore)
+						datas[i].Set("Ratio", ratio)
+					}
+				}
+			}
+
 		}
-		err := DisplayTable(datas)
+		err = DisplayTable(datas)
 		if err != nil {
 			log.Println("Error DisplayTable:", err)
 			// 表示できないけど、結果は出力したいので、続行
@@ -222,7 +243,13 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 			log.Println("seed not found")
 			continue
 		}
-		UpdateBestScore(seed.(int), int(score.(float64)))
+		log.Println("score type:", reflect.TypeOf(score), score)
+		switch score.(type) {
+		case int:
+			UpdateBestScore(seed.(int), score.(int))
+		case float64:
+			UpdateBestScore(seed.(int), int(score.(float64)))
+		}
 	}
 }
 

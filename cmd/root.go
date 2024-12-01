@@ -35,11 +35,12 @@ var (
 	setupcloud = fj.Command("setupCloud", "Generate Dockerfile and gcloud build files for cloud mode.")
 
 	// test command
-	test     = fj.Command("test", "Run test case.").Alias("t")
-	cmd      = test.Arg("cmd", "Exe Cmd.").Required().String()
-	seed     = test.Flag("seed", "Set Seed. default : 0.").Short('s').Default("0").Int()
-	count    = test.Flag("count", "Number of test cases.").Short('n').Default("1").Int()
-	parallel = test.Flag("parallel", "Number of parallel jobs.").Short('p').Default("1").Int()
+	test       = fj.Command("test", "Run test case.").Alias("t")
+	cmd        = test.Arg("cmd", "Exe Cmd.").Required().String()
+	seed       = test.Flag("seed", "Set Seed. default : 0.").Short('s').Default("0").Int()
+	count      = test.Flag("count", "Number of test cases.").Short('n').Default("1").Int()
+	parallel   = test.Flag("parallel", "Number of parallel jobs.").Short('p').Default("1").Int()
+	updateBest = test.Flag("updateBest", "Update best score.").Default("false").Bool()
 
 	// downloadcmd tester file from URL
 	downloadcmd = fj.Command("download", "Download tester file from URL.").Alias("d")

@@ -13,8 +13,13 @@ import (
 // CsvOutput csvファイルに出力する
 func CsvOutput(datas []*orderedmap.OrderedMap[string, any]) error {
 	now := time.Now()
-	filename := fmt.Sprintf("result_%s.csv", fmt.Sprintf("%04d%02d%02d_%02d%02d%02d", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second()))
-
+	filename := fmt.Sprintf("%s.csv", fmt.Sprintf("%04d%02d%02d_%02d%02d%02d", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second()))
+	filename = fmt.Sprintf("fj/result/%s", filename)
+	if _, err := os.Stat("fj/result"); os.IsNotExist(err) {
+		if err := os.Mkdir("fj/result", 0755); err != nil {
+			return err
+		}
+	}
 	file, err := os.Create(filename)
 	if err != nil {
 		return err

@@ -98,6 +98,22 @@ func GetBestScore(seed int) (int, error) {
 	return 0, fmt.Errorf("best score not found")
 }
 
+func GetBestScores() (map[int]int, error) {
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	data, err := readBestScore()
+	if err != nil {
+		return nil, err
+	}
+
+	bestScores := make(map[int]int)
+	for _, score := range data.Scores {
+		bestScores[score.Seed] = score.BestScore
+	}
+	return bestScores, nil
+}
+
 // UpdateBestScore は指定されたseedのベストスコアを設定する
 func UpdateBestScore(seed, score int) error {
 	if score <= 0 {
