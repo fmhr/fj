@@ -7,7 +7,6 @@ import (
 	"math"
 	"os"
 	"os/signal"
-	"reflect"
 	"sync"
 	"sync/atomic"
 	"syscall"
@@ -243,7 +242,6 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 			log.Println("seed not found")
 			continue
 		}
-		log.Println("score type:", reflect.TypeOf(score), score)
 		switch score.(type) {
 		case int:
 			UpdateBestScore(seed.(int), score.(int))
