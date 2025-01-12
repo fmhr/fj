@@ -6,7 +6,7 @@ import (
 	"github.com/fmhr/fj/cmd/setup"
 )
 
-func exexute(config *setup.Config, seed int) (rtn *orderedmap.OrderedMap[string, any], err error) {
+func exexute(config *setup.Config, seed int) (rtn *orderedmap.OrderedMap[string, string], err error) {
 	// GEN
 	err = cmd.Gen(config, seed)
 	if err != nil {
@@ -21,7 +21,7 @@ func exexute(config *setup.Config, seed int) (rtn *orderedmap.OrderedMap[string,
 	return rtn, nil
 }
 
-func run(config *setup.Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
+func run(config *setup.Config, seed int) (*orderedmap.OrderedMap[string, string], error) {
 	if config.Reactive {
 		return cmd.ReactiveRun(config, seed)
 	} else {

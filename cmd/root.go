@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/alecthomas/kingpin/v2"
 	"golang.org/x/text/language"
@@ -35,12 +36,12 @@ var (
 	setupcloud = fj.Command("setupCloud", "Generate Dockerfile and gcloud build files for cloud mode.")
 
 	// test command
-	test       = fj.Command("test", "Run test case.").Alias("t")
-	cmd        = test.Arg("cmd", "Exe Cmd.").Required().String()
-	seed       = test.Flag("seed", "Set Seed. default : 0.").Short('s').Default("0").Int()
-	count      = test.Flag("count", "Number of test cases.").Short('n').Default("1").Int()
-	parallel   = test.Flag("parallel", "Number of parallel jobs.").Short('p').Default("1").Int()
-	updateBest = test.Flag("updateBest", "Update best score.").Default("false").Bool()
+	test     = fj.Command("test", "Run test case.").Alias("t")
+	cmd      = test.Arg("cmd", "Exe Cmd.").Required().String()
+	seed     = test.Flag("seed", "Set Seed. default : 0.").Short('s').Default("0").Int()
+	count    = test.Flag("count", "Number of test cases.").Short('n').Default("1").Int()
+	parallel = test.Flag("parallel", "Number of parallel jobs.").Short('p').Default("1").Int()
+	//updateBest = test.Flag("updateBest", "Update best score.").Default("false").Bool()
 
 	// downloadcmd tester file from URL
 	downloadcmd = fj.Command("download", "Download tester file from URL.").Alias("d")
@@ -132,21 +133,15 @@ func Execute() error {
 					continue
 				}
 				p := message.NewPrinter(language.English)
-				switch v := v.(type) {
-				case int:
-					p.Fprintf(os.Stderr, "%s:%d ", k, v)
-				case float64:
-					if v == float64(int(v)) {
-						p.Fprintf(os.Stderr, "%s:%d ", k, int(v))
-					} else {
-						p.Fprintf(os.Stderr, "%s:%f ", k, v)
-					}
-				}
+				p.Fprintf(os.Stderr, "%s:%s ", k, v)
 			}
 			fmt.Fprintln(os.Stderr, "")
 			Score, _ := rtn.Get("Score")
-			fmt.Printf("%.0f\n", Score)
-			UpdateBestScore(*seed, int(Score.(float64)))
+			scoreInt, err := strconv.Atoi(Score)
+			if err != nil {
+				return err
+			}
+			UpdateBestScore(*seed, scoreInt)
 		} else {
 			startSeed := *seed
 			config.Jobs = *parallel

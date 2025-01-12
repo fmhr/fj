@@ -7,6 +7,7 @@ import (
 	"math"
 	"os"
 	"os/signal"
+	"strconv"
 	"sync"
 	"sync/atomic"
 	"syscall"
@@ -30,7 +31,7 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 	}
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, concurrentNum)
-	datas := make([]*orderedmap.OrderedMap[string, any], 0, len(seeds))
+	datas := make([]*orderedmap.OrderedMap[string, string], 0, len(seeds))
 	errorChan := make(chan string, len(seeds))
 	errorSeedChan := make(chan int, len(seeds))
 
@@ -98,7 +99,7 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 	for seed := range errorSeedChan {
 		errSeeds = append(errSeeds, seed)
 	}
-	sumScore := 0.0
+	sumScore := 0
 	logScore := 0.0
 	zeroSeeds := make([]int, 0)
 	tleSeeds := make([]int, 0)
@@ -112,7 +113,7 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 	//}
 	//}
 	for i := 0; i < len(datas); i++ {
-		seed, ok := datas[i].Get("seed")
+		seedStr, ok := datas[i].Get("seed")
 		if !ok {
 			log.Println("seed not found")
 			continue
@@ -120,29 +121,44 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 		v, ok := datas[i].Get("result")
 		if ok {
 			if v == "TLE" {
-				tleSeeds = append(tleSeeds, seed.(int))
+				seed, err := strconv.Atoi(seedStr)
+				if err != nil {
+					log.Println("seed not found")
+					continue
+				}
+				tleSeeds = append(tleSeeds, seed)
 			}
 		}
 
 		// error のときnilになる
 		if datas[i] != nil {
-			score, ok := datas[i].Get("Score")
+			scoreStr, ok := datas[i].Get("Score")
 			if !ok {
 				log.Println("Score not found")
 				continue
 			}
-			if score == -1 {
+			score, err := strconv.Atoi(scoreStr)
+			if err != nil {
+				log.Println("Score is not int")
 				continue
 			}
-			sumScore += score.(float64)
-			logScore += math.Max(0, math.Log(score.(float64)))
+			if scoreStr == "-1" {
+				continue
+			}
+			sumScore += score
+			logScore += math.Max(0, math.Log(float64(score)))
 			seed, ok := datas[i].Get("seed")
 			if !ok {
 				log.Println("seed not found")
 				continue
 			}
-			if score.(float64) == 0.0 {
-				zeroSeeds = append(zeroSeeds, seed.(int))
+			if score == 0 {
+				seed, err := strconv.Atoi(seed)
+				if err != nil {
+					log.Println("seed not found")
+					continue
+				}
+				zeroSeeds = append(zeroSeeds, seed)
 			}
 		}
 	}
@@ -157,18 +173,20 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 			if datas[i] != nil {
 				datas[i].Delete("stdErr")
 			}
-			seed, ok := datas[i].Get("seed")
+			seedStr, ok := datas[i].Get("seed")
 			if !ok {
 				log.Println("seed not found")
 				continue
 			}
-			if bestScore, ok := bestScores[seed.(int)]; ok {
-				datas[i].Set("Best", bestScore)
-				if score, ok := datas[i].Get("Score"); ok {
-					datas[i].Set("Score", int(score.(float64)))
-					if score.(float64) >= 0 && bestScore >= 0 {
-						ratio := score.(float64) / float64(bestScore)
-						datas[i].Set("Ratio", ratio)
+			seed, _ := strconv.Atoi(seedStr)
+			if bestScore, ok := bestScores[seed]; ok {
+				datas[i].Set("Best", fmt.Sprintf("%d", bestScore))
+				if scoreStr, ok := datas[i].Get("Score"); ok {
+					datas[i].Set("Score", scoreStr)
+					score, _ := strconv.Atoi(scoreStr)
+					if score >= 0 && bestScore >= 0 {
+						ratio := float64(score) / float64(bestScore)
+						datas[i].Set("Ratio", fmt.Sprintf("%.2f", ratio))
 					}
 				}
 			}
@@ -204,14 +222,19 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 				//log.Printf("seed:%d time not found", i)
 				timeNotFound++
 			} else {
-				sumTime += t.(float64)
-				maxTime = math.Max(maxTime, t.(float64))
+				timef, err := strconv.ParseFloat(t, 64)
+				if err != nil {
+					log.Println("Error time:", err)
+					continue
+				}
+				sumTime += timef
+				maxTime = math.Max(maxTime, timef)
 			}
 		}
 		sumTime /= float64(len(datas) - len(errSeeds) - timeNotFound)
 		fmt.Fprintf(os.Stderr, "(Time)avarage:%.2f  max:%.2f\n", sumTime, maxTime)
 	}
-	avarageScore := sumScore / float64(len(datas)-len(errSeeds))
+	avarageScore := float64(sumScore) / float64(len(datas)-len(errSeeds))
 	p := message.NewPrinter(language.English)
 	p.Fprintf(os.Stderr, "(Score)avarage:%.2f sum:%.2f\n", avarageScore, sumScore)
 
@@ -232,22 +255,19 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 		if datas[i] == nil {
 			continue
 		}
-		score, ok := datas[i].Get("Score")
+		scoreString, ok := datas[i].Get("Score")
 		if !ok {
 			log.Println("Score not found")
 			continue
 		}
-		seed, ok := datas[i].Get("seed")
+		seedStr, ok := datas[i].Get("seed")
 		if !ok {
 			log.Println("seed not found")
 			continue
 		}
-		switch score.(type) {
-		case int:
-			UpdateBestScore(seed.(int), score.(int))
-		case float64:
-			UpdateBestScore(seed.(int), int(score.(float64)))
-		}
+		score, _ := strconv.Atoi(scoreString)
+		seed, _ := strconv.Atoi(seedStr)
+		UpdateBestScore(seed, score)
 	}
 }
 
