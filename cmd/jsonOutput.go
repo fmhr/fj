@@ -10,7 +10,7 @@ import (
 	"github.com/elliotchance/orderedmap/v2"
 )
 
-func JsonOutput(datas []*orderedmap.OrderedMap[string, any]) error {
+func JsonOutput(datas []*orderedmap.OrderedMap[string, string]) error {
 	fileContent, err := json.MarshalIndent(datas, "", " ")
 	if err != nil {
 		log.Println("json marshal error")

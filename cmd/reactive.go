@@ -9,7 +9,7 @@ import (
 )
 
 // ReactiveRun はreactive=trueのときに使う
-func ReactiveRun(ctf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, any], err error) {
+func ReactiveRun(ctf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, string], err error) {
 	// 出力フォルダがない場合、作成
 	err = createDirIfNotExist(ctf.OutfilePath)
 	if err != nil {
@@ -21,8 +21,8 @@ func ReactiveRun(ctf *setup.Config, seed int) (pair *orderedmap.OrderedMap[strin
 		log.Println(err)
 	}
 	// 出力のパース
-	pair = orderedmap.NewOrderedMap[string, any]()
-	pair.Set("seed", seed)
+	pair = orderedmap.NewOrderedMap[string, string]()
+	pair.Set("seed", fmt.Sprintf("%d", seed))
 	keys, err := ExtractKeyValuePairs(pair, string(out))
 	_ = keys // ordermapを消す時に使う
 	if err != nil {
@@ -38,8 +38,8 @@ func ReactiveRun(ctf *setup.Config, seed int) (pair *orderedmap.OrderedMap[strin
 	//pair.Set("stdErr", out)
 	//pair.Set("result", timeout)
 	if timeout {
-		pair.Set("Score", 0)
-		pair.Set("time", float64(ctf.TimeLimitMS/1000))
+		pair.Set("Score", "0")
+		pair.Set("time", fmt.Sprintf("%v", ctf.TimeLimitMS/1000))
 	}
 	return pair, nil
 }

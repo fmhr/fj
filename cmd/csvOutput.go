@@ -11,7 +11,7 @@ import (
 )
 
 // CsvOutput csvファイルに出力する
-func CsvOutput(datas []*orderedmap.OrderedMap[string, any]) error {
+func CsvOutput(datas []*orderedmap.OrderedMap[string, string]) error {
 	now := time.Now()
 	filename := fmt.Sprintf("%s.csv", fmt.Sprintf("%04d%02d%02d_%02d%02d%02d", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second()))
 	filename = fmt.Sprintf("fj/result/%s", filename)

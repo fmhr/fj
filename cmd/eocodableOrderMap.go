@@ -11,7 +11,7 @@ import (
 // mapを使用すると、順序が保証されないため、sliceに変換する
 
 // EncodableOrderedMap is a wrapper of orderedmap.OrderedMap[string, any] for json.Marshal and json.Unmarshal
-type EncodableOrderedMap orderedmap.OrderedMap[string, any]
+type EncodableOrderedMap orderedmap.OrderedMap[string, string]
 
 type EncodableOrderedMapItem struct {
 	Key   string `json:"key"`
@@ -19,9 +19,9 @@ type EncodableOrderedMapItem struct {
 }
 
 func (m *EncodableOrderedMap) MarshalJSON() ([]byte, error) {
-	items := make([]EncodableOrderedMapItem, (*orderedmap.OrderedMap[string, any])(m).Len())
+	items := make([]EncodableOrderedMapItem, (*orderedmap.OrderedMap[string, string])(m).Len())
 	var i int
-	for el := (*orderedmap.OrderedMap[string, any])(m).Front(); el != nil; el = el.Next() {
+	for el := (*orderedmap.OrderedMap[string, string])(m).Front(); el != nil; el = el.Next() {
 		items[i] = EncodableOrderedMapItem{el.Key, el.Value}
 		i++
 	}
@@ -36,10 +36,10 @@ func (m *EncodableOrderedMap) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	self := (*orderedmap.OrderedMap[string, any])(m)
+	self := (*orderedmap.OrderedMap[string, string])(m)
 	//*self = *orderedmap.NewOrderedMap[string, any]()
 	for _, item := range items {
-		self.Set(item.Key, item.Value)
+		self.Set(item.Key, item.Value.(string))
 	}
 	return nil
 }

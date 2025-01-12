@@ -15,7 +15,7 @@ import (
 )
 
 // requestToWorker はバイナリをワーカーに送信する
-func requestToWorker(config *setup.Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
+func requestToWorker(config *setup.Config, seed int) (*orderedmap.OrderedMap[string, string], error) {
 	start := time.Now()
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
@@ -63,23 +63,27 @@ func requestToWorker(config *setup.Config, seed int) (*orderedmap.OrderedMap[str
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body: %v", err)
 	}
-	rtn := orderedmap.NewOrderedMap[string, any]()
-	if err := json.Unmarshal(bodyBytes, (*EncodableOrderedMap)(rtn)); err != nil {
+	rtn := orderedmap.NewOrderedMap[string, string]()
+	var tempMap map[string]string
+	if err := json.Unmarshal(bodyBytes, &tempMap); err != nil {
 		return nil, fmt.Errorf("failed to parse response body: %v", err)
 	}
+	for key, value := range tempMap {
+		rtn.Set(key, value)
+	}
 	elapsed := time.Since(start)
-	rtn.Set("responseTime", elapsed.Seconds())
+	rtn.Set("responseTime", elapsed.String())
 	score, ok := rtn.Get("Score")
 	if !ok {
 		return nil, fmt.Errorf("failed to get score from response body: %v", err)
 	}
-	if score == 0.0 {
+	if score == "0" {
 		log.Println("Score=0:response body:", string(bodyBytes))
 	}
 	return rtn, nil
 }
 
-func SendBinaryToWorker(config *setup.Config, seed int, binaryNameInBucket string) (*orderedmap.OrderedMap[string, any], error) {
+func SendBinaryToWorker(config *setup.Config, seed int, binaryNameInBucket string) (*orderedmap.OrderedMap[string, string], error) {
 	if config.WorkerURL == "" {
 		return nil, NewStackTraceError("worker URL is not specified")
 	}

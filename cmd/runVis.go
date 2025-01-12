@@ -10,14 +10,14 @@ import (
 	"github.com/fmhr/fj/cmd/setup"
 )
 
-func RunVis(cnf *setup.Config, seed int) (*orderedmap.OrderedMap[string, any], error) {
+func RunVis(cnf *setup.Config, seed int) (*orderedmap.OrderedMap[string, string], error) {
 	return runVis(cnf, seed)
 }
 
 // runVis は指定された設定とシードに基づいてコマンドを実行して、
 // その結果をvisに渡して、両方の結果を返す
 // 通常の問題（reactive=false)で使う
-func runVis(cnf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, any], err error) {
+func runVis(cnf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, string], err error) {
 	out, _, err := normalRun(cnf, seed)
 	if err != nil {
 		//log.Println("Error: ", err)
@@ -26,8 +26,8 @@ func runVis(cnf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, an
 		}
 		return nil, WrapError(fmt.Errorf("%w", err))
 	}
-	pair = orderedmap.NewOrderedMap[string, any]()
-	pair.Set("seed", seed)
+	pair = orderedmap.NewOrderedMap[string, string]()
+	pair.Set("seed", fmt.Sprintf("%d", seed))
 
 	keys, err := ExtractKeyValuePairs(pair, string(out))
 	if err != nil {
@@ -49,14 +49,14 @@ func runVis(cnf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, an
 	}
 
 	// Score=0の場合は出力を表示
-	if sc["Score"] == 0 {
+	if sc["Score"] == "0" {
 		log.Println("Score=0 out:", string(outVis))
 	}
 
 	for k, v := range sc {
 		pair.Set(k, v)
 	}
-	pair.Set("seed", seed)
+	pair.Set("seed", fmt.Sprintf("%d", seed))
 	return pair, nil
 }
 

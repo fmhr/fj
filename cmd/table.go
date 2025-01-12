@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"reflect"
 	"slices"
 	"sort"
 	"strconv"
@@ -14,7 +13,7 @@ import (
 )
 
 // DisplayTable はデータをテーブル形式で表示する
-func DisplayTable(data []*orderedmap.OrderedMap[string, any]) error {
+func DisplayTable(data []*orderedmap.OrderedMap[string, string]) error {
 	if len(data) == 0 {
 		return nil
 	}
@@ -28,12 +27,9 @@ func DisplayTable(data []*orderedmap.OrderedMap[string, any]) error {
 	sort.Slice(data, func(i, j int) bool {
 		seedI, _ := data[i].Get("seed")
 		seedJ, _ := data[j].Get("seed")
-		if reflect.TypeOf(seedI).Kind() == reflect.Int {
-			return seedI.(int) < seedJ.(int)
-		} else if reflect.TypeOf(seedI).Kind() == reflect.Float64 {
-			return seedI.(float64) < seedJ.(float64)
-		}
-		return seedI.(string) < seedJ.(string)
+		seedIint, _ := strconv.Atoi(seedI)
+		seedJint, _ := strconv.Atoi(seedJ)
+		return seedIint < seedJint
 	})
 
 	for _, rowMap := range data {
@@ -48,7 +44,7 @@ func DisplayTable(data []*orderedmap.OrderedMap[string, any]) error {
 				// seed(key)がなんらかの理由でない場合はスキップ
 				//log.Println("Error no value key:", key)
 				//continue
-				value = -1
+				value = "-1"
 			}
 			v, err := formatFloat(value)
 			if err != nil {
@@ -64,7 +60,7 @@ func DisplayTable(data []*orderedmap.OrderedMap[string, any]) error {
 }
 
 // extractHeaders はデータからヘッダーを抽出する
-func extractHeaders(data []*orderedmap.OrderedMap[string, any]) []string {
+func extractHeaders(data []*orderedmap.OrderedMap[string, string]) []string {
 	headers := append([]string(nil), data[0].Keys()...)
 	// seedを先頭に移動
 	seedIndex := slices.Index(headers, "seed")
