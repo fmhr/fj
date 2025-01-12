@@ -13,6 +13,10 @@ import (
 	"github.com/fmhr/fj/cmd/setup"
 )
 
+const (
+	FJ_DIRECTORY = "fj/"
+)
+
 func init() {
 	// flagのパース前にinitが実行されることに注意
 }
@@ -24,16 +28,19 @@ var (
 	jsonOutput = fj.Flag("json", "Output json format.").Default("false").Bool()
 	csvOutput  = fj.Flag("csv", "Output csv format.").Default("false").Bool()
 
+	// init command
 	setupCmd = fj.Command("init", "Generate config file.")
+	minimax  = setupCmd.Flag("minimax", "BestScore is mini or max").Default("max").String()
 
 	setupcloud = fj.Command("setupCloud", "Generate Dockerfile and gcloud build files for cloud mode.")
 
 	// test command
-	test     = fj.Command("test", "Run test case.").Alias("t")
-	cmd      = test.Arg("cmd", "Exe Cmd.").Required().String()
-	seed     = test.Flag("seed", "Set Seed. default : 0.").Short('s').Default("0").Int()
-	count    = test.Flag("count", "Number of test cases.").Short('n').Default("1").Int()
-	parallel = test.Flag("parallel", "Number of parallel jobs.").Short('p').Default("1").Int()
+	test       = fj.Command("test", "Run test case.").Alias("t")
+	cmd        = test.Arg("cmd", "Exe Cmd.").Required().String()
+	seed       = test.Flag("seed", "Set Seed. default : 0.").Short('s').Default("0").Int()
+	count      = test.Flag("count", "Number of test cases.").Short('n').Default("1").Int()
+	parallel   = test.Flag("parallel", "Number of parallel jobs.").Short('p').Default("1").Int()
+	updateBest = test.Flag("updateBest", "Update best score.").Default("false").Bool()
 
 	// downloadcmd tester file from URL
 	downloadcmd = fj.Command("download", "Download tester file from URL.").Alias("d")
@@ -63,10 +70,25 @@ func Execute() error {
 	switch result {
 	// Setup generate config file
 	case setupCmd.FullCommand():
-		err := setup.GenerateConfig()
-		if err != nil {
-			return err
+		// fj ディレクトリを作成
+		if _, err := os.Stat(FJ_DIRECTORY); os.IsNotExist(err) {
+			if err := os.Mkdir(FJ_DIRECTORY, 0755); err != nil {
+				return err
+			}
 		}
+		// fj/best_score.json の作成
+		if *minimax == "min" {
+			err := createNewBestScorejson(-1)
+			if err != nil {
+				return err
+			}
+		} else {
+			err := createNewBestScorejson(1)
+			if err != nil {
+				return err
+			}
+		}
+
 	case setupcloud.FullCommand():
 		err := mkDirCompilerBase()
 		if err != nil {
@@ -104,7 +126,6 @@ func Execute() error {
 					log.Println("TLE")
 				}
 			}
-			//fmt.Fprintln(os.Stdout, rtn)
 			for _, k := range rtn.Keys() {
 				v, ok := rtn.Get(k)
 				if !ok {
@@ -125,6 +146,7 @@ func Execute() error {
 			fmt.Fprintln(os.Stderr, "")
 			Score, _ := rtn.Get("Score")
 			fmt.Printf("%.0f\n", Score)
+			UpdateBestScore(*seed, int(Score.(float64)))
 		} else {
 			startSeed := *seed
 			config.Jobs = *parallel
