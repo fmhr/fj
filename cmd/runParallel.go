@@ -43,24 +43,34 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 	var datasMutex sync.Mutex
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
-	go handleSignals(sigCh, &currentlyRunningSeed)
 
 	printProgress(int(taskCompleted), totalTask) // プログレスバーの表示
 
 	// エラーが出たらそこで打ち止めにする
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-
+	var cancelBool atomic.Bool
 	go func() {
-		<-sigCh
-		fmt.Println("Received signal, cancelling all tasks")
-		cancel()
+		for {
+			sig := <-sigCh
+			switch sig {
+			case syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT:
+				fmt.Println("Received signal, cancell tasks")
+				cancelBool.Store(true)
+				cancel()
+				currentlyRunningSeed.Range(func(key, value interface{}) bool {
+					log.Printf("seed=%d is running\n", key)
+					return true
+				})
+				return
+			}
+		}
 	}()
 
 	for _, seed := range seeds {
 		select {
 		case <-ctx.Done():
-			fmt.Println("Cancelling all tasks")
+			fmt.Println("seed loop Cancelled")
 			return
 		default:
 			wg.Add(1)
@@ -75,7 +85,6 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 					errorChan <- fmt.Sprintf("Run error: seed=%d %v\n", seed, err)
 					errorSeedChan <- seed
 					log.Printf("seed=%d has Error %v\n", seed, err)
-					//cancel() // ここでコンテキストをキャンセルにする(すべてのごるーちんの停止)
 					return
 				}
 				// 後処理
@@ -103,15 +112,6 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 	logScore := 0.0
 	zeroSeeds := make([]int, 0)
 	tleSeeds := make([]int, 0)
-	// datasのチェック
-	//	for i, data := range datas {
-	////data := datas[i]
-	//keys := data.Keys()
-	//for _, key := range keys {
-	//v, ok := data.Get(key)
-	//log.Println(i, key, v, ok)
-	//}
-	//}
 	for i := 0; i < len(datas); i++ {
 		seedStr, ok := datas[i].Get("seed")
 		if !ok {
@@ -234,9 +234,9 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 		sumTime /= float64(len(datas) - len(errSeeds) - timeNotFound)
 		fmt.Fprintf(os.Stderr, "(Time)avarage:%.2f  max:%.2f\n", sumTime, maxTime)
 	}
-	avarageScore := float64(sumScore) / float64(len(datas)-len(errSeeds))
+	avarageScore := sumScore / (len(datas) - len(errSeeds))
 	p := message.NewPrinter(language.English)
-	p.Fprintf(os.Stderr, "(Score)avarage:%.2f sum:%.2f\n", avarageScore, sumScore)
+	p.Fprintf(os.Stderr, "(Score)avarage:%d sum:%d\n", avarageScore, sumScore)
 
 	if jsonOutput != nil && *jsonOutput {
 		err := JsonOutput(datas)
@@ -286,25 +286,6 @@ func printProgress(current, total int) {
 		}
 	}
 	fmt.Fprintf(os.Stderr, "\r[%d/%d] [%s] %.2f%%", current, total, string(progressBar), percentage*100)
-}
-
-// hanldleSingals Ctrl-Dでプログラムが終了したとき、実行中のシードを表示する
-func handleSignals(sigCh <-chan os.Signal, curent *sync.Map) {
-	for {
-		sig := <-sigCh
-		switch sig {
-		case syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT:
-			seeds := make([]int, 0)
-			curent.Range(func(key, value interface{}) bool {
-				seeds = append(seeds, key.(int))
-				return true
-			})
-			fmt.Println("\nReceived signal:", sig)
-			fmt.Println("Currently running seeds:", seeds)
-			return
-		}
-	}
-
 }
 
 // createDirIfNotExist 使用するディレクトリが存在しない時に作成する
