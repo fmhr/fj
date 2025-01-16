@@ -38,8 +38,6 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 	var taskCompleted int32 = 0
 	totalTask := len(seeds)
 
-	// Ctrl+Cで中断したときに、現在実行中のseedを表示する
-	var currentlyRunningSeed sync.Map
 	var datasMutex sync.Mutex
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
@@ -64,7 +62,6 @@ overloop:
 		default:
 			wg.Add(1)
 			sem <- struct{}{}
-			currentlyRunningSeed.Store(seed, true)
 			time.Sleep(5 * time.Millisecond)
 			go func(seed int) {
 				defer wg.Done()
@@ -74,15 +71,13 @@ overloop:
 					errorChan <- fmt.Sprintf("Run error: seed=%d %v\n", seed, err)
 					errorSeedChan <- seed
 					log.Printf("seed=%d has Error %v\n", seed, err)
-					return
+				} else {
+					datasMutex.Lock()
+					datas = append(datas, data) // 結果を追加
+					datasMutex.Unlock()
+					currentTaskCompleted := atomic.AddInt32(&taskCompleted, 1) // progressbar
+					printProgress(int(currentTaskCompleted), totalTask)        // progressbar
 				}
-				// 後処理
-				datasMutex.Lock()
-				datas = append(datas, data)                                // 結果を追加
-				currentTaskCompleted := atomic.AddInt32(&taskCompleted, 1) // progressbar
-				currentlyRunningSeed.Delete(seed)
-				datasMutex.Unlock()
-				printProgress(int(currentTaskCompleted), totalTask) // progressbar
 			}(seed)
 		}
 	}
