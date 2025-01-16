@@ -51,17 +51,10 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 	defer cancel()
 
 	// Ctrl+Cで中断したときに、現在実行中のseedを表示して、それ以降はキャンセルする
-	//var cancelBool atomic.Bool
 	go func() {
 		sig := <-sigCh
 		fmt.Printf("\nReceived signal: %v - waiting for running tasks to complete\n", sig)
-		//cancelBool.Store(true)
 		cancel()
-		//currentlyRunningSeed.Range(func(key, value interface{}) bool {
-		//fmt.Printf("\nWaiting for seed=%d to finish", key)
-		//return true
-		//})
-
 	}()
 overloop:
 	for _, seed := range seeds {
@@ -151,7 +144,6 @@ overloop:
 			if score == 0 {
 				seed, err := strconv.Atoi(seed)
 				if err != nil {
-					log.Println("seed not found")
 					continue
 				}
 				zeroSeeds = append(zeroSeeds, seed)
