@@ -49,29 +49,25 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 	// エラーが出たらそこで打ち止めにする
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	var cancelBool atomic.Bool
-	go func() {
-		for {
-			sig := <-sigCh
-			switch sig {
-			case syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT:
-				fmt.Println("Received signal, cancell tasks")
-				cancelBool.Store(true)
-				cancel()
-				currentlyRunningSeed.Range(func(key, value interface{}) bool {
-					log.Printf("seed=%d is running\n", key)
-					return true
-				})
-				return
-			}
-		}
-	}()
 
+	// Ctrl+Cで中断したときに、現在実行中のseedを表示して、それ以降はキャンセルする
+	//var cancelBool atomic.Bool
+	go func() {
+		sig := <-sigCh
+		fmt.Printf("\nReceived signal: %v - waiting for running tasks to complete\n", sig)
+		//cancelBool.Store(true)
+		cancel()
+		//currentlyRunningSeed.Range(func(key, value interface{}) bool {
+		//fmt.Printf("\nWaiting for seed=%d to finish", key)
+		//return true
+		//})
+
+	}()
+overloop:
 	for _, seed := range seeds {
 		select {
 		case <-ctx.Done():
-			fmt.Println("seed loop Cancelled")
-			return
+			break overloop
 		default:
 			wg.Add(1)
 			sem <- struct{}{}
@@ -190,7 +186,6 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 					}
 				}
 			}
-
 		}
 		err = DisplayTable(datas)
 		if err != nil {
