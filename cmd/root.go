@@ -158,6 +158,7 @@ func Execute() error {
 	case logout.FullCommand():
 		download.Logout()
 	case info.FullCommand():
+		fmt.Println("Login:", download.IsLogin())
 		fmt.Println("isReactive:", download.IsReactive())
 		cDir, _ := os.UserCacheDir()
 		fmt.Println("cacheDirectory:", cDir+"/fmhr-judge-tools")

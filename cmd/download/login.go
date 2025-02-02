@@ -69,6 +69,20 @@ func NewAtCoderClient(username string, password string) *AtCoderClient {
 	}
 }
 
+func IsLogin() bool {
+	jar, err := loadCookieds()
+	if err != nil {
+		fmt.Println("failed to load cookies:", err)
+		return false
+	}
+	atcoder := &AtCoderClient{
+		Client: &http.Client{
+			Jar: jar,
+		},
+	}
+	return atcoder.IsLoggedIn()
+}
+
 // submitのページにアクセスして、ログインしているかどうかを確認する
 // 200: ログイン済み
 // 302: ログインしていない
