@@ -190,20 +190,15 @@ overloop:
 		fmt.Fprintln(os.Stderr, "TLEs:", tleSeeds)
 	}
 	// timeがあれば、平均と最大を表示
-	_, exsit := datas[0].Get("time")
-	timeNotFound := 0
-	if exsit {
+	if _, exsit := datas[0].Get("time"); exsit {
 		sumTime := 0.0
 		maxTime := 0.0
+		nums := 0
 		for i := 0; i < len(datas); i++ {
 			if datas[i] == nil {
-				log.Println("skip seed=", i)
 				continue
 			}
-			if t, ok := datas[i].Get("time"); !ok {
-				//log.Printf("seed:%d time not found", i)
-				timeNotFound++
-			} else {
+			if t, ok := datas[i].Get("time"); ok {
 				timef, err := strconv.ParseFloat(t, 64)
 				if err != nil {
 					log.Println("Error time:", err)
@@ -211,10 +206,10 @@ overloop:
 				}
 				sumTime += timef
 				maxTime = math.Max(maxTime, timef)
+				nums++
 			}
 		}
-		sumTime /= float64(len(datas) - len(errSeeds) - timeNotFound)
-		fmt.Fprintf(os.Stderr, "(Time)avarage:%.2f  max:%.2f\n", sumTime, maxTime)
+		fmt.Fprintf(os.Stderr, "(Time)avarage:%.2f  max:%.2f\n", sumTime/float64(nums), maxTime)
 	}
 	avarageScore := sumScore / (len(datas) - len(errSeeds))
 	p := message.NewPrinter(language.English)
