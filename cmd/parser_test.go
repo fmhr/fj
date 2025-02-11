@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
+	"log"
 	"reflect"
 	"strconv"
 	"testing"
@@ -50,10 +52,15 @@ func TestExtractKeyValuePairs(t *testing.T) {
 		}
 	}
 }
+
 func TestExtractData(t *testing.T) {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
+	var errNoData = errors.New("no data found")
+
 	tests := []struct {
 		input  string
-		expect map[string]float64
+		expect map[string]string
 		err    error
 	}{
 		{
@@ -64,26 +71,45 @@ Placement cost = 805758.046
 Measurement cost = 10863.00
 Measurement count = 9585
 `,
-			expect: map[string]float64{
-				"Score":                   122.441,
-				"Number of wrong answers": 0,
-				"Placement cost":          805758.046,
-				"Measurement cost":        10863.00,
-				"Measurement count":       9585,
+			expect: map[string]string{
+				"Score":                   "122.441",
+				"Number of wrong answers": "0",
+				"Placement cost":          "805758.046",
+				"Measurement cost":        "10863.00",
+				"Measurement count":       "9585",
 			},
 			err: nil,
 		},
 		{
 			input:  `InvalidData = abc`,
 			expect: nil,
-			err:    fmt.Errorf("no data found"),
+			err:    errNoData,
+		},
+		{
+			input:  `Score = 100`,
+			expect: map[string]string{"Score": "100"},
+			err:    nil,
+		},
+		{
+			input:  `Score = 100.0`,
+			expect: map[string]string{"Score": "100.0"},
+			err:    nil,
 		},
 	}
 
-	for _, test := range tests {
-		result, err := extractData(test.input)
-		if !reflect.DeepEqual(result, test.expect) || (err != nil && test.err != nil && err.Error() != test.err.Error()) {
-			t.Errorf("For input %q, expected %v but got %v\n", test.input, test.expect, result)
-		}
+	for i, test := range tests {
+		t.Run(fmt.Sprintf("TestExtractData_%d", i), func(t *testing.T) {
+			result, err := extractData(test.input)
+
+			if (err == nil) != (test.err == nil) {
+				t.Errorf("Expected error %v, but got %v", test.err, err)
+			}
+			if err != nil && err.Error() != test.err.Error() {
+				t.Errorf("Expected error %v, but got %v", test.err, err)
+			}
+			if (err == nil && test.err == nil) && !reflect.DeepEqual(result, test.expect) {
+				t.Errorf("Expected %v, but got %v", test.expect, result)
+			}
+		})
 	}
 }

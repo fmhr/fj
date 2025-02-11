@@ -25,6 +25,7 @@ func ExtractKeyValuePairs(m *orderedmap.OrderedMap[string, string], msg string) 
 }
 
 // extractScore 公式toolのvisコマンドの出力からスコアを抽出します。
+// 小数点を含む数字に対応	しているけど、stringで返すので注意
 func extractData(src string) (map[string]string, error) {
 	// 例: "Score = 100"
 	re := regexp.MustCompile(`([^\n]+) = ([\d.]+)`)
