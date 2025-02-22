@@ -14,9 +14,9 @@ import (
 func CsvOutput(datas []*orderedmap.OrderedMap[string, string]) error {
 	now := time.Now()
 	filename := fmt.Sprintf("%s.csv", fmt.Sprintf("%04d%02d%02d_%02d%02d%02d", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second()))
-	filename = fmt.Sprintf("fj/result/%s", filename)
-	if _, err := os.Stat("fj/result"); os.IsNotExist(err) {
-		if err := os.Mkdir("fj/result", 0755); err != nil {
+	filename = fmt.Sprintf("out/%s", filename)
+	if _, err := os.Stat("out"); os.IsNotExist(err) {
+		if err := os.Mkdir("out", 0755); err != nil {
 			return err
 		}
 	}
