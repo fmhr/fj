@@ -213,7 +213,7 @@ overloop:
 	}
 	avarageScore := sumScore / (len(datas) - len(errSeeds))
 	p := message.NewPrinter(language.English)
-	p.Fprintf(os.Stderr, "(Score)avarage:%d sum:%d\n", avarageScore, sumScore)
+	p.Fprintf(os.Stderr, "(Score)avarage:%d sum:%d sum(log):%f\n", avarageScore, sumScore, logScore)
 
 	if jsonOutput != nil && *jsonOutput {
 		err := JsonOutput(datas)
