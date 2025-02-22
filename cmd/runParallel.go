@@ -62,7 +62,7 @@ overloop:
 		default:
 			wg.Add(1)
 			sem <- struct{}{}
-			time.Sleep(5 * time.Millisecond)
+			time.Sleep(100 * time.Millisecond) // 100ms待つ エラー出力を見やすくするため
 			go func(seed int) {
 				defer wg.Done()
 				defer func() { <-sem }()
