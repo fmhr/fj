@@ -27,8 +27,8 @@ var (
 	debug      = fj.Flag("debug", "Enable debug mode.").Default("false").Bool()
 	cloud      = fj.Flag("cloud", "Enable cloud mode.").Default("false").Bool()
 	jsonOutput = fj.Flag("json", "Output json format.").Default("false").Bool()
-	csvOutput  = fj.Flag("csv", "Output csv format.").Default("false").String()
-	bestScore  = fj.Flag("best", "Best score.").Default("0").Bool()
+	csvOutput  = fj.Flag("csv", "Output csv format.").String()
+	bestScore  = fj.Flag("best", "Best score.").Bool()
 
 	// init command
 	setupCmd = fj.Command("init", "Generate config file.")
