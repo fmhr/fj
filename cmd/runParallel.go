@@ -145,8 +145,7 @@ overloop:
 			}
 		}
 	}
-	// テーブル表示 代替を考えるまでtrue
-	if true {
+	if *bestScore {
 		bestScores, err := GetBestScores()
 		if err != nil {
 			log.Println("Error GetBestScores:", err)
@@ -174,11 +173,11 @@ overloop:
 				}
 			}
 		}
-		err = DisplayTable(datas)
-		if err != nil {
-			log.Println("Error DisplayTable:", err)
-			// 表示できないけど、結果は出力したいので、続行
-		}
+	}
+	err := DisplayTable(datas)
+	if err != nil {
+		log.Println("Error DisplayTable:", err)
+		// 表示できないけど、結果は出力したいので、続行
 	}
 	if len(errSeeds) > 0 {
 		fmt.Fprintln(os.Stderr, "Errors:", errSeeds)
