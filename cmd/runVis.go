@@ -5,6 +5,8 @@ import (
 	"log"
 	"os/exec"
 	"path/filepath"
+	"regexp"
+	"strconv"
 
 	"github.com/elliotchance/orderedmap/v2"
 	"github.com/fmhr/fj/cmd/setup"
@@ -34,6 +36,25 @@ func runVis(cnf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, st
 		return pair, err
 	}
 	_ = keys // Ordermapを消す時に使う
+
+	// メモリ使用量を正規表現で抽出
+	// 数字の後に"maximum resident set size"が続くパターンを検索
+	re := regexp.MustCompile(`\s*(\d+)\s+maximum resident set size`)
+	// ステータス出力からメモリ使用量を抽出
+	matches := re.FindStringSubmatch(string(out))
+	if len(matches) > 1 {
+		memUsage, _ := strconv.Atoi(matches[1])
+		fmt.Printf("Memory usage: %d KB\n", memUsage)
+		mb, err := strconv.Atoi(matches[1])
+		if err != nil {
+			return nil, err
+		}
+		mb /= 1024
+		pair.Set("Memory", fmt.Sprintf("%d", mb))
+	} else {
+		log.Println("Memory usage not found.")
+	}
+
 	// vis
 	infile := filepath.Join(cnf.InfilePath, fmt.Sprintf("%04d.txt", seed))
 	outfile := filepath.Join(cnf.OutfilePath, fmt.Sprintf("%04d.txt", seed))
