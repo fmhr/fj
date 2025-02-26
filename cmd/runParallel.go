@@ -221,30 +221,35 @@ overloop:
 			log.Println("Error JsonOutput:", err)
 		}
 	}
-	if csvOutput != nil && *csvOutput {
-		err := CsvOutput(datas)
+	if csvOutput != nil && *csvOutput != "" {
+		err := CsvOutput(datas, *csvOutput)
 		if err != nil {
 			log.Println("Error CsvOutput:", err)
 		}
 	}
 	// update best score
-	for i := 0; i < len(datas); i++ {
-		if datas[i] == nil {
-			continue
+	if *bestScore {
+		for i := 0; i < len(datas); i++ {
+			if datas[i] == nil {
+				continue
+			}
+			scoreString, ok := datas[i].Get("Score")
+			if !ok {
+				log.Println("Score not found")
+				continue
+			}
+			seedStr, ok := datas[i].Get("seed")
+			if !ok {
+				log.Println("seed not found")
+				continue
+			}
+			score, _ := strconv.Atoi(scoreString)
+			seed, _ := strconv.Atoi(seedStr)
+			err := UpdateBestScore(seed, score)
+			if err != nil {
+				log.Println("Error UpdateBestScore:", err)
+			}
 		}
-		scoreString, ok := datas[i].Get("Score")
-		if !ok {
-			log.Println("Score not found")
-			continue
-		}
-		seedStr, ok := datas[i].Get("seed")
-		if !ok {
-			log.Println("seed not found")
-			continue
-		}
-		score, _ := strconv.Atoi(scoreString)
-		seed, _ := strconv.Atoi(seedStr)
-		UpdateBestScore(seed, score)
 	}
 }
 

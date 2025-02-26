@@ -27,7 +27,8 @@ var (
 	debug      = fj.Flag("debug", "Enable debug mode.").Default("false").Bool()
 	cloud      = fj.Flag("cloud", "Enable cloud mode.").Default("false").Bool()
 	jsonOutput = fj.Flag("json", "Output json format.").Default("false").Bool()
-	csvOutput  = fj.Flag("csv", "Output csv format.").Default("false").Bool()
+	csvOutput  = fj.Flag("csv", "Output csv format.").Default("false").String()
+	bestScore  = fj.Flag("best", "Best score.").Default("0").Bool()
 
 	// init command
 	setupCmd = fj.Command("init", "Generate config file.")
@@ -78,15 +79,17 @@ func Execute() error {
 			}
 		}
 		// fj/best_score.json の作成
-		if *minimax == "min" {
-			err := createNewBestScorejson(-1)
-			if err != nil {
-				return err
-			}
-		} else {
-			err := createNewBestScorejson(1)
-			if err != nil {
-				return err
+		if *bestScore {
+			if *minimax == "min" {
+				err := createNewBestScorejson(-1)
+				if err != nil {
+					return err
+				}
+			} else {
+				err := createNewBestScorejson(1)
+				if err != nil {
+					return err
+				}
 			}
 		}
 
@@ -141,7 +144,13 @@ func Execute() error {
 			if err != nil {
 				return err
 			}
-			UpdateBestScore(*seed, scoreInt)
+			if *bestScore {
+				err = UpdateBestScore(*seed, scoreInt)
+				log.Println("faile to update best score:")
+				if err != nil {
+					return err
+				}
+			}
 		} else {
 			startSeed := *seed
 			config.Jobs = *parallel
