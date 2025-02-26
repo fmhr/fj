@@ -43,13 +43,11 @@ func runVis(cnf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, st
 	// ステータス出力からメモリ使用量を抽出
 	matches := re.FindStringSubmatch(string(out))
 	if len(matches) > 1 {
-		memUsage, _ := strconv.Atoi(matches[1])
-		fmt.Printf("Memory usage: %d KB\n", memUsage)
 		mb, err := strconv.Atoi(matches[1])
 		if err != nil {
 			return nil, err
 		}
-		mb /= 1024
+		mb /= 1024 * 1024
 		pair.Set("Memory", fmt.Sprintf("%d", mb))
 	} else {
 		log.Println("Memory usage not found.")
