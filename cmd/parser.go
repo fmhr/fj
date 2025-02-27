@@ -12,7 +12,8 @@ import (
 // ExtractKeyValuePairs はコマンドから出力を、キーと値のマップで返します。
 func ExtractKeyValuePairs(m *orderedmap.OrderedMap[string, string], msg string) (keys []string, err error) {
 	// 例: "score=100.0 time=1.0"
-	re := regexp.MustCompile(`(\w+)=([\d.]+)`)
+	//re := regexp.MustCompile(`(\w+)=([\d.]+)`)
+	re := regexp.MustCompile(`([\p{L}\p{N}\p{M}\p{S}_-]+)=([\d.]+)`)
 	matches := re.FindAllStringSubmatch(msg, -1)
 	for _, match := range matches {
 		key := match[1]
