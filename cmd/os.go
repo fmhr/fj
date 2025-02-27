@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"log"
+	"os/exec"
 	"runtime"
 )
 
@@ -15,11 +16,16 @@ func createCommand(cmdStr string) (cmdArgs []string) {
 		cmdArgs = []string{"cmd", "/C", cmdStr}
 		return cmdArgs
 	case "linux":
-		// Linux では　GNU time を使う
+		// GNU time
 		timeCmd = "/usr/bin/time -v"
 	case "darwin", "freebsd":
-		// macOSとFreeBSD では　BSD time を使う
-		timeCmd = "/usr/bin/time -l"
+		// macOS, FreeBSDではGNU timeがあればそれを使う
+		if commandExist("gtime") {
+			timeCmd = `gtime -f "time:%E memory=%M KB nCPU:%P "`
+		} else {
+			// なければ BSD time
+			timeCmd = "/usr/bin/time -l"
+		}
 	default:
 		log.Println("OS not supported")
 	}
@@ -31,4 +37,10 @@ func createCommand(cmdStr string) (cmdArgs []string) {
 	cmdArgs = []string{"/bin/sh", "-c", cmdStr}
 
 	return cmdArgs
+}
+
+// commandExist はコマンドが存在するか確認する
+func commandExist(cmd string) bool {
+	_, err := exec.LookPath(cmd)
+	return err == nil
 }
