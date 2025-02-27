@@ -1,8 +1,11 @@
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
+	"os"
 	"os/exec"
 	"time"
 )
@@ -20,27 +23,49 @@ func runCommandWithTimeout(cmdStrings []string, timelimitMS int) ([]byte, bool, 
 
 	cmd := exec.CommandContext(ctx, cmdStrings[0], cmdStrings[1:]...)
 
-	// OS-specific setup
+	// OS毎のコマンド修正
 	err := cmdCustom(cmd)
 
 	if err != nil {
 		return nil, false, fmt.Errorf("failed to set up command: %v", err)
 	}
 
-	cmd.WaitDelay = 5 * time.Second // Wait 5 seconds before sending SIGKILL　子プロセスとのIOの完了を待つ
-	output, err := cmd.CombinedOutput()
+	// 標準出力と標準エラーの操作 端末とバッファにの両方に出力
+	var outputBuf bytes.Buffer
+	multiOut := io.MultiWriter(nil, &outputBuf)
+	// --show-error オプションが指定されている場合はエラーを表示する
+	var multiErr io.Writer
+	if *showError {
+		multiErr = io.MultiWriter(os.Stderr, &outputBuf)
+	} else {
+		multiErr = &outputBuf
+	}
 
+	cmd.Stdout = multiOut
+	cmd.Stderr = multiErr
+
+	cmd.WaitDelay = 5 * time.Second // Wait 5 seconds before sending SIGKILL　子プロセスとのIOの完了を待つ
+
+	// コマンド実行
+	err = cmd.Start()
+	if err != nil {
+		return nil, false, fmt.Errorf("command execution failed: %v", err)
+	}
+
+	err = cmd.Wait()
+
+	//output, err := cmd.CombinedOutput()
 	if ctx.Err() == context.DeadlineExceeded {
 		cmd.Cancel() // Ensure the process is terminated on timeout
-		return output, true, fmt.Errorf("command timed out after %d ms", timelimitMS)
+		return outputBuf.Bytes(), true, fmt.Errorf("command timed out after %d ms", timelimitMS)
 	}
 
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
-			return output, false, fmt.Errorf("command failed with exit code %d: %v", exitErr.ExitCode(), err)
+			return outputBuf.Bytes(), false, fmt.Errorf("command failed with exit code %d: %v", exitErr.ExitCode(), err)
 		}
-		return output, false, fmt.Errorf("command execution failed: %v", err)
+		return outputBuf.Bytes(), false, fmt.Errorf("command execution failed: %v", err)
 	}
 
-	return output, false, nil
+	return outputBuf.Bytes(), false, nil
 }

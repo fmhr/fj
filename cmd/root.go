@@ -29,6 +29,7 @@ var (
 	jsonOutput = fj.Flag("json", "Output json format.").Default("false").Bool()
 	csvOutput  = fj.Flag("csv", "Output csv format.").String()
 	bestScore  = fj.Flag("best", "Best score.").Bool()
+	showError  = fj.Flag("show-error", "Display error log on the terminal.").Default("false").Bool()
 
 	// init command
 	setupCmd = fj.Command("init", "Generate config file.")
