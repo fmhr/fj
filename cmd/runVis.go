@@ -61,6 +61,15 @@ func runVis(cnf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, st
 		log.Println("vis error:", err)
 		return nil, err
 	}
+
+	// testerで要素を出力するように改造したときに、ここで値を取得する
+	_, err = ExtractKeyValuePairs(pair, string(outVis))
+	if err != nil {
+		log.Println("Failed to extract key value pairs from vis output")
+		return pair, err
+	}
+
+	// Score = を抜き出す
 	sc, err := extractData(string(outVis))
 	if err != nil {
 		return nil, err
