@@ -250,6 +250,12 @@ overloop:
 			}
 		}
 	}
+	if len(errSeeds) == 0 && len(zeroSeeds) == 0 && len(tleSeeds) == 0 {
+		fmt.Fprintln(os.Stderr, "All tests passed")
+		fmt.Println(sumScore)
+	} else {
+		fmt.Println("Some tests failed")
+	}
 }
 
 const progressBarWidth = 40

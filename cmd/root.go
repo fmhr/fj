@@ -152,6 +152,7 @@ func Execute() error {
 					return err
 				}
 			}
+			fmt.Println(Score)
 		} else {
 			startSeed := *seed
 			config.Jobs = *parallel
