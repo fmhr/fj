@@ -18,11 +18,10 @@ func DisplayTable(data []*orderedmap.OrderedMap[string, string]) error {
 		return nil
 	}
 
-	table := tablewriter.NewWriter(os.Stderr)
-	table.SetAutoFormatHeaders(false)
-	//	log.Println(data)
 	headers := extractHeaders(data)
-	table.SetHeader(headers)
+	table := tablewriter.NewWriter(os.Stderr)
+	//	log.Println(data)
+	table.Header(toInterfaceSlice(headers)...)
 
 	sort.Slice(data, func(i, j int) bool {
 		seedI, _ := data[i].Get("seed")
@@ -85,4 +84,13 @@ func formatFloat(value any) (string, error) {
 	}
 	log.Println("invalid type")
 	return "", fmt.Errorf("invalid type")
+}
+
+// toInterfaceSlice converts a string slice to an interface slice
+func toInterfaceSlice(slice []string) []interface{} {
+	result := make([]interface{}, len(slice))
+	for i, v := range slice {
+		result[i] = v
+	}
+	return result
 }
