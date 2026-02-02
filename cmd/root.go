@@ -18,6 +18,9 @@ const (
 	FJ_DIRECTORY = "fj/"
 )
 
+// Version はビルド時にldflags で設定される
+var Version = "dev"
+
 func init() {
 	// flagのパース前にinitが実行されることに注意
 }
@@ -50,6 +53,8 @@ var (
 	testerURL   = downloadcmd.Arg("url", "Direct ZIP file URL.").Required().String()
 	// info
 	info = fj.Command("info", "Show info.")
+	// version
+	version = fj.Command("version", "Show version information.").Alias("v")
 )
 
 func Execute() error {
@@ -161,6 +166,8 @@ func Execute() error {
 		fmt.Println("isReactive:", download.IsReactive())
 		cDir, _ := os.UserCacheDir()
 		fmt.Println("cacheDirectory:", cDir+"/fmhr-judge-tools")
+	case version.FullCommand():
+		fmt.Printf("fj version %s\n", Version)
 	}
 	return nil
 }
