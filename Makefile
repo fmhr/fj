@@ -43,6 +43,11 @@ $(BINARIES): $(GO_FILES)
 .PHONY: clean
 clean:
 	rm -rf $(BUILD_DIR)/$(BINARY_NAME)
+
+# 実行ファイルとバージョンファイルの完全クリーンアップ
+.PHONY: clean-all
+clean-all:
+	rm -rf $(BUILD_DIR)/$(BINARY_NAME)
 	rm -f $(VERSION_FILE)
 
 # 依存関係のダウンロード
