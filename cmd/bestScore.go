@@ -110,11 +110,12 @@ func UpdateBestScore(seed, score int) error {
 	}
 	for i, s := range data.Scores {
 		if s.Seed == seed {
-			if data.MiniMax == 1 {
+			switch data.MiniMax {
+			case 1:
 				if score > data.Scores[i].BestScore || data.Scores[i].BestScore == -1 {
 					data.Scores[i].BestScore = score
 				}
-			} else if data.MiniMax == -1 {
+			case -1:
 				if score < data.Scores[i].BestScore || data.Scores[i].BestScore == -1 {
 					data.Scores[i].BestScore = score
 				}
