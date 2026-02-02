@@ -35,8 +35,8 @@ var (
 	showError  = fj.Flag("show-error", "Display error log on the terminal.").Default("false").Bool()
 
 	// init command
-	setupCmd = fj.Command("init", "Generate config file.")
-	minimax  = setupCmd.Flag("minimax", "BestScore is mini or max").Default("max").String()
+	setupCmd = fj.Command("init", "Initialize config and best score tracking. Example: fj init --best --minimax=max")
+	minimax  = setupCmd.Flag("minimax", "Optimization direction: 'max' for maximization, 'min' for minimization (use with --best)").Default("max").String()
 
 	setupcloud = fj.Command("setupCloud", "Generate Dockerfile and gcloud build files for cloud mode.")
 
