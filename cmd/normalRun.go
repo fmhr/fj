@@ -59,7 +59,7 @@ func normalRunWithTime(cnf *setup.Config, seed int) ([]byte, bool, error) {
 	}
 
 	// 実行時間を出力に追加（秒単位）
-	timeStr := fmt.Sprintf("time:%.3f", elapsed.Seconds())
+	timeStr := fmt.Sprintf("time=%.3f", elapsed.Seconds())
 	out = append(out, []byte("\n"+timeStr)...)
 
 	return out, timeout, nil
