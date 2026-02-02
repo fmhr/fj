@@ -27,6 +27,7 @@ main
 vis.html
 vis.png
 seed.txt
+.version
 
 # File extensions to ignore
 *.svg
