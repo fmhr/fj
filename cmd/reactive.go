@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/elliotchance/orderedmap/v2"
 	"github.com/fmhr/fj/cmd/setup"
@@ -52,10 +53,22 @@ func reactiveRunCmd(ctf *setup.Config, seed int) ([]byte, bool, error) {
 	setsArgs := setArgs(ctf.Args) // コマンドオプションの追加
 	cmdStr := fmt.Sprintf("%s %s %s < %s > %s", ctf.TesterPath, cmd, setsArgs, infile, outfile)
 	cmdStrings := createCommand(cmdStr)
+
+	// 実行時間を計測
+	startTime := time.Now()
 	out, timeout, err := runCommandWithTimeout(cmdStrings, int(ctf.TimeLimitMS))
+	elapsed := time.Since(startTime)
+
 	if err != nil {
 		log.Println("Error: ", err, "command:", cmdStr)
 	}
+
+	// 実行時間を出力に追加（秒単位）
+	if !timeout {
+		timeStr := fmt.Sprintf("time:%.3f", elapsed.Seconds())
+		out = append(out, []byte("\n"+timeStr)...)
+	}
+
 	return out, timeout, err
 }
 

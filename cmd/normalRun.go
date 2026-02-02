@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/fmhr/fj/cmd/setup"
 )
@@ -12,6 +13,11 @@ import (
 // normalRun は指定された設定とシードに基づいてコマンドを実行する
 // normal モード用
 func normalRun(cnf *setup.Config, seed int) ([]byte, bool, error) {
+	return normalRunWithTime(cnf, seed)
+}
+
+// normalRunWithTime は実行時間を計測しながらコマンドを実行する
+func normalRunWithTime(cnf *setup.Config, seed int) ([]byte, bool, error) {
 	cmd := cnf.ExecuteCmd
 	if cmd == "" {
 		return nil, false, NewStackTraceError("error: Not found execute comand")
@@ -34,7 +40,12 @@ func normalRun(cnf *setup.Config, seed int) ([]byte, bool, error) {
 	cmd += " " + setArgs(cnf.Args) // カスタム引数を追加
 	cmdStr := fmt.Sprintf("%s < %s > %s", cmd, inputfile, outputfile)
 	cmdStrings := createCommand(cmdStr)
+
+	// 実行時間を計測
+	startTime := time.Now()
 	out, timeout, err := runCommandWithTimeout(cmdStrings, int(cnf.TimeLimitMS))
+	elapsed := time.Since(startTime)
+
 	if err != nil {
 		log.Println("Error: ", err)
 		if len(out) > 0 {
@@ -46,6 +57,11 @@ func normalRun(cnf *setup.Config, seed int) ([]byte, bool, error) {
 		log.Printf("処理が制限時間%dmsを超えたためタイムアウトしました", int(cnf.TimeLimitMS))
 		return out, timeout, fmt.Errorf("TIMEOUT %dms", int(cnf.TimeLimitMS))
 	}
+
+	// 実行時間を出力に追加（秒単位）
+	timeStr := fmt.Sprintf("time:%.3f", elapsed.Seconds())
+	out = append(out, []byte("\n"+timeStr)...)
+
 	return out, timeout, nil
 }
 
