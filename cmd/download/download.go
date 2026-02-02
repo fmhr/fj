@@ -9,27 +9,19 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"regexp"
 	"sort"
 	"time"
 )
 
-// Download tester file from URL.
+// Download tester zip file directly from URL.
 func Download(urlStr string) error {
 	// check if url is valid
 	u, err := url.Parse(urlStr)
 	if err != nil || u.Scheme == "" || u.Host == "" {
 		return fmt.Errorf("invalid URL: %s", urlStr)
 	}
-	u.RawQuery = ""
-	urlStr = u.String()
 
-	ac := NewAtCoderClient("", "")
-	// login to atcoder
-	if !ac.IsLoggedIn() {
-		return fmt.Errorf("not logged in")
-	}
-	if err := DownloadLoacaTesterZip(ac.Client, urlStr); err != nil {
+	if err := DownloadLoacaTesterZip(http.DefaultClient, urlStr); err != nil {
 		return fmt.Errorf("failed to download loacatester.zip:%v", err)
 	}
 	fmt.Println("[SUCCESS]Download loacatester.zip")
@@ -45,35 +37,17 @@ func Download(urlStr string) error {
 	return downloadLogging(urlStr) // ダウンロード履歴をログに記録
 }
 
-func DownloadLoacaTesterZip(client *http.Client, url string) error {
-	resp, err := client.Get(url)
+func DownloadLoacaTesterZip(client *http.Client, zipURL string) error {
+	// download zip file directly
+	resp, err := client.Get(zipURL)
 	if err != nil {
-		return fmt.Errorf("failed to access %s:%v", url, err)
+		return fmt.Errorf("failed to download zip file from %s:%v", zipURL, err)
 	}
 	defer resp.Body.Close()
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("failed to read body:%v", err)
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to download zip file: status code %d", resp.StatusCode)
 	}
-
-	// リンクを抽出するための正規表現
-	re := regexp.MustCompile(`<a href="(https://img\.atcoder\.jp/[^"]+\.zip(?:\?[^"]*)?)">.*?(ローカル版|Local version).*?</a>`)
-
-	match := re.FindSubmatch(body)
-	if match == nil {
-		return fmt.Errorf("failed to find download link")
-	}
-
-	zipURL := string(match[1])
-	fmt.Printf("Found zip file URL: %s\n", zipURL)
-
-	// download zip file
-	resp, err = client.Get(zipURL)
-	if err != nil {
-		return fmt.Errorf("failed to download zip file:%v", err)
-	}
-	defer resp.Body.Close()
 
 	zipBody, err := io.ReadAll(resp.Body)
 	if err != nil {
