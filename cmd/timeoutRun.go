@@ -30,9 +30,9 @@ func runCommandWithTimeout(cmdStrings []string, timelimitMS int) ([]byte, bool, 
 		return nil, false, fmt.Errorf("failed to set up command: %v", err)
 	}
 
-	// 標準出力と標準エラーの操作 端末とバッファにの両方に出力
+	// 標準出力と標準エラーの操作
 	var outputBuf bytes.Buffer
-	multiOut := io.MultiWriter(nil, &outputBuf)
+	multiOut := &outputBuf
 	// --show-error オプションが指定されている場合はエラーを表示する
 	var multiErr io.Writer
 	if *showError {

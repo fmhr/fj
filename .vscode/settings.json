@@ -4,4 +4,7 @@
     "makefile.configureOnEdit": true,
     "makefile.buildBeforeLaunch": true,
     "makefile.clearOutputBeforeBuild": true,
+    "chat.tools.terminal.autoApprove": {
+        "go": true
+    },
 }
