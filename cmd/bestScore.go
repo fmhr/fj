@@ -80,24 +80,6 @@ func writeBestScore(data *BestData) error {
 	return nil
 }
 
-// GetBestScore は指定されたseedのベストスコアを取得する
-func GetBestScore(seed int) (int, error) {
-	mutex.Lock()
-	defer mutex.Unlock()
-
-	data, err := readBestScore()
-	if err != nil {
-		return 0, err
-	}
-
-	for _, score := range data.Scores {
-		if score.Seed == seed {
-			return score.BestScore, nil
-		}
-	}
-	return 0, fmt.Errorf("best score not found")
-}
-
 func GetBestScores() (map[int]int, error) {
 	mutex.Lock()
 	defer mutex.Unlock()

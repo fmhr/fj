@@ -82,13 +82,3 @@ func requestToWorker(config *setup.Config, seed int) (*orderedmap.OrderedMap[str
 	}
 	return rtn, nil
 }
-
-func SendBinaryToWorker(config *setup.Config, seed int, binaryNameInBucket string) (*orderedmap.OrderedMap[string, string], error) {
-	if config.WorkerURL == "" {
-		return nil, NewStackTraceError("worker URL is not specified")
-	}
-	if config.BinaryPath == "" {
-		return nil, NewStackTraceError("binary path is not specified")
-	}
-	return requestToWorker(config, seed)
-}

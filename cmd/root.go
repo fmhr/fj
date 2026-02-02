@@ -45,16 +45,9 @@ var (
 	parallel = test.Flag("parallel", "Number of parallel jobs.").Short('p').Default("1").Int()
 	//updateBest = test.Flag("updateBest", "Update best score.").Default("false").Bool()
 
-	// downloadcmd tester file from URL
-	downloadcmd = fj.Command("download", "Download tester file from URL.").Alias("d")
-	testerURL   = downloadcmd.Arg("url", "Tester file URL.").Required().String()
-	// login to atcoder
-	login    = fj.Command("login", "Log in to AtCoder.").Alias("l")
-	username = login.Flag("username", "Username.").Required().Short('u').String()
-	password = login.Flag("password", "Password.").Required().Short('p').String()
-	loginurl = login.Arg("url", "URL.").Default("https://atcoder.jp/login?").String()
-	// logout
-	logout = fj.Command("logout", "Log out from AtCoder.")
+	// downloadcmd tester zip file from direct URL
+	downloadcmd = fj.Command("download", "Download tester zip file directly from URL.").Alias("d")
+	testerURL   = downloadcmd.Arg("url", "Direct ZIP file URL.").Required().String()
 	// info
 	info = fj.Command("info", "Show info.")
 )
@@ -164,12 +157,7 @@ func Execute() error {
 		}
 	case downloadcmd.FullCommand():
 		return download.Download(*testerURL)
-	case login.FullCommand():
-		return download.Login(*loginurl, *username, *password)
-	case logout.FullCommand():
-		download.Logout()
 	case info.FullCommand():
-		fmt.Println("Login:", download.IsLogin())
 		fmt.Println("isReactive:", download.IsReactive())
 		cDir, _ := os.UserCacheDir()
 		fmt.Println("cacheDirectory:", cDir+"/fmhr-judge-tools")

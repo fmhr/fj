@@ -41,18 +41,6 @@ type Config struct {
 	ConcurrentRequests int      `toml:"ConcurrentRequests"` // クラウドジャッジコンテナの並列アクセス数
 }
 
-// GenerateConfig はfj init コマンドで読み出されて fj/config.tomlを生成する
-func GenerateConfig() error {
-	// fj ディレクトリを作成
-	if _, err := os.Stat(FJ_DIRECTORY); os.IsNotExist(err) {
-		if err := os.Mkdir(FJ_DIRECTORY, 0755); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 // SetConfig はconfig.tomlを読み込む
 func SetConfig() (*Config, error) {
 	if !configExists() {
