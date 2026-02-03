@@ -124,7 +124,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// 実行
-	out, err := exexute(&config, seedInt)
+	out, err := execute(&config, seedInt)
 	if err != nil {
 		errmsg := fmt.Sprint("Failed to execute", err.Error())
 		http.Error(w, errmsg, http.StatusInternalServerError)

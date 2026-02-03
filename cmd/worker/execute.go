@@ -6,7 +6,7 @@ import (
 	"github.com/fmhr/fj/cmd/setup"
 )
 
-func exexute(config *setup.Config, seed int) (rtn *orderedmap.OrderedMap[string, string], err error) {
+func execute(config *setup.Config, seed int) (rtn *orderedmap.OrderedMap[string, string], err error) {
 	// GEN
 	err = cmd.Gen(config, seed)
 	if err != nil {

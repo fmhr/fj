@@ -21,7 +21,7 @@ func Download(urlStr string) error {
 		return fmt.Errorf("invalid URL: %s", urlStr)
 	}
 
-	if err := DownloadLoacaTesterZip(http.DefaultClient, urlStr); err != nil {
+	if err := DownloadLocalTesterZip(http.DefaultClient, urlStr); err != nil {
 		return fmt.Errorf("failed to download loacatester.zip:%v", err)
 	}
 	fmt.Println("[SUCCESS]Download loacatester.zip")
@@ -37,7 +37,7 @@ func Download(urlStr string) error {
 	return downloadLogging(urlStr) // ダウンロード履歴をログに記録
 }
 
-func DownloadLoacaTesterZip(client *http.Client, zipURL string) error {
+func DownloadLocalTesterZip(client *http.Client, zipURL string) error {
 	// download zip file directly
 	resp, err := client.Get(zipURL)
 	if err != nil {
@@ -109,9 +109,9 @@ func downloadLogging(url string) error {
 		}
 	}
 	// isReactiveはtools/README.mdを読んで確認する
-	reactibe := IsReactive()
-	dlog.Reactive = reactibe
-	if reactibe {
+	reactive := IsReactive()
+	dlog.Reactive = reactive
+	if reactive {
 		fmt.Println("Reactive Problem")
 	} else {
 		fmt.Println("Not Reactive Problem")

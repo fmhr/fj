@@ -21,10 +21,6 @@ const (
 // Version はビルド時にldflags で設定される
 var Version = "dev"
 
-func init() {
-	// flagのパース前にinitが実行されることに注意
-}
-
 var (
 	fj         = kingpin.New("fj", "fj is a command line tool for AtCoder Heuristic Contest.")
 	debug      = fj.Flag("debug", "Enable debug mode.").Default("false").Bool()
@@ -38,7 +34,7 @@ var (
 	setupCmd = fj.Command("init", "Initialize config and best score tracking. Example: fj init --best --minimax=max")
 	minimax  = setupCmd.Flag("minimax", "Optimization direction: 'max' for maximization, 'min' for minimization (use with --best)").Default("max").String()
 
-	setupcloud = fj.Command("setupCloud", "Generate Dockerfile and gcloud build files for cloud mode.")
+	setupcloud = fj.Command("setup-cloud", "Generate Dockerfile and gcloud build files for cloud mode.")
 
 	// test command
 	test     = fj.Command("test", "Run test case.").Alias("t")
@@ -46,7 +42,6 @@ var (
 	seed     = test.Flag("seed", "Set Seed. default : 0.").Short('s').Default("0").Int()
 	count    = test.Flag("count", "Number of test cases.").Short('n').Default("1").Int()
 	parallel = test.Flag("parallel", "Number of parallel jobs.").Short('p').Default("1").Int()
-	//updateBest = test.Flag("updateBest", "Update best score.").Default("false").Bool()
 
 	// downloadcmd tester zip file from direct URL
 	downloadcmd = fj.Command("download", "Download tester zip file directly from URL.").Alias("d")
@@ -148,9 +143,8 @@ func Execute() error {
 				return err
 			}
 			if *bestScore {
-				err = UpdateBestScore(*seed, scoreInt)
-				log.Println("faile to update best score:")
-				if err != nil {
+				if err = UpdateBestScore(*seed, scoreInt); err != nil {
+					log.Println("failed to update best score:", err)
 					return err
 				}
 			}

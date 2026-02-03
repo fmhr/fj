@@ -36,8 +36,6 @@ func ReactiveRun(ctf *setup.Config, seed int) (pair *orderedmap.OrderedMap[strin
 	for k, v := range testerDate {
 		pair.Set(k, v)
 	}
-	//pair.Set("stdErr", out)
-	//pair.Set("result", timeout)
 	if timeout {
 		pair.Set("Score", "0")
 		pair.Set("time", fmt.Sprintf("%v", ctf.TimeLimitMS/1000))
