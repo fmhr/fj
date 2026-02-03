@@ -87,3 +87,18 @@ func newConfig() (c Config) {
 	c.TimeLimitMS = 5000
 	return c
 }
+
+// WriteDefaultConfig はデフォルト値で fj/config.toml を生成する
+func WriteDefaultConfig() error {
+	conf := newConfig()
+	file, err := os.Create(FJ_DIRECTORY + CONFIG_FILE)
+	if err != nil {
+		return fmt.Errorf("failed to create config.toml: %v", err)
+	}
+	defer file.Close()
+	encoder := toml.NewEncoder(file)
+	if err := encoder.Encode(conf); err != nil {
+		return fmt.Errorf("failed to encode config.toml: %v", err)
+	}
+	return nil
+}

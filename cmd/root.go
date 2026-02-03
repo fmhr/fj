@@ -77,6 +77,10 @@ func Execute() error {
 				return err
 			}
 		}
+		// fj/config.toml の生成
+		if err := ensureConfigToml(); err != nil {
+			return err
+		}
 		// fj/best_score.json の作成
 		if *bestScore {
 			if *minimax == "min" {
@@ -170,6 +174,15 @@ func Execute() error {
 		fmt.Printf("fj version %s\n", Version)
 	}
 	return nil
+}
+
+// ensureConfigToml は fj/config.toml が存在しない場合にデフォルト値で生成する
+func ensureConfigToml() error {
+	dst := FJ_DIRECTORY + "config.toml"
+	if _, err := os.Stat(dst); err == nil {
+		return nil // 既に存在する場合は何もしない
+	}
+	return setup.WriteDefaultConfig()
 }
 
 // updateConfig はコマンドライン引数でconfigを更新する
