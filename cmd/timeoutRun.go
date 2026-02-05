@@ -33,9 +33,9 @@ func runCommandWithTimeout(cmdStrings []string, timelimitMS int) ([]byte, bool, 
 	// 標準出力と標準エラーの操作
 	var outputBuf bytes.Buffer
 	multiOut := &outputBuf
-	// --show-error オプションが指定されている場合はエラーを表示する
+	// --show-stderr オプションが指定されている場合はstderrを表示する
 	var multiErr io.Writer
-	if *showError {
+	if *showStderr {
 		multiErr = io.MultiWriter(os.Stderr, &outputBuf)
 	} else {
 		multiErr = &outputBuf
