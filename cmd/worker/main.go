@@ -126,14 +126,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	// 実行
 	out, err := execute(&config, seedInt)
 	if err != nil {
-		errmsg := fmt.Sprint("Failed to execute", err.Error())
+		errmsg := fmt.Sprint("Failed to execute:", err.Error())
 		http.Error(w, errmsg, http.StatusInternalServerError)
 		return
 	}
 	// json
 	jsonData, err := json.Marshal((*cmd.EncodableOrderedMap)(out))
 	if err != nil {
-		errmsg := fmt.Sprint("Failed to marshal", err.Error())
+		errmsg := fmt.Sprint("Failed to marshal:", err.Error())
 		http.Error(w, errmsg, http.StatusInternalServerError)
 		return
 	}

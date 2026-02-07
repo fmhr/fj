@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/elliotchance/orderedmap/v2"
 	"github.com/fmhr/fj/cmd"
 	"github.com/fmhr/fj/cmd/setup"
@@ -16,7 +18,7 @@ func execute(config *setup.Config, seed int) (rtn *orderedmap.OrderedMap[string,
 	// RUN
 	rtn, err = run(config, seed)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("RUNが失敗: %w", err)
 	}
 	return rtn, nil
 }
