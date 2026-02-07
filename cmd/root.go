@@ -28,7 +28,7 @@ var (
 	jsonOutput = fj.Flag("json", "Output json format.").Default("false").Bool()
 	csvOutput  = fj.Flag("csv", "Output csv format.").String()
 	bestScore  = fj.Flag("best", "Best score.").Bool()
-	showStderr = fj.Flag("show-stderr", "Display stderr output on the terminal.").Default("false").Bool()
+	showStderr = fj.Flag("stderr", "Display stderr output on the terminal.").Default("false").Bool()
 
 	// init command
 	setupCmd = fj.Command("init", "Initialize config and best score tracking. Example: fj init --best --minimax=max")
