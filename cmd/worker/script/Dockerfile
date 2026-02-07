@@ -10,7 +10,7 @@ COPY ./tools /work/tools
 RUN (cd tools && cargo build --release --quiet)
 
 
-FROM golang:1.21 as workerbuild
+FROM golang:1.25 as workerbuild
 WORKDIR /work
 RUN git clone https://github.com/fmhr/fj.git
 
@@ -25,7 +25,7 @@ RUN CGO_ENABLED=0 go build -o /work/worker
 FROM ubuntu:latest
 WORKDIR /judge
 
-RUN apt-get update && apt-get install ca-certificates openssl
+RUN apt-get update && apt-get install -y ca-certificates openssl
 # RUN apt-get install -y openjdk-17-jre
 
 COPY --from=workerbuild /work/worker /judge/worker

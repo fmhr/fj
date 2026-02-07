@@ -8,23 +8,23 @@ import (
 	"path/filepath"
 )
 
-//go:embed"../compiler/script/*"
+//go:embed compiler/script/*
 var compilerFiles embed.FS
 
-//go:embed"../worker/script/*""
+//go:embed worker/script/*
 var workerFiles embed.FS
 
 func mkDirCompilerBase() error {
-	targetDir := "./fj/compiler/"
-	return extractEmbeddedFiles(compilerFiles, "cmd/compiler/script", targetDir)
+    targetDir := "./fj/compiler/"
+    return extractEmbeddedFiles(compilerFiles, "compiler/script", targetDir)
 }
 
 func mkDirWorkerBase() error {
-	targetDir := "./fj/worker/"
-	return extractEmbeddedFiles(workerFiles, "cmd/worker/script", targetDir)
+    targetDir := "./fj/worker/"
+    return extractEmbeddedFiles(workerFiles, "worker/script", targetDir)
 }
 
-func extractEmbeddedFiles(embeddedFS embed.FS, sourcdDir, targetDir string) error {
+func extractEmbeddedFiles(embeddedFS embed.FS, sourceDir, targetDir string) error {
 	if _, err := os.Stat(targetDir); os.IsNotExist(err) {
 		if err := os.MkdirAll(targetDir, 0777); err != nil {
 			log.Println("Failed to create directory")
@@ -32,7 +32,7 @@ func extractEmbeddedFiles(embeddedFS embed.FS, sourcdDir, targetDir string) erro
 		}
 	}
 	// embeddedFSからファイルを取得
-	err := fs.WalkDir(embeddedFS, sourcdDir, func(path string, d fs.DirEntry, err error) error {
+	err := fs.WalkDir(embeddedFS, sourceDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -46,7 +46,7 @@ func extractEmbeddedFiles(embeddedFS embed.FS, sourcdDir, targetDir string) erro
 			return err
 		}
 		// ターゲットパスを作成
-		relativePath, err := filepath.Rel(sourcdDir, path)
+		relativePath, err := filepath.Rel(sourceDir, path)
 		if err != nil {
 			return err
 		}
