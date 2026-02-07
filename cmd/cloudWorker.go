@@ -63,13 +63,18 @@ func requestToWorker(config *setup.Config, seed int) (*orderedmap.OrderedMap[str
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body: %v", err)
 	}
+	type KV struct {
+		Key string `json:"key"`
+		Val string `json:"val"`
+	}
+	var kvList []KV
 	rtn := orderedmap.NewOrderedMap[string, string]()
-	var tempMap map[string]string
-	if err := json.Unmarshal(bodyBytes, &tempMap); err != nil {
+	if err := json.Unmarshal(bodyBytes, &kvList); err != nil {
+		log.Println("Response body:", string(bodyBytes))
 		return nil, fmt.Errorf("failed to parse response body: %v", err)
 	}
-	for key, value := range tempMap {
-		rtn.Set(key, value)
+	for _, kv := range kvList {
+		rtn.Set(kv.Key, kv.Val)
 	}
 	elapsed := time.Since(start)
 	rtn.Set("responseTime", elapsed.String())
