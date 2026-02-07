@@ -51,7 +51,7 @@ func gen(cnf *setup.Config, seed int) error {
 	cmd := exec.Command(cmdStrings[0], cmdStrings[1:]...)
 	err = cmd.Run()
 	if err != nil {
-		return fmt.Errorf("genの実行に失敗: %w", err)
+		return fmt.Errorf("genの実行に失敗: %w\n %s", err, cmdStrings)
 	}
 	// in/0000.txtをin/{seed}.txtにリネーム
 	err = os.Rename("in/0000.txt", fmt.Sprintf("in2/%04d.txt", seed))
