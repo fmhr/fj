@@ -1,8 +1,8 @@
 #!/bin/sh
 
 GCLOUD_PROJECT="ahc-contests"
-REPOSITORY="images"
-IMAGE_NAME="ahc023-tester"
+REPOSITORY="my-app-images"
+IMAGE_NAME="ahc060"
 REGION="asia-northeast1"
 
 set -e #コマンドが失敗したらそこで終了する

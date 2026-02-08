@@ -1,14 +1,18 @@
 #!/bin/sh
 
 GCLOUD_PROJECT="ahc-contests"
-REPOSITORY="images"
+REGION="asia-northeast1"
+REPOSITORY="my-app-images"
 IMAGE_NAME="compiler-go"
+IMAGE_URL="${REGION}-docker.pkg.dev/${GCLOUD_PROJECT}/${REPOSITORY}/${IMAGE_NAME}:latest"
 
-set -e #コマンドが失敗したらそこで終了する
+set -eu #コマンドが失敗したらそこで終了する
 set -x #実行したコマンドを表示する
 
-gcloud builds submit --tag asia-northeast1-docker.pkg.dev/${GCLOUD_PROJECT}/${REPOSITORY}/${IMAGE_NAME}:latest .
+gcloud builds submit --tag ${IMAGE_URL} .
 
 gcloud run deploy ${IMAGE_NAME}\
-    --image asia-northeast1-docker.pkg.dev/${GCLOUD_PROJECT}/${REPOSITORY}/${IMAGE_NAME}:latest \
-    --platform managed
+    --region ${REGION} \
+    --image ${IMAGE_URL} \
+    --platform managed \
+    --allow-unauthenticated 
