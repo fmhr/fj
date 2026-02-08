@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/elliotchance/orderedmap/v2"
@@ -48,6 +49,11 @@ func reactiveRunCmd(ctf *setup.Config, seed int) ([]byte, bool, error) {
 	cmd := ctf.ExecuteCmd
 	infile := ctf.InfilePath + fmt.Sprintf("%04d.txt", seed)
 	outfile := ctf.OutfilePath + fmt.Sprintf("%04d.txt", seed)
+	// in/0000.txtの存在確認
+	_, err := fileExists(infile)
+	if err != nil {
+		return nil, false, fmt.Errorf("input fileの確認に失敗: %w", err)
+	}
 	setsArgs := setArgs(ctf.Args) // コマンドオプションの追加
 	cmdStr := fmt.Sprintf("%s %s %s < %s > %s", ctf.TesterPath, cmd, setsArgs, infile, outfile)
 	cmdStrings := createCommand(cmdStr)
@@ -77,4 +83,15 @@ func setArgs(args []string) string {
 		str += v + " "
 	}
 	return str
+}
+
+func fileExists(filename string) (bool, error) {
+	_, err := os.Stat(filename)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, fmt.Errorf("file does not exist: %s", filename)
+	}
+	return false, err
 }
