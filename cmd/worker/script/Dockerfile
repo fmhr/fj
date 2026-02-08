@@ -1,4 +1,4 @@
-FROM rust:buster as toolsbuilder
+FROM rust:latest as toolsbuilder
 WORKDIR /work
 
 # 直接ダウンロードするとき　例)AHC027
@@ -7,7 +7,7 @@ WORKDIR /work
 
 # ローカルのtoolsをコピーするときは tools/　をDockerfileと同じ階層に置く
 COPY ./tools /work/tools
-RUN (cd tools && cargo build --release --quiet)
+RUN cd tools && cargo build --release --quiet
 
 
 FROM golang:1.25 as workerbuild
@@ -22,16 +22,16 @@ RUN CGO_ENABLED=0 go build -o /work/worker
 
 
 # 3. 実行時の環境
-FROM ubuntu:latest
+FROM ubuntu:24.04
 WORKDIR /judge
 
-RUN apt-get update && apt-get install -y ca-certificates openssl
-# RUN apt-get install -y openjdk-17-jre
+RUN apt-get update \
+    && apt-get install -y ca-certificates openssl time \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=workerbuild /work/worker /judge/worker
 COPY --from=toolsbuilder /work/tools/target/release/* /judge/tools/target/release/
 
 RUN mkdir -p /judge/bin
 
-EXPOSE $PORT
 CMD ["/judge/worker"]
