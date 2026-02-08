@@ -20,7 +20,7 @@ func normalRun(cnf *setup.Config, seed int) ([]byte, bool, error) {
 func normalRunWithTime(cnf *setup.Config, seed int) ([]byte, bool, error) {
 	cmd := cnf.ExecuteCmd
 	if cmd == "" {
-		return nil, false, NewStackTraceError("error: Not found execute comand")
+		return nil, false, fmt.Errorf("error: Not found execute command")
 	}
 	inputfile := filepath.Join(cnf.InfilePath, fmt.Sprintf("%04d.txt", seed))
 	outputfile := filepath.Join(cnf.OutfilePath, fmt.Sprintf("%04d.txt", seed))
