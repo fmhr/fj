@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"time"
 
@@ -20,7 +19,7 @@ func ReactiveRun(ctf *setup.Config, seed int) (pair *orderedmap.OrderedMap[strin
 	// 実行
 	out, timeout, err := reactiveRunCmd(ctf, seed)
 	if err != nil {
-		log.Println(err)
+		return nil, fmt.Errorf("reactiveRunCmdの実行に失敗: %w", err)
 	}
 	// 出力のパース
 	pair = orderedmap.NewOrderedMap[string, string]()
@@ -64,7 +63,7 @@ func reactiveRunCmd(ctf *setup.Config, seed int) ([]byte, bool, error) {
 	elapsed := time.Since(startTime)
 
 	if err != nil {
-		log.Println("Error: ", err, "command:", cmdStr)
+		return out, timeout, fmt.Errorf("commandの実行に失敗: %w cmd: %s", err, cmdStr)
 	}
 
 	// 実行時間を出力に追加（秒単位）
