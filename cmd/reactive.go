@@ -31,7 +31,7 @@ func ReactiveRun(ctf *setup.Config, seed int) (pair *orderedmap.OrderedMap[strin
 	}
 	testerDate, err := extractData((string(out)))
 	if err != nil {
-		return pair, fmt.Errorf("failed to extract data: %w", err)
+		return pair, fmt.Errorf("extractDataの実行に失敗: %w", err)
 	}
 	for k, v := range testerDate {
 		pair.Set(k, v)
