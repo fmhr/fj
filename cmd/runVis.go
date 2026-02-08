@@ -26,7 +26,7 @@ func runVis(cnf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, st
 		if len(out) > 0 {
 			log.Println("out:", string(out))
 		}
-		return nil, WrapError(fmt.Errorf("%w", err))
+		return nil, fmt.Errorf("%w", err)
 	}
 	pair = orderedmap.NewOrderedMap[string, string]()
 	pair.Set("seed", fmt.Sprintf("%d", seed))
@@ -93,7 +93,7 @@ func vis(cnf *setup.Config, infile, outfile string) ([]byte, error) {
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Printf("failed: %v\nout: %s cmd: %s\n", err, string(out), cmdStrings)
-		return nil, WrapError(fmt.Errorf("failed: %v\nout: %s cmd: %s", err, string(out), cmdStrings))
+		return nil, fmt.Errorf("failed: %v\nout: %s cmd: %s", err, string(out), cmdStrings)
 	}
 	return out, nil
 }

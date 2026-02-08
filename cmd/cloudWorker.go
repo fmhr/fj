@@ -23,12 +23,12 @@ func requestToWorker(config *setup.Config, seed int) (*orderedmap.OrderedMap[str
 	// configをJSONに変換
 	configData, err := json.Marshal(config)
 	if err != nil {
-		return nil, NewStackTraceError(err.Error())
+		return nil, err
 	}
 	// JSON configを追加
 	configPart, err := writer.CreateFormField("config")
 	if err != nil {
-		return nil, NewStackTraceError(err.Error())
+		return nil, err
 	}
 	configPart.Write(configData)
 
@@ -53,9 +53,9 @@ func requestToWorker(config *setup.Config, seed int) (*orderedmap.OrderedMap[str
 	if resp.StatusCode != http.StatusOK {
 		bodyBytes, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return nil, WrapError(err)
+			return nil, err
 		}
-		return nil, NewStackTraceError(fmt.Sprintf("error response status code:%d resp:%s", resp.StatusCode, string(bodyBytes)))
+		return nil, fmt.Errorf("error response status code:%d resp:%s", resp.StatusCode, string(bodyBytes))
 	}
 
 	// レスポンスボディから文字列を取り出す

@@ -17,16 +17,16 @@ import (
 
 func checkConfigCloudCompile(config *setup.Config) error {
 	if config.Language == "" {
-		return NewStackTraceError("error: [Language] must not be empty")
+		return fmt.Errorf("error: [Language] must not be empty")
 	}
 	if config.SourceFilePath == "" {
-		return NewStackTraceError("error: [SourcePath] must not be empty")
+		return fmt.Errorf("error: [SourcePath] must not be empty")
 	}
 	if config.BinaryPath == "" {
-		return NewStackTraceError("error: [BinaryPath] must not be empty")
+		return fmt.Errorf("error: [BinaryPath] must not be empty")
 	}
 	if config.CompilerURL == "" {
-		return NewStackTraceError("error: [CompilerURL] must not be empty")
+		return fmt.Errorf("error: [CompilerURL] must not be empty")
 	}
 	return nil
 }
@@ -40,7 +40,7 @@ func checkConfigCloudCompile(config *setup.Config) error {
 func CloudCompile(config *setup.Config) error {
 	_, ok := setup.LanguageSets[config.Language]
 	if !ok {
-		return NewStackTraceError(fmt.Sprintf("error: language [%s] is not supported. suported %v", config.Language, setup.LanguageList()))
+		return fmt.Errorf("error: language [%s] is not supported. suported %v", config.Language, setup.LanguageList())
 	}
 	log.Println("cloud compiling...")
 	if err := checkConfigCloudCompile(config); err != nil {
@@ -89,7 +89,7 @@ func CloudCompile(config *setup.Config) error {
 			return err
 		}
 		msg := fmt.Sprint("server response:", string(bodyBytes), "url:", config.CompilerURL, "\n")
-		return NewStackTraceError(msg)
+		return fmt.Errorf(msg)
 	}
 
 	// cloud storageに保存したバイナルの名前を取得
