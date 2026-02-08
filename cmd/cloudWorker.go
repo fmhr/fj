@@ -63,9 +63,10 @@ func requestToWorker(config *setup.Config, seed int) (*orderedmap.OrderedMap[str
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body: %v", err)
 	}
+
 	type KV struct {
 		Key string `json:"key"`
-		Val string `json:"val"`
+		Val string `json:"value"`
 	}
 	var kvList []KV
 	rtn := orderedmap.NewOrderedMap[string, string]()

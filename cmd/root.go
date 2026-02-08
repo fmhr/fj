@@ -182,5 +182,7 @@ func ensureConfigToml() error {
 // updateConfig はコマンドライン引数でconfigを更新する
 func updateConfig(config *setup.Config) {
 	config.CloudMode = config.CloudMode || *cloud
-	config.ExecuteCmd = *cmd
+	if !config.CloudMode {
+		config.ExecuteCmd = *cmd
+	}
 }

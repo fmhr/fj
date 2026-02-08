@@ -21,6 +21,7 @@ import (
 func main() {
 	http.HandleFunc("/worker", handler)
 	http.ListenAndServe(":8080", nil)
+	log.SetOutput(os.Stderr)
 	log.Println("Worker server started on port 8080")
 }
 
