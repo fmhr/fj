@@ -72,7 +72,7 @@ func reactiveRunCmd(ctf *setup.Config, seed int) ([]byte, bool, error) {
 		out = append(out, []byte("\n"+timeStr)...)
 	}
 
-	return out, timeout, err
+	return out, timeout, nil
 }
 
 // setArgs return string
