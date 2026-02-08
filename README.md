@@ -110,7 +110,7 @@ VisPath = 'tools/target/release/vis'
 GenPath = 'tools/target/release/gen'
 InfilePath = 'tools/in/'
 OutfilePath = 'out/'
-TimeLimitMS = 5000
+TimeLimitMS = 7000
 ```
 
 | 設定項目 | 説明 |

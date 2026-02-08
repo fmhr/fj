@@ -7,7 +7,6 @@ import (
 )
 
 // OS別にコマンドを変更
-
 func createCommand(cmdStr string) (cmdArgs []string) {
 	var timeCmd string
 	switch runtime.GOOS {
@@ -27,6 +26,7 @@ func createCommand(cmdStr string) (cmdArgs []string) {
 			timeCmd = "/usr/bin/time -l"
 		}
 	default:
+		// 未対応OS
 		log.Println("OS not supported")
 	}
 
