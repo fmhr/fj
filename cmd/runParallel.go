@@ -220,8 +220,8 @@ overloop:
 			log.Println("Error JsonOutput:", err)
 		}
 	}
-	if csvOutput != nil && *csvOutput != "" {
-		err := CsvOutput(datas, *csvOutput)
+	if csvOutput != nil && *csvOutput {
+		err := CsvOutput(datas, "result")
 		if err != nil {
 			log.Println("Error CsvOutput:", err)
 		}

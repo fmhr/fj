@@ -26,7 +26,7 @@ var (
 	debug      = fj.Flag("debug", "Enable debug mode.").Default("false").Bool()
 	cloud      = fj.Flag("cloud", "Enable cloud mode.").Default("false").Bool()
 	jsonOutput = fj.Flag("json", "Output json format.").Default("false").Bool()
-	csvOutput  = fj.Flag("csv", "Output csv format.").String()
+	csvOutput  = fj.Flag("csv", "Output csv format.").Default("false").Bool()
 	bestScore  = fj.Flag("best", "Best score.").Bool()
 	showStderr = fj.Flag("stderr", "Display stderr output on the terminal.").Default("false").Bool()
 
