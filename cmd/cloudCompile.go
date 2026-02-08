@@ -88,8 +88,7 @@ func CloudCompile(config *setup.Config) error {
 		if err != nil {
 			return err
 		}
-		msg := fmt.Sprint("server response:", string(bodyBytes), "url:", config.CompilerURL, "\n")
-		return fmt.Errorf(msg)
+		return fmt.Errorf("error response status code:%d resp:%s", resp.StatusCode, string(bodyBytes))
 	}
 
 	// cloud storageに保存したバイナルの名前を取得
