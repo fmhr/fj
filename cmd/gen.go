@@ -47,7 +47,7 @@ func gen(cnf *setup.Config, seed int) error {
 	}
 	// genを実行
 	cmdStr := fmt.Sprintf("%s %s", cnf.GenPath, seedfile)
-	cmdStrings := createCommand(cmdStr)
+	cmdStrings := parseCommand(cmdStr)
 	cmd := exec.Command(cmdStrings[0], cmdStrings[1:]...)
 	err = cmd.Run()
 	if err != nil {
@@ -71,4 +71,31 @@ func gen(cnf *setup.Config, seed int) error {
 func writeIntToFile(n int, filename string) error {
 	data := fmt.Sprintf("%d", n)
 	return os.WriteFile(filename, []byte(data), 0644)
+}
+
+func parseCommand(command string) []string {
+	// コマンドをスペースで分割
+	var result []string
+	current := ""
+	inQuotes := false
+
+	for _, char := range command {
+		switch char {
+		case ' ':
+			if inQuotes {
+				current += string(char)
+			} else if current != "" {
+				result = append(result, current)
+				current = ""
+			}
+		case '"':
+			inQuotes = !inQuotes
+		default:
+			current += string(char)
+		}
+	}
+	if current != "" {
+		result = append(result, current)
+	}
+	return result
 }
