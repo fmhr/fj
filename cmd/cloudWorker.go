@@ -78,7 +78,8 @@ func requestToWorker(config *setup.Config, seed int) (*orderedmap.OrderedMap[str
 		rtn.Set(kv.Key, kv.Val)
 	}
 	elapsed := time.Since(start)
-	rtn.Set("responseTime", elapsed.String())
+	elap := elapsed.Seconds()
+	rtn.Set("responseTime", fmt.Sprintf("%.3f", elap))
 	score, ok := rtn.Get("Score")
 	if !ok {
 		return nil, fmt.Errorf("failed to get score from response body: %v", err)
