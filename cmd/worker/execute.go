@@ -26,9 +26,15 @@ func execute(config *setup.Config, seed int) (rtn *orderedmap.OrderedMap[string,
 func run(config *setup.Config, seed int) (*orderedmap.OrderedMap[string, string], error) {
 	if config.Reactive {
 		rtn, err := cmd.ReactiveRun(config, seed)
-		return rtn, fmt.Errorf("ReactiveRunの実行に失敗: %w", err)
+		if err != nil {
+			return nil, fmt.Errorf("ReactiveRunの実行に失敗: %w", err)
+		}
+		return rtn, nil
 	} else {
 		rtn, err := cmd.RunVis(config, seed)
-		return rtn, fmt.Errorf("RunVisの実行に失敗: %w", err)
+		if err != nil {
+			return nil, fmt.Errorf("RunVisの実行に失敗: %w", err)
+		}
+		return rtn, nil
 	}
 }
