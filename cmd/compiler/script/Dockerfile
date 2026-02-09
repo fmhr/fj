@@ -24,11 +24,9 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 COPY . /work
-###################################################################
-# 不要な言語のインストールを避けるため、コメントアウトしています。
-###################################################################
+# 不要な言語はコメントアウト
 RUN sh install_go.sh 
-ENV PATH $PATH:/opt/go/bin
+ENV PATH=$PATH:/opt/go/bin
 # RUN sh install_cpp20.sh 
 # RUN sh install_cs.sh
 # RUN sh install_java.sh
