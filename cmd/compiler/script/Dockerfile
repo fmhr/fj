@@ -1,4 +1,4 @@
-FROM golang:1.25 as serverbuild
+FROM golang:1.25 AS serverbuild
 
 WORKDIR /app
 

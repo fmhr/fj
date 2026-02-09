@@ -1,4 +1,4 @@
-FROM rust:latest as toolsbuilder
+FROM rust:latest AS toolsbuilder
 WORKDIR /work
 
 # 直接ダウンロードするとき　例)AHC027
@@ -10,7 +10,7 @@ COPY ./tools /work/tools
 RUN cd tools && cargo build --release --quiet
 
 
-FROM golang:1.25 as workerbuild
+FROM golang:1.25 AS workerbuild
 WORKDIR /work
 RUN git clone https://github.com/fmhr/fj.git
 
