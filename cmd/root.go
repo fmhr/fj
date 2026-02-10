@@ -108,7 +108,10 @@ func Execute() error {
 			return err
 		}
 		// config を読み込む
-		updateConfig(config)
+		err = updateConfig(config)
+		if err != nil {
+			return err
+		}
 		// cloud mode ならソースコードをアップロードしてバイナリを受け取る
 		if config.CloudMode {
 			err = CloudCompile(config)
@@ -180,9 +183,22 @@ func ensureConfigToml() error {
 }
 
 // updateConfig はコマンドライン引数でconfigを更新する
-func updateConfig(config *setup.Config) {
+func updateConfig(config *setup.Config) error {
 	config.CloudMode = config.CloudMode || *cloud
 	if !config.CloudMode {
 		config.ExecuteCmd = *cmd
 	}
+	// cloudモードで必要な設定がconfig.tomlにあるか確認する
+	if config.CloudMode {
+		if config.Language == "" {
+			return fmt.Errorf("error: [Language] must not be empty in cloud mode")
+		}
+		if config.SourceFilePath == "" {
+			return fmt.Errorf("error: [SourceFilePath] must not be empty in cloud mode")
+		}
+		if config.WorkerURL == "" {
+			return fmt.Errorf("error: [WorkerURL] must not be empty in cloud mode")
+		}
+	}
+	return nil
 }

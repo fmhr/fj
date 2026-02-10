@@ -78,6 +78,8 @@ func configExists() bool {
 }
 
 func newConfig() (c Config) {
+	c.Language = "Go"
+	c.SourceFilePath = "main.go"
 	c.Reactive = download.IsReactive()
 	c.TesterPath = "tools/target/release/tester"
 	c.VisPath = "tools/target/release/vis"

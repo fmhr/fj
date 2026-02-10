@@ -2,11 +2,13 @@
 
 GCLOUD_PROJECT="ahc-contests"
 REPOSITORY="my-app-images"
-IMAGE_NAME="ahc060"
+IMAGE_NAME=""
 REGION="asia-northeast1"
 
 set -e #コマンドが失敗したらそこで終了する
 set -x #実行したコマンドを表示する
+
+
 
 gcloud builds submit --tag ${REGION}-docker.pkg.dev/${GCLOUD_PROJECT}/${REPOSITORY}/${IMAGE_NAME}:latest .
 
