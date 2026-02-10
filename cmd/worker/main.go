@@ -111,6 +111,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		// バイナリパスをtmpバイナリに変更
 		config.BinaryPath = config.TmpBinary
 		log.Println("Binary is ready at", config.BinaryPath)
+		config.ExecuteCmd = fmt.Sprintf("./%s", config.BinaryPath)
+		log.Println("Overwrite ExecuteCommand:", config.ExecuteCmd)
 	}
 
 	// 入力ファイルを作成

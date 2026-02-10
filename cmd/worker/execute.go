@@ -9,10 +9,10 @@ import (
 )
 
 func execute(config *setup.Config, seed int) (rtn *orderedmap.OrderedMap[string, string], err error) {
-	// コマンド生成
+	// genコマンドで入力ファイルの生成
 	err = cmd.Gen(config, seed)
 	if err != nil {
-		return nil, fmt.Errorf("コマンド生成が失敗: %w", err)
+		return nil, fmt.Errorf("genコマンドで入力ファイルの生成が失敗: %w", err)
 	}
 
 	// RUN
