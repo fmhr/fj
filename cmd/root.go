@@ -209,6 +209,9 @@ func updateConfig(config *setup.Config) error {
 		if config.Bucket == "" {
 			return fmt.Errorf("error: [Bucket] must not be empty in cloud mode")
 		}
+		if config.Reactive && config.BinaryPath == "" {
+			return fmt.Errorf("error: [BinaryPath] must not be empty in cloud mode for reactive problems")
+		}
 	}
 	return nil
 }

@@ -75,7 +75,12 @@ func reactiveRunCmd(ctf *setup.Config, seed int) ([]byte, bool, error) {
 	log.Println("Executing command:", cmdStr)
 	// デバッグ用にlsコマンドを実行してファイル一覧を表示
 	cmdLs := []string{"ls", "-l"}
-	exec.Command(cmdLs[0], cmdLs[1:]...).Run()
+	out, err := exec.Command(cmdLs[0], cmdLs[1:]...).CombinedOutput()
+	if err != nil {
+		log.Println("Failed to execute ls command:", err)
+	} else {
+		log.Println("File list:\n", string(out))
+	}
 
 	// コマンド実行
 	out, timeout, err := runCommandWithTimeout(cmdStrings, int(ctf.TimeLimitMS))
