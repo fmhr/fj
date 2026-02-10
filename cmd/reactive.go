@@ -59,6 +59,11 @@ func reactiveRunCmd(ctf *setup.Config, seed int) ([]byte, bool, error) {
 	if err != nil {
 		return nil, false, fmt.Errorf("output directoryの確認に失敗: %w", err)
 	}
+	// testerPathが存在するか確認
+	_, err = fileExists(ctf.TesterPath)
+	if err != nil {
+		return nil, false, fmt.Errorf("tester fileの確認に失敗: %w", err)
+	}
 	// コマンド作成
 	setsArgs := setArgs(ctf.Args) // コマンドオプションの追加
 	cmdStr := fmt.Sprintf("%s %s %s < %s > %s", ctf.TesterPath, cmd, setsArgs, infile, outfile)
@@ -66,6 +71,7 @@ func reactiveRunCmd(ctf *setup.Config, seed int) ([]byte, bool, error) {
 
 	// 実行時間を計測
 	startTime := time.Now()
+	log.Println("Executing command:", cmdStr)
 	out, timeout, err := runCommandWithTimeout(cmdStrings, int(ctf.TimeLimitMS))
 	elapsed := time.Since(startTime)
 
