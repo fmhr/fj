@@ -193,6 +193,9 @@ func updateConfig(config *setup.Config) error {
 		if config.Language == "" {
 			return fmt.Errorf("error: [Language] must not be empty in cloud mode")
 		}
+		if config.ExecuteCmd == "" {
+			return fmt.Errorf("error: [ExecuteCmd] must not be empty in cloud mode")
+		}
 		if config.SourceFilePath == "" {
 			return fmt.Errorf("error: [SourceFilePath] must not be empty in cloud mode")
 		}
