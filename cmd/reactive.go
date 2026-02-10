@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -63,7 +64,8 @@ func reactiveRunCmd(ctf *setup.Config, seed int) ([]byte, bool, error) {
 	elapsed := time.Since(startTime)
 
 	if err != nil {
-		return out, timeout, fmt.Errorf("commandの実行に失敗: %w cmd: %s", err, cmdStr)
+		log.Println("Command output:", string(out))
+		return out, timeout, fmt.Errorf("commandの実行に失敗: %w cmd: %s stderr: %s", err, cmdStr, string(out))
 	}
 
 	// 実行時間を出力に追加（秒単位）

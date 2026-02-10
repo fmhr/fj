@@ -87,6 +87,8 @@ func newConfig() (c Config) {
 	c.InfilePath = "tools/in/"
 	c.OutfilePath = "out/"
 	c.TimeLimitMS = 7000
+	c.Bucket = "binary-buckets"
+	c.ConcurrentRequests = 10
 	return c
 }
 

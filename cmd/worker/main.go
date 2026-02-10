@@ -20,8 +20,6 @@ import (
 
 func main() {
 	log.Println("SERVER STARTED")
-	fmt.Println("STDOUT TEST")
-	fmt.Fprintln(os.Stderr, "STDERR TEST")
 
 	http.HandleFunc("/worker", handler)
 	http.ListenAndServe(":8080", nil)
