@@ -196,8 +196,15 @@ func updateConfig(config *setup.Config) error {
 		if config.SourceFilePath == "" {
 			return fmt.Errorf("error: [SourceFilePath] must not be empty in cloud mode")
 		}
+		// sourceFilePathが存在するか確認する
+		if _, err := os.Stat(config.SourceFilePath); os.IsNotExist(err) {
+			return fmt.Errorf("error: [SourceFilePath] %s does not exist", config.SourceFilePath)
+		}
 		if config.WorkerURL == "" {
 			return fmt.Errorf("error: [WorkerURL] must not be empty in cloud mode")
+		}
+		if config.Bucket == "" {
+			return fmt.Errorf("error: [Bucket] must not be empty in cloud mode")
 		}
 	}
 	return nil
