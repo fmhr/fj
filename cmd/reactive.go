@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"time"
 
 	"github.com/elliotchance/orderedmap/v2"
@@ -72,6 +73,11 @@ func reactiveRunCmd(ctf *setup.Config, seed int) ([]byte, bool, error) {
 	// 実行時間を計測
 	startTime := time.Now()
 	log.Println("Executing command:", cmdStr)
+	// デバッグ用にlsコマンドを実行してファイル一覧を表示
+	cmdLs := []string{"ls", "-l"}
+	exec.Command(cmdLs[0], cmdLs[1:]...).Run()
+
+	// コマンド実行
 	out, timeout, err := runCommandWithTimeout(cmdStrings, int(ctf.TimeLimitMS))
 	elapsed := time.Since(startTime)
 
