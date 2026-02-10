@@ -53,7 +53,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	// javaやpythonではソースフィルをダウンロードする
 	if config.Language == "java" || config.Language == "C#" {
-		err = downloadFileFromGoogleCloudStorage(config.Bucket, config.TmpBinary, config.SourceFilePath)
+		err = downloadFileFromGoogleCloudStorage(config.Bucket, config.TmpBinary, config.TmpBinary)
 		if err != nil {
 			errmsg := fmt.Sprint("Failed to download source file from Cloud Storage:", err.Error())
 			errmsg += fmt.Sprint("Bucket:", config.Bucket, " TmpBinary:", config.TmpBinary, " SourceFilePath:", config.SourceFilePath)
@@ -93,30 +93,23 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 		if os.IsNotExist(err) {
 			// バイナリをCloud Storageからダウンロード
-			err = downloadFileFromGoogleCloudStorage(config.Bucket, config.TmpBinary, config.BinaryPath)
+			err = downloadFileFromGoogleCloudStorage(config.Bucket, config.TmpBinary, config.TmpBinary)
 			if err != nil {
 				errmsg := fmt.Sprint("Failed to download binary from Cloud Storage:", err.Error())
-				errmsg += fmt.Sprint("Bucket:", config.Bucket, " TmpBinary:", config.TmpBinary, " BinaryPath:", config.BinaryPath)
 				http.Error(w, errmsg, http.StatusInternalServerError)
 				return
 			}
 
 			// 実行権限を与える
-			err = os.Chmod(config.BinaryPath, 0755)
+			err = os.Chmod(config.TmpBinary, 0755)
 			if err != nil {
 				errmsg := fmt.Sprint("Failed to chmod", err.Error())
 				http.Error(w, errmsg, http.StatusInternalServerError)
 				return
 			}
-		} else {
-			// tmpバイナリをmainに改名
-			err = os.Rename(config.TmpBinary, config.BinaryPath)
-			if err != nil {
-				errmsg := fmt.Sprint("Failed to rename binary", err.Error())
-				http.Error(w, errmsg, http.StatusInternalServerError)
-				return
-			}
 		}
+		// バイナリパスをtmpバイナリに変更
+		config.BinaryPath = config.TmpBinary
 	}
 
 	// 入力ファイルを作成
@@ -143,18 +136,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonData)
-	// バイナリをtmpネームに改名
-	// C#はディレクトリ以下にバイナリがあるので、ディレクトリごとつくる
-	if err := os.MkdirAll(filepath.Dir(config.TmpBinary), 0755); err != nil {
-		log.Println(err)
-	}
-	err = os.Rename(config.BinaryPath, config.TmpBinary)
-	if err != nil {
-		errmsg := fmt.Sprint("Failed to rename binary", err.Error())
-		log.Println(errmsg, config.BinaryPath, config.TmpBinary)
-		//http.Error(w, errmsg, http.StatusInternalServerError)
-		return
-	}
 }
 
 func downloadFileFromGoogleCloudStorage(bucketName string, objectName string, destination string) error {
