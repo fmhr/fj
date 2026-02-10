@@ -81,6 +81,7 @@ func reactiveRunCmd(ctf *setup.Config, seed int) ([]byte, bool, error) {
 	} else {
 		log.Println("File list:\n", string(out))
 	}
+	log.Println("cmdStrings:", cmdStrings)
 
 	// コマンド実行
 	out, timeout, err := runCommandWithTimeout(cmdStrings, int(ctf.TimeLimitMS))
