@@ -54,6 +54,12 @@ func reactiveRunCmd(ctf *setup.Config, seed int) ([]byte, bool, error) {
 	if err != nil {
 		return nil, false, fmt.Errorf("input fileの確認に失敗: %w", err)
 	}
+	// outfilePathが存在するか確認
+	_, err = fileExists(ctf.OutfilePath)
+	if err != nil {
+		return nil, false, fmt.Errorf("output directoryの確認に失敗: %w", err)
+	}
+	// コマンド作成
 	setsArgs := setArgs(ctf.Args) // コマンドオプションの追加
 	cmdStr := fmt.Sprintf("%s %s %s < %s > %s", ctf.TesterPath, cmd, setsArgs, infile, outfile)
 	cmdStrings := createCommand(cmdStr)
