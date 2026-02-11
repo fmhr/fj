@@ -10,12 +10,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/elliotchance/orderedmap/v2"
 	"github.com/fmhr/fj/cmd/setup"
 )
 
 // requestToWorker はバイナリをワーカーに送信する
-func requestToWorker(config *setup.Config, seed int) (*orderedmap.OrderedMap[string, string], error) {
+func requestToWorker(config *setup.Config, seed int) (SliceMap, error) {
 	start := time.Now()
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
@@ -64,28 +63,20 @@ func requestToWorker(config *setup.Config, seed int) (*orderedmap.OrderedMap[str
 		return nil, fmt.Errorf("failed to read response body: %v", err)
 	}
 
-	type KV struct {
-		Key string `json:"key"`
-		Val string `json:"value"`
-	}
-	var kvList []KV
-	rtn := orderedmap.NewOrderedMap[string, string]()
+	kvList := NewSliceMap()
 	if err := json.Unmarshal(bodyBytes, &kvList); err != nil {
 		log.Println("Response body:", string(bodyBytes))
 		return nil, fmt.Errorf("failed to parse response body: %v", err)
 	}
-	for _, kv := range kvList {
-		rtn.Set(kv.Key, kv.Val)
-	}
 	elapsed := time.Since(start)
 	elap := elapsed.Seconds()
-	rtn.Set("responseTime", fmt.Sprintf("%.3f", elap))
-	score, ok := rtn.Get("Score")
+	kvList.Set("responseTime", fmt.Sprintf("%.3f", elap))
+	score, ok := kvList.Get("Score")
 	if !ok {
 		return nil, fmt.Errorf("failed to get score from response body: %v", err)
 	}
 	if score == "0" {
 		log.Println("Score=0:response body:", string(bodyBytes))
 	}
-	return rtn, nil
+	return kvList, nil
 }

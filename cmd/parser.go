@@ -11,7 +11,7 @@ import (
 func ExtractKeyValuePairs(msg string) (keys SliceMap, err error) {
 	// 例: "score=100.0 time=1.0"
 	//re := regexp.MustCompile(`(\w+)=([\d.]+)`)
-	keys = *NewSliceMap()
+	keys = NewSliceMap()
 	re := regexp.MustCompile(`([\p{L}\p{N}\p{M}\p{S}_-]+)=([\d.]+)`)
 	matches := re.FindAllStringSubmatch(msg, -1)
 	for _, match := range matches {

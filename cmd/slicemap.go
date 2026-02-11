@@ -3,15 +3,15 @@ package cmd
 // OrderedMap の代替
 
 type kv struct {
-	key string
-	val string
+	key string `json:"key"`
+	val string `json:"value"`
 }
 
 type SliceMap []kv
 
-func NewSliceMap() *SliceMap {
+func NewSliceMap() SliceMap {
 	sm := SliceMap{}
-	return &sm
+	return sm
 }
 
 func (sm *SliceMap) exists(key string) bool {
@@ -31,4 +31,13 @@ func (sm *SliceMap) Set(key, val string) {
 		}
 	}
 	*sm = append(*sm, kv{key: key, val: val})
+}
+
+func (sm *SliceMap) Get(key string) (string, bool) {
+	for _, v := range *sm {
+		if v.key == key {
+			return v.val, true
+		}
+	}
+	return "", false
 }
