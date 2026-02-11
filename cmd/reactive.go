@@ -2,9 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
-	"os/exec"
 	"time"
 
 	"github.com/elliotchance/orderedmap/v2"
@@ -72,23 +70,12 @@ func reactiveRunCmd(ctf *setup.Config, seed int) ([]byte, bool, error) {
 
 	// 実行時間を計測
 	startTime := time.Now()
-	log.Println("Executing command:", cmdStr)
-	// デバッグ用にlsコマンドを実行してファイル一覧を表示
-	cmdLs := []string{"ls", "-l"}
-	out, err := exec.Command(cmdLs[0], cmdLs[1:]...).CombinedOutput()
-	if err != nil {
-		log.Println("Failed to execute ls command:", err)
-	} else {
-		log.Println("File list:\n", string(out))
-	}
-	log.Println("cmdStrings:", cmdStrings)
 
 	// コマンド実行
 	out, timeout, err := runCommandWithTimeout(cmdStrings, int(ctf.TimeLimitMS))
 	elapsed := time.Since(startTime)
 
 	if err != nil {
-		log.Println("Command output:", string(out))
 		return out, timeout, fmt.Errorf("commandの実行に失敗: %w cmd: %s stderr: %s", err, cmdStr, string(out))
 	}
 
