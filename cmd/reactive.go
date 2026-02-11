@@ -5,16 +5,15 @@ import (
 	"os"
 	"time"
 
-	"github.com/elliotchance/orderedmap/v2"
 	"github.com/fmhr/fj/cmd/setup"
 )
 
 // ReactiveRun はreactive=trueのときに使う
-func ReactiveRun(ctf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, string], err error) {
+func ReactiveRun(ctf *setup.Config, seed int) (kv SliceMap, err error) {
 	// 出力フォルダがない場合、作成
 	err = createDirIfNotExist(ctf.OutfilePath)
 	if err != nil {
-		return pair, fmt.Errorf("failed to create output directory: %v", err)
+		return nil, fmt.Errorf("failed to create output directory: %v", err)
 	}
 	// 実行
 	out, timeout, err := reactiveRunCmd(ctf, seed)
@@ -22,25 +21,27 @@ func ReactiveRun(ctf *setup.Config, seed int) (pair *orderedmap.OrderedMap[strin
 		return nil, fmt.Errorf("reactiveRunCmdの実行に失敗: %w", err)
 	}
 	// 出力のパース
-	pair = orderedmap.NewOrderedMap[string, string]()
-	pair.Set("seed", fmt.Sprintf("%d", seed))
-	keys, err := ExtractKeyValuePairs(pair, string(out))
-	_ = keys // ordermapを消す時に使う
+	kv.Set("seed", fmt.Sprintf("%d", seed))
+	keys, err := ExtractKeyValuePairs(string(out))
 	if err != nil {
-		return pair, fmt.Errorf("failed to extract key-value pairs: %v, source: %s", err, string(out))
+		return kv, fmt.Errorf("failed to extract key-value pairs: %v, source: %s", err, string(out))
 	}
 	testerDate, err := extractData((string(out)))
 	if err != nil {
-		return pair, fmt.Errorf("extractDataの実行に失敗: %w", err)
+		return kv, fmt.Errorf("extractDataの実行に失敗: %w", err)
 	}
+	for _, v := range keys {
+		kv.Set(v.key, v.val)
+	}
+
 	for k, v := range testerDate {
-		pair.Set(k, v)
+		kv.Set(k, v)
 	}
 	if timeout {
-		pair.Set("Score", "0")
-		pair.Set("time", fmt.Sprintf("%v", ctf.TimeLimitMS/1000))
+		kv.Set("Score", "0")
+		kv.Set("time", fmt.Sprintf("%v", ctf.TimeLimitMS/1000))
 	}
-	return pair, nil
+	return kv, nil
 }
 
 // reactiveRunCmd はreactive=trueのときに使う

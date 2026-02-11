@@ -5,22 +5,20 @@ import (
 	"log"
 	"regexp"
 	"strings"
-
-	"github.com/elliotchance/orderedmap/v2"
 )
 
 // ExtractKeyValuePairs はコマンドから出力を、キーと値のマップで返します。
-func ExtractKeyValuePairs(m *orderedmap.OrderedMap[string, string], msg string) (keys []string, err error) {
+func ExtractKeyValuePairs(msg string) (keys SliceMap, err error) {
 	// 例: "score=100.0 time=1.0"
 	//re := regexp.MustCompile(`(\w+)=([\d.]+)`)
+	keys = *NewSliceMap()
 	re := regexp.MustCompile(`([\p{L}\p{N}\p{M}\p{S}_-]+)=([\d.]+)`)
 	matches := re.FindAllStringSubmatch(msg, -1)
 	for _, match := range matches {
 		key := match[1]
 		//value, err := strconv.ParseFloat(match[2], 64)
 		value := match[2]
-		m.Set(key, value)
-		keys = append(keys, key)
+		keys.Set(key, value)
 	}
 	return keys, nil
 }
