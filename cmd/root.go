@@ -131,11 +131,8 @@ func Execute() error {
 					log.Println("TLE")
 				}
 			}
-			for _, k := range rtn.Keys() {
-				v, ok := rtn.Get(k)
-				if !ok {
-					continue
-				}
+			for _, kv := range rtn {
+				k, v := kv.key, kv.val
 				p := message.NewPrinter(language.English)
 				p.Fprintf(os.Stderr, "%s:%s ", k, v)
 			}

@@ -13,7 +13,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/elliotchance/orderedmap/v2"
 	"github.com/fmhr/fj/cmd/setup"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
@@ -31,7 +30,7 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 	}
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, concurrentNum)
-	datas := make([]*orderedmap.OrderedMap[string, string], 0, len(seeds))
+	datas := make([]SliceMap, 0, len(seeds))
 	errorChan := make(chan string, len(seeds))
 	errorSeedChan := make(chan int, len(seeds))
 
@@ -152,9 +151,6 @@ overloop:
 		}
 		// delete stdErr
 		for i := 0; i < len(datas); i++ {
-			if datas[i] != nil {
-				datas[i].Delete("stdErr")
-			}
 			seedStr, ok := datas[i].Get("seed")
 			if !ok {
 				log.Println("seed not found")

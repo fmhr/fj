@@ -8,18 +8,17 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/elliotchance/orderedmap/v2"
 	"github.com/fmhr/fj/cmd/setup"
 )
 
-func RunVis(cnf *setup.Config, seed int) (*orderedmap.OrderedMap[string, string], error) {
+func RunVis(cnf *setup.Config, seed int) (SliceMap, error) {
 	return runVis(cnf, seed)
 }
 
 // runVis は指定された設定とシードに基づいてコマンドを実行して、
 // その結果をvisに渡して、両方の結果を返す
 // 通常の問題（reactive=false)で使う
-func runVis(cnf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, string], err error) {
+func runVis(cnf *setup.Config, seed int) (kv SliceMap, err error) {
 	out, _, err := normalRun(cnf, seed)
 	if err != nil {
 		//log.Println("Error: ", err)
@@ -28,14 +27,16 @@ func runVis(cnf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, st
 		}
 		return nil, fmt.Errorf("%w", err)
 	}
-	pair = orderedmap.NewOrderedMap[string, string]()
-	pair.Set("seed", fmt.Sprintf("%d", seed))
+	kv = NewSliceMap()
+	kv.Set("seed", fmt.Sprintf("%d", seed))
 
-	keys, err := ExtractKeyValuePairs(pair, string(out))
+	keys, err := ExtractKeyValuePairs(string(out))
 	if err != nil {
-		return pair, err
+		return kv, err
 	}
-	_ = keys // Ordermapを消す時に使う
+	for _, v := range keys {
+		kv.Set(v.key, v.val)
+	}
 
 	// メモリ使用量を正規表現で抽出
 	// BSD timeコマンドの出力を想定
@@ -49,7 +50,7 @@ func runVis(cnf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, st
 			return nil, err
 		}
 		mb /= 1024 * 1024
-		pair.Set("Memory", fmt.Sprintf("%d", mb))
+		kv.Set("Memory", fmt.Sprintf("%d", mb))
 	}
 
 	// vis
@@ -62,9 +63,12 @@ func runVis(cnf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, st
 	}
 
 	// testerで要素を出力するように改造したときに、ここで値を取得する
-	_, err = ExtractKeyValuePairs(pair, string(outVis))
+	kvv, err := ExtractKeyValuePairs(string(outVis))
 	if err != nil {
 		return nil, fmt.Errorf("visの出力からキーと値のペアを抽出に失敗: %w", err)
+	}
+	for _, v := range kvv {
+		kv.Set(v.key, v.val)
 	}
 
 	// Score = を抜き出す
@@ -79,10 +83,10 @@ func runVis(cnf *setup.Config, seed int) (pair *orderedmap.OrderedMap[string, st
 	}
 
 	for k, v := range sc {
-		pair.Set(k, v)
+		kv.Set(k, v)
 	}
-	pair.Set("seed", fmt.Sprintf("%d", seed))
-	return pair, nil
+	kv.Set("seed", fmt.Sprintf("%d", seed))
+	return kv, nil
 }
 
 // vis is a wrapper for vis command
