@@ -60,7 +60,7 @@ func DisplayTable(data []SliceMap) error {
 func extractHeaders(data SliceMap) []string {
 	headers := make([]string, 0)
 	for _, kv := range data {
-		headers = append(headers, kv.key)
+		headers = append(headers, kv.Key)
 	}
 	return headers
 }

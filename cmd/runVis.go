@@ -35,7 +35,7 @@ func runVis(cnf *setup.Config, seed int) (kv SliceMap, err error) {
 		return kv, err
 	}
 	for _, v := range keys {
-		kv.Set(v.key, v.val)
+		kv.Set(v.Key, v.Val)
 	}
 
 	// メモリ使用量を正規表現で抽出
@@ -68,7 +68,7 @@ func runVis(cnf *setup.Config, seed int) (kv SliceMap, err error) {
 		return nil, fmt.Errorf("visの出力からキーと値のペアを抽出に失敗: %w", err)
 	}
 	for _, v := range kvv {
-		kv.Set(v.key, v.val)
+		kv.Set(v.Key, v.Val)
 	}
 
 	// Score = を抜き出す

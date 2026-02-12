@@ -31,7 +31,7 @@ func ReactiveRun(ctf *setup.Config, seed int) (kv SliceMap, err error) {
 		return kv, fmt.Errorf("extractDataの実行に失敗: %w", err)
 	}
 	for _, v := range keys {
-		kv.Set(v.key, v.val)
+		kv.Set(v.Key, v.Val)
 	}
 
 	for k, v := range testerDate {

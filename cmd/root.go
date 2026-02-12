@@ -132,7 +132,7 @@ func Execute() error {
 				}
 			}
 			for _, kv := range rtn {
-				k, v := kv.key, kv.val
+				k, v := kv.Key, kv.Val
 				p := message.NewPrinter(language.English)
 				p.Fprintf(os.Stderr, "%s:%s ", k, v)
 			}
