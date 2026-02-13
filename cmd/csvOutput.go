@@ -20,19 +20,24 @@ func CsvOutput(datas []SliceMap, filename string) error {
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	var heagders []string
+	var headers []string
+	seen := map[string]bool{}
 	for _, data := range datas {
 		for _, kv := range data {
-			heagders = append(heagders, kv.Key)
+			if seen[kv.Key] {
+				continue
+			}
+			seen[kv.Key] = true
+			headers = append(headers, kv.Key)
 		}
 	}
-	if err := writer.Write(heagders); err != nil {
+	if err := writer.Write(headers); err != nil {
 		return err
 	}
 
 	for _, data := range datas {
 		values := make([]string, 0)
-		for _, key := range heagders {
+		for _, key := range headers {
 			v, ok := data.Get(key)
 			if !ok {
 				values = append(values, "")
