@@ -10,10 +10,6 @@ import (
 func createCommand(cmdStr string) (cmdArgs []string) {
 	var timeCmd string
 	switch runtime.GOOS {
-	case "windows":
-		// Windows では　time コマンドが使えないのでそのまま実行
-		cmdArgs = []string{"cmd", "/C", cmdStr}
-		return cmdArgs
 	case "linux":
 		// GNU time
 		timeCmd = "/usr/bin/time -v"

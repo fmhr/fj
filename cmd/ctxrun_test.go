@@ -6,7 +6,8 @@ import (
 
 func TestRunCommandWithTimeout(t *testing.T) {
 	t.Run("Test successful command execution", func(t *testing.T) {
-		cmd := []string{"echo", "hello"}
+		// runCommandWithTimeout captures stderr, not stdout
+		cmd := []string{"sh", "-c", "echo hello >&2"}
 		output, timeout, err := runCommandWithTimeout(cmd, 5000)
 		if err != nil {
 			t.Errorf("Unexpected error: %v", err)
