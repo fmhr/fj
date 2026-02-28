@@ -39,6 +39,7 @@ var (
 	// test command
 	test     = fj.Command("test", "Run test case.").Alias("t")
 	cmd      = test.Arg("cmd", "Exe Cmd.").Required().String()
+	args     = test.Flag("args", "Arguments to pass to the executable.").String()
 	seed     = test.Flag("seed", "Set Seed. default : 0.").Short('s').Default("0").Int()
 	count    = test.Flag("count", "Number of test cases.").Short('n').Default("1").Int()
 	parallel = test.Flag("parallel", "Number of parallel jobs.").Short('p').Default("1").Int()
@@ -184,6 +185,9 @@ func updateConfig(config *setup.Config) error {
 	config.CloudMode = config.CloudMode || *cloud
 	if !config.CloudMode {
 		config.ExecuteCmd = *cmd
+	}
+	if args != nil && *args != "" {
+		config.Args = []string{*args}
 	}
 	// cloudモードで必要な設定がconfig.tomlにあるか確認する
 	if config.CloudMode {
