@@ -6,11 +6,9 @@ import (
 	"log"
 	"os"
 	"time"
-
-	"github.com/elliotchance/orderedmap/v2"
 )
 
-func JsonOutput(datas []*orderedmap.OrderedMap[string, string]) error {
+func JsonOutput(datas []SliceMap) error {
 	fileContent, err := json.MarshalIndent(datas, "", " ")
 	if err != nil {
 		log.Println("json marshal error")

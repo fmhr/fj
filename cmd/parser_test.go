@@ -7,8 +7,6 @@ import (
 	"reflect"
 	"strconv"
 	"testing"
-
-	"github.com/elliotchance/orderedmap/v2"
 )
 
 func TestExtractKeyValuePairs(t *testing.T) {
@@ -35,13 +33,16 @@ func TestExtractKeyValuePairs(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		result := orderedmap.NewOrderedMap[string, string]()
-		keys, err := ExtractKeyValuePairs(result, test.input)
+		keys, err := ExtractKeyValuePairs(test.input)
 		if (err != nil) != test.err {
 			t.Errorf("Expected error %v, but got %v", test.err, err)
 		}
 		for key, value := range test.output {
-			vstr, _ := result.Get(key)
+			vstr, got := keys.Get(key)
+			if !got {
+				t.Error("Expected key", key, "not found")
+				continue
+			}
 			v, _ := strconv.ParseFloat(vstr, 64)
 			if value != v {
 				t.Error("Expected", value, "but got", v)

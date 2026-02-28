@@ -4,8 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io"
-	"os"
+	"log"
 	"os/exec"
 	"time"
 )
@@ -32,17 +31,8 @@ func runCommandWithTimeout(cmdStrings []string, timelimitMS int) ([]byte, bool, 
 
 	// 標準出力と標準エラーの操作
 	var outputBuf bytes.Buffer
-	multiOut := &outputBuf
-	// --show-stderr オプションが指定されている場合はstderrを表示する
-	var multiErr io.Writer
-	if *showStderr {
-		multiErr = io.MultiWriter(os.Stderr, &outputBuf)
-	} else {
-		multiErr = &outputBuf
-	}
 
-	cmd.Stdout = multiOut
-	cmd.Stderr = multiErr
+	cmd.Stderr = &outputBuf
 
 	cmd.WaitDelay = 5 * time.Second // Wait 5 seconds before sending SIGKILL　子プロセスとのIOの完了を待つ
 
@@ -65,6 +55,10 @@ func runCommandWithTimeout(cmdStrings []string, timelimitMS int) ([]byte, bool, 
 			return outputBuf.Bytes(), false, fmt.Errorf("command failed with exit code %d: %v", exitErr.ExitCode(), err)
 		}
 		return outputBuf.Bytes(), false, fmt.Errorf("command execution failed: %v", err)
+	}
+	// 標準エラーの内容をログに出力 --stderrオプション
+	if showStderr != nil && *showStderr {
+		log.Println("stderr:\n", outputBuf.String())
 	}
 
 	return outputBuf.Bytes(), false, nil

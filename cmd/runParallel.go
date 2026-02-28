@@ -13,7 +13,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/elliotchance/orderedmap/v2"
 	"github.com/fmhr/fj/cmd/setup"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
@@ -31,7 +30,7 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 	}
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, concurrentNum)
-	datas := make([]*orderedmap.OrderedMap[string, string], 0, len(seeds))
+	datas := make([]SliceMap, 0, len(seeds))
 	errorChan := make(chan string, len(seeds))
 	errorSeedChan := make(chan int, len(seeds))
 
@@ -152,9 +151,6 @@ overloop:
 		}
 		// delete stdErr
 		for i := 0; i < len(datas); i++ {
-			if datas[i] != nil {
-				datas[i].Delete("stdErr")
-			}
 			seedStr, ok := datas[i].Get("seed")
 			if !ok {
 				log.Println("seed not found")
@@ -213,6 +209,37 @@ overloop:
 	avarageScore := sumScore / (len(datas) - len(errSeeds))
 	p := message.NewPrinter(language.English)
 	p.Fprintf(os.Stderr, "(Score)avarage:%d sum:%d sum(log):%f\n", avarageScore, sumScore, logScore)
+
+	// 全ての数値項目の平均を表示
+	if len(datas) > 0 {
+		// 最初のデータからキー一覧を取得
+		keys := make([]string, 0)
+		for _, kvp := range datas[0] {
+			keys = append(keys, kvp.Key)
+		}
+		for _, key := range keys {
+			if key == "seed" || key == "result" {
+				continue
+			}
+			sum := 0.0
+			count := 0
+			for i := 0; i < len(datas); i++ {
+				if datas[i] == nil {
+					continue
+				}
+				if v, ok := datas[i].Get(key); ok {
+					f, err := strconv.ParseFloat(v, 64)
+					if err == nil {
+						sum += f
+						count++
+					}
+				}
+			}
+			if count > 0 {
+				fmt.Fprintf(os.Stderr, "(%s)avarage:%.4f\n", key, sum/float64(count))
+			}
+		}
+	}
 
 	if jsonOutput != nil && *jsonOutput {
 		err := JsonOutput(datas)

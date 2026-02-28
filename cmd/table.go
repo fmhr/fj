@@ -4,21 +4,19 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"slices"
 	"sort"
 	"strconv"
 
-	"github.com/elliotchance/orderedmap/v2"
 	"github.com/olekukonko/tablewriter"
 )
 
 // DisplayTable はデータをテーブル形式で表示する
-func DisplayTable(data []*orderedmap.OrderedMap[string, string]) error {
+func DisplayTable(data []SliceMap) error {
 	if len(data) == 0 {
 		return nil
 	}
 
-	headers := extractHeaders(data)
+	headers := extractHeaders(data[0])
 	table := tablewriter.NewWriter(os.Stderr)
 	//	log.Println(data)
 	table.Header(toInterfaceSlice(headers)...)
@@ -59,13 +57,11 @@ func DisplayTable(data []*orderedmap.OrderedMap[string, string]) error {
 }
 
 // extractHeaders はデータからヘッダーを抽出する
-func extractHeaders(data []*orderedmap.OrderedMap[string, string]) []string {
-	headers := append([]string(nil), data[0].Keys()...)
-	// seedを先頭に移動
-	seedIndex := slices.Index(headers, "seed")
-	headers = append(headers[:seedIndex], headers[seedIndex+1:]...)
-	headers = append([]string{"seed"}, headers...)
-
+func extractHeaders(data SliceMap) []string {
+	headers := make([]string, 0)
+	for _, kv := range data {
+		headers = append(headers, kv.Key)
+	}
 	return headers
 }
 

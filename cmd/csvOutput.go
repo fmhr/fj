@@ -5,12 +5,10 @@ import (
 	"fmt"
 	"log"
 	"os"
-
-	"github.com/elliotchance/orderedmap/v2"
 )
 
 // CsvOutput csvファイルに出力する
-func CsvOutput(datas []*orderedmap.OrderedMap[string, string], filename string) error {
+func CsvOutput(datas []SliceMap, filename string) error {
 	filename = fmt.Sprintf("%s.csv", filename)
 	file, err := os.Create(filename)
 	if err != nil {
@@ -22,14 +20,24 @@ func CsvOutput(datas []*orderedmap.OrderedMap[string, string], filename string) 
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	heagders := append([]string{}, datas[0].Keys()...)
-	if err := writer.Write(heagders); err != nil {
+	var headers []string
+	seen := map[string]bool{}
+	for _, data := range datas {
+		for _, kv := range data {
+			if seen[kv.Key] {
+				continue
+			}
+			seen[kv.Key] = true
+			headers = append(headers, kv.Key)
+		}
+	}
+	if err := writer.Write(headers); err != nil {
 		return err
 	}
 
 	for _, data := range datas {
 		values := make([]string, 0)
-		for _, key := range heagders {
+		for _, key := range headers {
 			v, ok := data.Get(key)
 			if !ok {
 				values = append(values, "")

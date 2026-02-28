@@ -3,12 +3,11 @@ package main
 import (
 	"fmt"
 
-	"github.com/elliotchance/orderedmap/v2"
 	"github.com/fmhr/fj/cmd"
 	"github.com/fmhr/fj/cmd/setup"
 )
 
-func execute(config *setup.Config, seed int) (rtn *orderedmap.OrderedMap[string, string], err error) {
+func execute(config *setup.Config, seed int) (rtn cmd.SliceMap, err error) {
 	// genコマンドで入力ファイルの生成
 	err = cmd.Gen(config, seed)
 	if err != nil {
@@ -23,7 +22,7 @@ func execute(config *setup.Config, seed int) (rtn *orderedmap.OrderedMap[string,
 	return rtn, nil
 }
 
-func run(config *setup.Config, seed int) (*orderedmap.OrderedMap[string, string], error) {
+func run(config *setup.Config, seed int) (cmd.SliceMap, error) {
 	if config.Reactive {
 		rtn, err := cmd.ReactiveRun(config, seed)
 		if err != nil {
