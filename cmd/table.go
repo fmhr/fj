@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"slices"
 	"sort"
 	"strconv"
 
@@ -15,8 +16,7 @@ func DisplayTable(data []SliceMap) error {
 	if len(data) == 0 {
 		return nil
 	}
-
-	headers := extractHeaders(data[0])
+	headers := extractHeaders(data)
 	table := tablewriter.NewWriter(os.Stderr)
 	//	log.Println(data)
 	table.Header(toInterfaceSlice(headers)...)
@@ -57,10 +57,14 @@ func DisplayTable(data []SliceMap) error {
 }
 
 // extractHeaders はデータからヘッダーを抽出する
-func extractHeaders(data SliceMap) []string {
+func extractHeaders(data []SliceMap) []string {
 	headers := make([]string, 0)
-	for _, kv := range data {
-		headers = append(headers, kv.Key)
+	for _, d := range data {
+		for _, kv := range d {
+			if !slices.Contains(headers, kv.Key) {
+				headers = append(headers, kv.Key)
+			}
+		}
 	}
 	return headers
 }

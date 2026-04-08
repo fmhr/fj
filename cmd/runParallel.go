@@ -7,6 +7,7 @@ import (
 	"math"
 	"os"
 	"os/signal"
+	"slices"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -212,10 +213,14 @@ overloop:
 
 	// 全ての数値項目の平均を表示
 	if len(datas) > 0 {
-		// 最初のデータからキー一覧を取得
+		// 全てのデータからキー一覧を取得
 		keys := make([]string, 0)
-		for _, kvp := range datas[0] {
-			keys = append(keys, kvp.Key)
+		for _, data := range datas {
+			for _, kvp := range data {
+				if !slices.Contains(keys, kvp.Key) {
+					keys = append(keys, kvp.Key)
+				}
+			}
 		}
 		for _, key := range keys {
 			if key == "seed" || key == "result" {
