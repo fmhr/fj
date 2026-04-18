@@ -91,6 +91,9 @@ func runVis(cnf *setup.Config, seed int) (kv SliceMap, err error) {
 
 // vis is a wrapper for vis command
 func vis(cnf *setup.Config, infile, outfile string) ([]byte, error) {
+	if !exists(cnf.VisPath) && exists("tools/target/release/score") {
+		cnf.VisPath = "tools/target/release/score"
+	}
 	cmdStr := fmt.Sprintf(cnf.VisPath+" %s %s", infile, outfile)
 	cmdStrings := createCommand(cmdStr)
 	cmd := exec.Command(cmdStrings[0], cmdStrings[1:]...)
@@ -100,4 +103,9 @@ func vis(cnf *setup.Config, infile, outfile string) ([]byte, error) {
 		return nil, fmt.Errorf("failed: %v\nout: %s cmd: %s", err, string(out), cmdStrings)
 	}
 	return out, nil
+}
+
+func exists(path string) bool {
+	_, err := exec.LookPath(path)
+	return err == nil
 }
