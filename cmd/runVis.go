@@ -91,6 +91,7 @@ func runVis(cnf *setup.Config, seed int) (kv SliceMap, err error) {
 
 // vis is a wrapper for vis command
 func vis(cnf *setup.Config, infile, outfile string) ([]byte, error) {
+	// visコマンドが存在しない場合は、scoreコマンドを探す
 	if !exists(cnf.VisPath) && exists("tools/target/release/score") {
 		cnf.VisPath = "tools/target/release/score"
 	}
