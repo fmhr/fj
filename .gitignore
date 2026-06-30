@@ -1,8 +1,8 @@
 #vscode
-.vscode/setting.json
-.vscode/launch.json
-.vscde/*.code-workspace
-.vscode/extensions.json
+.vscode
+
+#claude
+.claude
 
 # log
 *.log

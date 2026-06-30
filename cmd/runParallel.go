@@ -97,6 +97,9 @@ overloop:
 	zeroSeeds := make([]int, 0)
 	tleSeeds := make([]int, 0)
 	for i := 0; i < len(datas); i++ {
+		if datas[i] == nil {
+			continue
+		}
 		seedStr, ok := datas[i].Get("seed")
 		if !ok {
 			log.Println("seed not found")
@@ -152,6 +155,9 @@ overloop:
 		}
 		// delete stdErr
 		for i := 0; i < len(datas); i++ {
+			if datas[i] == nil {
+				continue
+			}
 			seedStr, ok := datas[i].Get("seed")
 			if !ok {
 				log.Println("seed not found")
@@ -186,28 +192,35 @@ overloop:
 		fmt.Fprintln(os.Stderr, "TLEs:", tleSeeds)
 	}
 	// timeがあれば、平均と最大を表示
-	if _, exsit := datas[0].Get("time"); exsit {
-		sumTime := 0.0
-		maxTime := 0.0
-		nums := 0
-		for i := 0; i < len(datas); i++ {
-			if datas[i] == nil {
-				continue
-			}
-			if t, ok := datas[i].Get("time"); ok {
-				timef, err := strconv.ParseFloat(t, 64)
-				if err != nil {
-					log.Println("Error time:", err)
+	if len(datas) > 0 {
+		if _, exsit := datas[0].Get("time"); exsit {
+			sumTime := 0.0
+			maxTime := 0.0
+			nums := 0
+			for i := 0; i < len(datas); i++ {
+				if datas[i] == nil {
 					continue
 				}
-				sumTime += timef
-				maxTime = math.Max(maxTime, timef)
-				nums++
+				if t, ok := datas[i].Get("time"); ok {
+					timef, err := strconv.ParseFloat(t, 64)
+					if err != nil {
+						log.Println("Error time:", err)
+						continue
+					}
+					sumTime += timef
+					maxTime = math.Max(maxTime, timef)
+					nums++
+				}
+			}
+			if nums > 0 {
+				fmt.Fprintf(os.Stderr, "(Time)avarage:%.2f  max:%.2f\n", sumTime/float64(nums), maxTime)
 			}
 		}
-		fmt.Fprintf(os.Stderr, "(Time)avarage:%.2f  max:%.2f\n", sumTime/float64(nums), maxTime)
 	}
-	avarageScore := sumScore / (len(datas) - len(errSeeds))
+	avarageScore := 0
+	if len(datas) > len(errSeeds) {
+		avarageScore = sumScore / (len(datas) - len(errSeeds))
+	}
 	p := message.NewPrinter(language.English)
 	p.Fprintf(os.Stderr, "(Score)avarage:%d sum:%d sum(log):%f\n", avarageScore, sumScore, logScore)
 
