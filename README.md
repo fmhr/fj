@@ -96,7 +96,7 @@ fj info
 | `--stderr` | 実行プログラムのstderr出力を表示 |
 | `--cloud` | クラウドモードを有効化 |
 | `--json` | JSON形式で出力 |
-| `--csv <filename>` | CSV形式でファイルに出力 |
+| `--csv` | CSV形式で result.csv に出力 |
 > **注意:** `--cloud` オプションは現在動作しません。
 
 ## 設定ファイル
