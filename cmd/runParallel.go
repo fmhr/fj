@@ -193,7 +193,7 @@ overloop:
 	}
 	// timeがあれば、平均と最大を表示
 	if len(datas) > 0 {
-		if _, exsit := datas[0].Get("time"); exsit {
+		if _, exist := datas[0].Get("time"); exist {
 			sumTime := 0.0
 			maxTime := 0.0
 			nums := 0
@@ -213,16 +213,16 @@ overloop:
 				}
 			}
 			if nums > 0 {
-				fmt.Fprintf(os.Stderr, "(Time)avarage:%.2f  max:%.2f\n", sumTime/float64(nums), maxTime)
+				fmt.Fprintf(os.Stderr, "(Time)average:%.2f  max:%.2f\n", sumTime/float64(nums), maxTime)
 			}
 		}
 	}
-	avarageScore := 0
+	averageScore := 0
 	if len(datas) > len(errSeeds) {
-		avarageScore = sumScore / (len(datas) - len(errSeeds))
+		averageScore = sumScore / (len(datas) - len(errSeeds))
 	}
 	p := message.NewPrinter(language.English)
-	p.Fprintf(os.Stderr, "(Score)avarage:%d sum:%d sum(log):%f\n", avarageScore, sumScore, logScore)
+	p.Fprintf(os.Stderr, "(Score)average:%d sum:%d sum(log):%f\n", averageScore, sumScore, logScore)
 
 	// 全ての数値項目の平均を表示
 	if len(datas) > 0 {
@@ -254,7 +254,7 @@ overloop:
 				}
 			}
 			if count > 0 {
-				fmt.Fprintf(os.Stderr, "(%s)avarage:%.4f\n", key, sum/float64(count))
+				fmt.Fprintf(os.Stderr, "(%s)average:%.4f\n", key, sum/float64(count))
 			}
 		}
 	}

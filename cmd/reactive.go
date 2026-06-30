@@ -26,7 +26,7 @@ func ReactiveRun(ctf *setup.Config, seed int) (kv SliceMap, err error) {
 	if err != nil {
 		return kv, fmt.Errorf("failed to extract key-value pairs: %v, source: %s", err, string(out))
 	}
-	testerDate, err := extractData((string(out)))
+	testerData, err := extractData((string(out)))
 	if err != nil {
 		return kv, fmt.Errorf("extractDataの実行に失敗: %w", err)
 	}
@@ -34,7 +34,7 @@ func ReactiveRun(ctf *setup.Config, seed int) (kv SliceMap, err error) {
 		kv.Set(v.Key, v.Val)
 	}
 
-	for k, v := range testerDate {
+	for k, v := range testerData {
 		kv.Set(k, v)
 	}
 	if timeout {
