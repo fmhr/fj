@@ -7,7 +7,7 @@ import (
 	"github.com/elliotchance/orderedmap/v2"
 )
 
-func TestEncodableOrderedMap_MarshalJSON(t *testing.T) {
+func TestEncodableOrderedMapMarshalJSON(t *testing.T) {
 	om := orderedmap.NewOrderedMap[string, string]()
 	om.Set("first", "1")
 	om.Set("second", "2")
@@ -26,7 +26,7 @@ func TestEncodableOrderedMap_MarshalJSON(t *testing.T) {
 	}
 }
 
-func TestEncodableOrderedMap_UnmarshalJSON(t *testing.T) {
+func TestEncodableOrderedMapUnmarshalJSON(t *testing.T) {
 	jsonInput := `[{"key":"a","value":"apple"},{"key":"b","value":"banana"},{"key":"c","value":"cherry"}]`
 
 	var encMap EncodableOrderedMap
@@ -61,7 +61,7 @@ func TestEncodableOrderedMap_UnmarshalJSON(t *testing.T) {
 	}
 }
 
-func TestEncodableOrderedMap_UnmarshalJSON_Error(t *testing.T) {
+func TestEncodableOrderedMapUnmarshalJSONError(t *testing.T) {
 	invalidJSON := `[{"key":"a", "value": 123}]` // value が string ではない
 
 	var encMap EncodableOrderedMap
