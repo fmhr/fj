@@ -90,22 +90,6 @@ func compileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// javaとpyhtonの場合はコンパイルせずにソースファイルをアップロードする
-	if language == "java" || language == "C#" {
-		defer os.Remove(source)
-		bucketName := r.FormValue("bucket")
-		rdm := generateRandomString(10)
-		// ソースコードのアップロード
-		newfilename, err := uploarFileToGoogleCloudStorage(bucketName, source, rdm)
-		if err != nil {
-			http.Error(w, "Failed to upload source file to bucket:"+err.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Disposition", "attachment; filename="+newfilename)
-		w.Header().Set("Content-Type", "application/octet-stream")
-		w.WriteHeader(http.StatusOK)
-		return
-	}
 
 	// コンパイル
 	compileCmd := setup.LanguageSets[language].CompileCmd
