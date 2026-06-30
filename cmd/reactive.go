@@ -16,7 +16,7 @@ func ReactiveRun(ctf *setup.Config, seed int) (kv SliceMap, err error) {
 		return nil, fmt.Errorf("failed to create output directory: %v", err)
 	}
 	// 実行
-	out, timeout, err := reactiveRunCmd(ctf, seed)
+	out, timeout, maxRSS, err := reactiveRunCmd(ctf, seed)
 	if err != nil {
 		return nil, fmt.Errorf("reactiveRunCmdの実行に失敗: %w", err)
 	}
@@ -40,30 +40,36 @@ func ReactiveRun(ctf *setup.Config, seed int) (kv SliceMap, err error) {
 	if timeout {
 		kv.Set("result", "TLE")
 		kv.Set("Score", "0")
-		kv.Set("time", fmt.Sprintf("%.3f", float64(ctf.TimeLimitMS)/1000.0))
+		kv.Set("time", fmt.Sprintf("%d", ctf.TimeLimitMS))
 	}
+
+	// メモリ使用量を結果に追加
+	if maxRSS > 0 {
+		kv.Set("Memory", fmt.Sprintf("%d", maxRSS))
+	}
+
 	return kv, nil
 }
 
 // reactiveRunCmd はreactive=trueのときに使う
-func reactiveRunCmd(ctf *setup.Config, seed int) ([]byte, bool, error) {
+func reactiveRunCmd(ctf *setup.Config, seed int) ([]byte, bool, int64, error) {
 	cmd := ctf.ExecuteCmd
 	infile := ctf.InfilePath + fmt.Sprintf("%04d.txt", seed)
 	outfile := ctf.OutfilePath + fmt.Sprintf("%04d.txt", seed)
 	// in/0000.txtの存在確認
 	_, err := fileExists(infile)
 	if err != nil {
-		return nil, false, fmt.Errorf("input fileの確認に失敗: %w", err)
+		return nil, false, 0, fmt.Errorf("input fileの確認に失敗: %w", err)
 	}
 	// outfilePathが存在するか確認
 	_, err = fileExists(ctf.OutfilePath)
 	if err != nil {
-		return nil, false, fmt.Errorf("output directoryの確認に失敗: %w", err)
+		return nil, false, 0, fmt.Errorf("output directoryの確認に失敗: %w", err)
 	}
 	// testerPathが存在するか確認
 	_, err = fileExists(ctf.TesterPath)
 	if err != nil {
-		return nil, false, fmt.Errorf("tester fileの確認に失敗: %w", err)
+		return nil, false, 0, fmt.Errorf("tester fileの確認に失敗: %w", err)
 	}
 	// コマンド作成
 	setsArgs := setArgs(ctf.Args) // コマンドオプションの追加
@@ -74,20 +80,20 @@ func reactiveRunCmd(ctf *setup.Config, seed int) ([]byte, bool, error) {
 	startTime := time.Now()
 
 	// コマンド実行
-	out, timeout, err := runCommandWithTimeout(cmdStrings, int(ctf.TimeLimitMS))
+	out, timeout, maxRSS, err := runCommandWithTimeout(cmdStrings, int(ctf.TimeLimitMS))
 	elapsed := time.Since(startTime)
 
 	if err != nil {
-		return out, timeout, fmt.Errorf("commandの実行に失敗: %w cmd: %s stderr: %s", err, cmdStr, string(out))
+		return out, timeout, maxRSS, fmt.Errorf("commandの実行に失敗: %w cmd: %s stderr: %s", err, cmdStr, string(out))
 	}
 
-	// 実行時間を出力に追加（秒単位）
+	// 実行時間を出力に追加（ミリ秒単位）
 	if !timeout {
-		timeStr := fmt.Sprintf("time=%.3f", elapsed.Seconds())
+		timeStr := fmt.Sprintf("time=%d", elapsed.Milliseconds())
 		out = append(out, []byte("\n"+timeStr)...)
 	}
 
-	return out, timeout, nil
+	return out, timeout, maxRSS, nil
 }
 
 // setArgs return string
