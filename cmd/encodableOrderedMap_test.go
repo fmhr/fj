@@ -70,7 +70,7 @@ func TestEncodableOrderedMap_UnmarshalJSON_Error(t *testing.T) {
 
 	// valueの型ミスマッチによるエラーハンドリングを確認
 	// ValueはanyでUnmarshalされるが、内部で Value.(string) キャストするためパニックまたはエラーになるか？
-	// eocodableOrderMap.go 42行目: self.Set(item.Key, item.Value.(string))
+	// encodableOrderedMap.go 42行目: self.Set(item.Key, item.Value.(string))
 	// ここは string 以外の値が来ると Go の interface 変換で panic する可能性がある。
 	// テストとしてこれを検証（本来は panic を防ぐ方が良いが、現状の実装の振る舞いを確認）
 	defer func() {
