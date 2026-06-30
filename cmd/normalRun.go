@@ -46,16 +46,16 @@ func normalRunWithTime(cnf *setup.Config, seed int) ([]byte, bool, error) {
 	out, timeout, err := runCommandWithTimeout(cmdStrings, int(cnf.TimeLimitMS))
 	elapsed := time.Since(startTime)
 
+	if timeout {
+		log.Printf("処理が制限時間%dmsを超えたためタイムアウトしました", int(cnf.TimeLimitMS))
+		return out, timeout, nil
+	}
 	if err != nil {
 		log.Println("Error: ", err)
 		if len(out) > 0 {
 			log.Println("out:", string(out))
 		}
 		return out, timeout, fmt.Errorf("cmd.Run() for command [%q] failed with: %w out:%s", cmdStrings, err, out)
-	}
-	if timeout {
-		log.Printf("処理が制限時間%dmsを超えたためタイムアウトしました", int(cnf.TimeLimitMS))
-		return out, timeout, fmt.Errorf("TIMEOUT %dms", int(cnf.TimeLimitMS))
 	}
 
 	// 実行時間を出力に追加（秒単位）

@@ -6,20 +6,18 @@ import (
 
 func TestFormatFloat(t *testing.T) {
 	tests := []struct {
-		input    float64
+		input    string
 		expected string
 	}{
-		{1.123, "1.123"},
-		{3.0, "3"},
+		{"1.123", "1.123"},
+		{"3.0", "3"},
+		{"abc", "abc"},
 	}
 
 	for _, test := range tests {
-		result, err := formatFloat(test.input)
-		if err != nil {
-			t.Errorf("Error: %s", err)
-		}
+		result := formatFloat(test.input)
 		if result != test.expected {
-			t.Errorf("Expected %s for input %f, but got %s", test.expected, test.input, result)
+			t.Errorf("Expected %s for input %s, but got %s", test.expected, test.input, result)
 		}
 	}
 }

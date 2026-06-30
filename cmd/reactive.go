@@ -38,8 +38,9 @@ func ReactiveRun(ctf *setup.Config, seed int) (kv SliceMap, err error) {
 		kv.Set(k, v)
 	}
 	if timeout {
+		kv.Set("result", "TLE")
 		kv.Set("Score", "0")
-		kv.Set("time", fmt.Sprintf("%v", ctf.TimeLimitMS/1000))
+		kv.Set("time", fmt.Sprintf("%.3f", float64(ctf.TimeLimitMS)/1000.0))
 	}
 	return kv, nil
 }

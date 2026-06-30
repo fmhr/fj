@@ -273,6 +273,7 @@ overloop:
 	}
 	// update best score
 	if *bestScore {
+		newScores := make(map[int]int)
 		for i := 0; i < len(datas); i++ {
 			if datas[i] == nil {
 				continue
@@ -289,10 +290,11 @@ overloop:
 			}
 			score, _ := strconv.Atoi(scoreString)
 			seed, _ := strconv.Atoi(seedStr)
-			err := UpdateBestScore(seed, score)
-			if err != nil {
-				log.Println("Error UpdateBestScore:", err)
-			}
+			newScores[seed] = score
+		}
+		err := UpdateBestScores(newScores)
+		if err != nil {
+			log.Println("Error UpdateBestScores:", err)
 		}
 	}
 	if len(errSeeds) == 0 && len(zeroSeeds) == 0 && len(tleSeeds) == 0 {

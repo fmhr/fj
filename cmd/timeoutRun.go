@@ -46,8 +46,7 @@ func runCommandWithTimeout(cmdStrings []string, timelimitMS int) ([]byte, bool, 
 
 	//output, err := cmd.CombinedOutput()
 	if ctx.Err() == context.DeadlineExceeded {
-		cmd.Cancel() // Ensure the process is terminated on timeout
-		return outputBuf.Bytes(), true, fmt.Errorf("command timed out after %d ms", timelimitMS)
+		return outputBuf.Bytes(), true, nil
 	}
 
 	if err != nil {

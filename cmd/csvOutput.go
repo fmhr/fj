@@ -43,7 +43,7 @@ func CsvOutput(datas []SliceMap, filename string) error {
 				values = append(values, "")
 				continue
 			}
-			values = append(values, numToString(v))
+			values = append(values, v)
 		}
 		if err := writer.Write(values); err != nil {
 			return err
@@ -51,22 +51,4 @@ func CsvOutput(datas []SliceMap, filename string) error {
 	}
 	log.Println("save csv file:", filename)
 	return nil
-}
-
-func numToString(num any) string {
-	switch v := num.(type) {
-	case int:
-		return fmt.Sprintf("%d", v)
-	case float64:
-		if float64(int(v)) == v {
-			return fmt.Sprintf("%d", int(v))
-		}
-		return fmt.Sprintf("%f", v)
-	case string:
-		return string(v)
-	case []byte:
-		return string(v)
-	default:
-		return ""
-	}
 }

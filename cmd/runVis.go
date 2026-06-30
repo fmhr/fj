@@ -19,7 +19,7 @@ func RunVis(cnf *setup.Config, seed int) (SliceMap, error) {
 // その結果をvisに渡して、両方の結果を返す
 // 通常の問題（reactive=false)で使う
 func runVis(cnf *setup.Config, seed int) (kv SliceMap, err error) {
-	out, _, err := normalRun(cnf, seed)
+	out, timeout, err := normalRun(cnf, seed)
 	if err != nil {
 		//log.Println("Error: ", err)
 		if len(out) > 0 {
@@ -29,6 +29,13 @@ func runVis(cnf *setup.Config, seed int) (kv SliceMap, err error) {
 	}
 	kv = NewSliceMap()
 	kv.Set("seed", fmt.Sprintf("%d", seed))
+
+	if timeout {
+		kv.Set("result", "TLE")
+		kv.Set("Score", "0")
+		kv.Set("time", fmt.Sprintf("%.3f", float64(cnf.TimeLimitMS)/1000.0))
+		return kv, nil
+	}
 
 	keys, err := ExtractKeyValuePairs(string(out))
 	if err != nil {
