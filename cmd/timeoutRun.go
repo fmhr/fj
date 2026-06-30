@@ -34,7 +34,8 @@ func runCommandWithTimeout(cmdStrings []string, timelimitMS int) ([]byte, bool, 
 
 	cmd.Stderr = &outputBuf
 
-	cmd.WaitDelay = 5 * time.Second // Wait 5 seconds before sending SIGKILL　子プロセスとのIOの完了を待つ
+	// プロセス終了後にI/Oパイプがクローズされるのを待つ最大時間 (ゾンビプロセスによるハングアップ防止用)
+	cmd.WaitDelay = 500 * time.Millisecond
 
 	// コマンド実行
 	err = cmd.Start()
