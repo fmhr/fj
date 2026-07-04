@@ -115,7 +115,7 @@ func Execute() error {
 		}
 		// cloud mode ならソースコードをアップロードしてバイナリを受け取る
 		if config.CloudMode {
-			err = CloudCompile(config)
+			err = cloudCompile(config)
 			if err != nil {
 				log.Println("Cloud mode Compile error:", err)
 				return err
@@ -128,8 +128,8 @@ func Execute() error {
 			}
 			r, ok := rtn.Get("result")
 			if ok {
-				if r == "TLE" {
-					log.Println("TLE")
+				if r == "TimeOut" {
+					log.Println("TimeOut")
 				}
 			}
 			for _, kv := range rtn {
@@ -144,7 +144,7 @@ func Execute() error {
 				return err
 			}
 			if *bestScore {
-				if err = UpdateBestScore(*seed, scoreInt); err != nil {
+				if err = updateBestScore(*seed, scoreInt); err != nil {
 					log.Println("failed to update best score:", err)
 					return err
 				}
@@ -157,7 +157,7 @@ func Execute() error {
 			for i := startSeed; i < startSeed+*count; i++ {
 				seeds[i-startSeed] = i
 			}
-			RunParallel(config, seeds)
+			runParallel(config, seeds)
 		}
 	case downloadcmd.FullCommand():
 		return download.Download(*testerURL)

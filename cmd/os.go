@@ -16,8 +16,8 @@ func createCommand(cmdStr string) (cmdArgs []string) {
 	return cmdArgs
 }
 
-// EnsureDirExists はディレクトリが存在するか確認し、存在しない場合は作成します
-func EnsureDirExists(dir string) error {
+// ensureDirExists はディレクトリが存在するか確認し、存在しない場合は作成します
+func ensureDirExists(dir string) error {
 	if dir == "" {
 		return nil
 	}

@@ -32,7 +32,7 @@ func normalRunWithTime(cnf *setup.Config, seed int) ([]byte, bool, int64, error)
 		return nil, false, 0, err
 	}
 
-	if err := EnsureDirExists(cnf.OutfilePath); err != nil {
+	if err := ensureDirExists(cnf.OutfilePath); err != nil {
 		return nil, false, 0, err
 	}
 

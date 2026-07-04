@@ -9,14 +9,14 @@ import (
 )
 
 // ReactiveRun はreactive=trueのときに使う
-func ReactiveRun(ctf *setup.Config, seed int) (kv SliceMap, err error) {
+func ReactiveRun(cnf *setup.Config, seed int) (kv SliceMap, err error) {
 	// 出力フォルダがない場合、作成
-	err = EnsureDirExists(ctf.OutfilePath)
+	err = ensureDirExists(cnf.OutfilePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create output directory: %v", err)
 	}
 	// 実行
-	out, timeout, maxRSS, err := reactiveRunCmd(ctf, seed)
+	out, timeout, maxRSS, err := reactiveRunCmd(cnf, seed)
 	if err != nil {
 		return nil, fmt.Errorf("reactiveRunCmdの実行に失敗: %w", err)
 	}
@@ -38,9 +38,9 @@ func ReactiveRun(ctf *setup.Config, seed int) (kv SliceMap, err error) {
 		kv.Set(k, v)
 	}
 	if timeout {
-		kv.Set("result", "TLE")
+		kv.Set("result", "TimeOut")
 		kv.Set("Score", "0")
-		kv.Set("time", fmt.Sprintf("%d", ctf.TimeLimitMS))
+		kv.Set("time", fmt.Sprintf("%d", cnf.TimeLimitMS))
 	}
 
 	// メモリ使用量を結果に追加
@@ -52,35 +52,35 @@ func ReactiveRun(ctf *setup.Config, seed int) (kv SliceMap, err error) {
 }
 
 // reactiveRunCmd はreactive=trueのときに使う
-func reactiveRunCmd(ctf *setup.Config, seed int) ([]byte, bool, int64, error) {
-	cmd := ctf.ExecuteCmd
-	infile := ctf.InfilePath + fmt.Sprintf("%04d.txt", seed)
-	outfile := ctf.OutfilePath + fmt.Sprintf("%04d.txt", seed)
+func reactiveRunCmd(cnf *setup.Config, seed int) ([]byte, bool, int64, error) {
+	cmd := cnf.ExecuteCmd
+	infile := cnf.InfilePath + fmt.Sprintf("%04d.txt", seed)
+	outfile := cnf.OutfilePath + fmt.Sprintf("%04d.txt", seed)
 	// in/0000.txtの存在確認
 	_, err := fileExists(infile)
 	if err != nil {
 		return nil, false, 0, fmt.Errorf("input fileの確認に失敗: %w", err)
 	}
 	// outfilePathが存在するか確認
-	_, err = fileExists(ctf.OutfilePath)
+	_, err = fileExists(cnf.OutfilePath)
 	if err != nil {
 		return nil, false, 0, fmt.Errorf("output directoryの確認に失敗: %w", err)
 	}
 	// testerPathが存在するか確認
-	_, err = fileExists(ctf.TesterPath)
+	_, err = fileExists(cnf.TesterPath)
 	if err != nil {
 		return nil, false, 0, fmt.Errorf("tester fileの確認に失敗: %w", err)
 	}
 	// コマンド作成
-	setsArgs := setArgs(ctf.Args) // コマンドオプションの追加
-	cmdStr := fmt.Sprintf("%s %s %s < %s > %s", ctf.TesterPath, cmd, setsArgs, infile, outfile)
+	setsArgs := setArgs(cnf.Args) // コマンドオプションの追加
+	cmdStr := fmt.Sprintf("%s %s %s < %s > %s", cnf.TesterPath, cmd, setsArgs, infile, outfile)
 	cmdStrings := createCommand(cmdStr)
 
 	// 実行時間を計測
 	startTime := time.Now()
 
 	// コマンド実行
-	out, timeout, maxRSS, err := runCommandWithTimeout(cmdStrings, int(ctf.TimeLimitMS))
+	out, timeout, maxRSS, err := runCommandWithTimeout(cmdStrings, int(cnf.TimeLimitMS))
 	elapsed := time.Since(startTime)
 
 	if err != nil {

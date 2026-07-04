@@ -80,7 +80,7 @@ func writeBestScore(data *BestData) error {
 	return nil
 }
 
-func GetBestScores() (map[int]int, error) {
+func getBestScores() (map[int]int, error) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
@@ -97,7 +97,7 @@ func GetBestScores() (map[int]int, error) {
 }
 
 // UpdateBestScores は複数のseedのベストスコアを一括で更新する
-func UpdateBestScores(newScores map[int]int) error {
+func updateBestScores(newScores map[int]int) error {
 	if len(newScores) == 0 {
 		return nil
 	}
@@ -141,6 +141,6 @@ func UpdateBestScores(newScores map[int]int) error {
 }
 
 // UpdateBestScore は指定されたseedのベストスコアを設定する
-func UpdateBestScore(seed, score int) error {
-	return UpdateBestScores(map[int]int{seed: score})
+func updateBestScore(seed, score int) error {
+	return updateBestScores(map[int]int{seed: score})
 }

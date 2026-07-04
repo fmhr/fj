@@ -8,13 +8,13 @@ import (
 	"time"
 )
 
-func JsonOutput(datas []SliceMap) error {
+func writeJsonOutput(datas []SliceMap) error {
 	fileContent, err := json.MarshalIndent(datas, "", " ")
 	if err != nil {
 		log.Println("json marshal error")
 		return err
 	}
-	err = EnsureDirExists("fj/data/")
+	err = ensureDirExists("fj/data/")
 	if err != nil {
 		log.Println("create dir error")
 		return err

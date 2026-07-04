@@ -37,7 +37,7 @@ func TestJsonOutput(t *testing.T) {
 	datas := []SliceMap{sm1, sm2}
 
 	// 実行
-	err = JsonOutput(datas)
+	err = writeJsonOutput(datas)
 	if err != nil {
 		t.Fatalf("JsonOutput failed: %v", err)
 	}
@@ -100,7 +100,7 @@ func TestCsvOutput(t *testing.T) {
 	datas := []SliceMap{sm1, sm2}
 
 	// 実行 (内部で .csv 拡張子が追加されるため、csvFilePath.csv が作成される)
-	err := CsvOutput(datas, csvFilePath)
+	err := writeCsvOutput(datas, csvFilePath)
 	if err != nil {
 		t.Fatalf("CsvOutput failed: %v", err)
 	}

@@ -23,7 +23,7 @@ type runParallelMetrics struct {
 	sumScore     int
 	logScore     float64
 	zeroSeeds    []int
-	tleSeeds     []int
+	timeoutSeeds []int
 	errSeeds     []int
 	averageScore int
 }
@@ -117,10 +117,10 @@ func calculateMetrics(datas []SliceMap, errSeeds []int) runParallelMetrics {
 			continue
 		}
 		v, ok := datas[i].Get("result")
-		if ok && v == "TLE" {
+		if ok && v == "TimeOut" {
 			seed, err := strconv.Atoi(seedStr)
 			if err == nil {
-				metrics.tleSeeds = append(metrics.tleSeeds, seed)
+				metrics.timeoutSeeds = append(metrics.timeoutSeeds, seed)
 			}
 		}
 
@@ -156,7 +156,7 @@ func calculateMetrics(datas []SliceMap, errSeeds []int) runParallelMetrics {
 }
 
 func applyBestScores(datas []SliceMap) {
-	bestScores, err := GetBestScores()
+	bestScores, err := getBestScores()
 	if err != nil {
 		log.Println("Error GetBestScores:", err)
 		return
@@ -271,14 +271,14 @@ func updateBestScoresWithResults(datas []SliceMap) {
 		seed, _ := strconv.Atoi(seedStr)
 		newScores[seed] = score
 	}
-	err := UpdateBestScores(newScores)
+	err := updateBestScores(newScores)
 	if err != nil {
 		log.Println("Error UpdateBestScores:", err)
 	}
 }
 
-// RunParallel 複数のシードに対して並列にテストを実行する
-func RunParallel(cnf *setup.Config, seeds []int) {
+// runParallel 複数のシードに対して並列にテストを実行する
+func runParallel(cnf *setup.Config, seeds []int) {
 	datas, errSeeds := runTestSeeds(cnf, seeds)
 
 	metrics := calculateMetrics(datas, errSeeds)
@@ -298,8 +298,8 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 	if len(metrics.zeroSeeds) > 0 {
 		fmt.Fprintln(os.Stderr, "Zeros:", metrics.zeroSeeds)
 	}
-	if len(metrics.tleSeeds) > 0 {
-		fmt.Fprintln(os.Stderr, "TLEs:", metrics.tleSeeds)
+	if len(metrics.timeoutSeeds) > 0 {
+		fmt.Fprintln(os.Stderr, "TimeOuts:", metrics.timeoutSeeds)
 	}
 
 	printTimeSummary(datas)
@@ -310,15 +310,15 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 	printAverageOfNumericalFields(datas)
 
 	if jsonOutput != nil && *jsonOutput {
-		err := JsonOutput(datas)
+		err := writeJsonOutput(datas)
 		if err != nil {
-			log.Println("Error JsonOutput:", err)
+			log.Println("Error jsonOutput:", err)
 		}
 	}
 	if csvOutput != nil && *csvOutput {
-		err := CsvOutput(datas, "result")
+		err := writeCsvOutput(datas, "result")
 		if err != nil {
-			log.Println("Error CsvOutput:", err)
+			log.Println("Error csvOutput:", err)
 		}
 	}
 
@@ -326,7 +326,7 @@ func RunParallel(cnf *setup.Config, seeds []int) {
 		updateBestScoresWithResults(datas)
 	}
 
-	if len(metrics.errSeeds) == 0 && len(metrics.zeroSeeds) == 0 && len(metrics.tleSeeds) == 0 {
+	if len(metrics.errSeeds) == 0 && len(metrics.zeroSeeds) == 0 && len(metrics.timeoutSeeds) == 0 {
 		fmt.Fprintln(os.Stderr, "All tests passed")
 	} else {
 		fmt.Fprintln(os.Stderr, "Some tests failed")

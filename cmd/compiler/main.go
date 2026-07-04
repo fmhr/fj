@@ -102,12 +102,12 @@ func runCompiler(language string) ([]byte, error) {
 
 func uploadArtifacts(bucketName string, source string, binaryFileName string, rdm string) (string, error) {
 	// バイナリのアップロード
-	newfilename, err := uploarFileToGoogleCloudStorage(bucketName, binaryFileName, rdm)
+	newfilename, err := uploadFileToGoogleCloudStorage(bucketName, binaryFileName, rdm)
 	if err != nil {
 		return "", fmt.Errorf("Failed to upload binary file to bucket:%w", err)
 	}
 	// ソースコードのアップロード
-	_, err = uploarFileToGoogleCloudStorage(bucketName, source, rdm)
+	_, err = uploadFileToGoogleCloudStorage(bucketName, source, rdm)
 	if err != nil {
 		return "", fmt.Errorf("Failed to upload source file to bucket:%w", err)
 	}
@@ -196,7 +196,7 @@ func createFileWithDirs(path string, data []byte) error {
 	return nil
 }
 
-func uploarFileToGoogleCloudStorage(bucketName string, file, rdm string) (string, error) {
+func uploadFileToGoogleCloudStorage(bucketName string, file, rdm string) (string, error) {
 	if bucketName == "" {
 		return "", fmt.Errorf("bucket name is not specified")
 	}

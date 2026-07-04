@@ -29,7 +29,7 @@ func runVis(cnf *setup.Config, seed int) (kv SliceMap, err error) {
 	kv.Set("seed", fmt.Sprintf("%d", seed))
 
 	if timeout {
-		kv.Set("result", "TLE")
+		kv.Set("result", "TimeOut")
 		kv.Set("Score", "0")
 		kv.Set("time", fmt.Sprintf("%d", cnf.TimeLimitMS))
 		return kv, nil

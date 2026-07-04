@@ -7,8 +7,8 @@ import (
 	"os"
 )
 
-// CsvOutput csvファイルに出力する
-func CsvOutput(datas []SliceMap, filename string) error {
+// writeCsvOutput csvファイルに出力する
+func writeCsvOutput(datas []SliceMap, filename string) error {
 	filename = fmt.Sprintf("%s.csv", filename)
 	file, err := os.Create(filename)
 	if err != nil {
