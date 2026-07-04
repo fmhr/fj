@@ -11,7 +11,7 @@ import (
 // ReactiveRun はreactive=trueのときに使う
 func ReactiveRun(ctf *setup.Config, seed int) (kv SliceMap, err error) {
 	// 出力フォルダがない場合、作成
-	err = createDirIfNotExist(ctf.OutfilePath)
+	err = EnsureDirExists(ctf.OutfilePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create output directory: %v", err)
 	}

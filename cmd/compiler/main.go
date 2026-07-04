@@ -23,112 +23,134 @@ import (
 //  3. コンパイルコマンド
 //  4. file=ソースファイル, compileCmd=コンパイルコマンド,
 //     srcFile=ソースファイル名, binaryFile=バイナリファイル名
-func compileHandler(w http.ResponseWriter, r *http.Request) {
+func parseCompileRequest(r *http.Request) (file io.ReadCloser, language string, bucket string, err error) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Only POST method is allowed", http.StatusMethodNotAllowed)
-		return
+		return nil, "", "", fmt.Errorf("Only POST method is allowed")
 	}
 	// マルチパートリーダー
-	err := r.ParseMultipartForm(50 << 20) //10MB limit
+	err = r.ParseMultipartForm(50 << 20) //10MB limit
 	if err != nil {
-		http.Error(w, "Failed to parse form:"+err.Error(), http.StatusBadRequest)
-		return
+		return nil, "", "", fmt.Errorf("Failed to parse form:%w", err)
 	}
 
 	// ソースファイル
-	file, _, err := r.FormFile("file")
+	file, _, err = r.FormFile("file")
 	if err != nil {
-		http.Error(w, "Failed to get the file:"+err.Error(), http.StatusBadRequest)
-		return
+		return nil, "", "", fmt.Errorf("Failed to get the file:%w", err)
 	}
-	defer file.Close()
 
 	// language
-	language := r.FormValue("language")
+	language = r.FormValue("language")
 	if language == "" {
-		http.Error(w, "Language not specified:", http.StatusBadRequest)
-		return
+		file.Close()
+		return nil, "", "", fmt.Errorf("Language not specified:")
 	}
 
 	if _, ok := setup.LanguageSets[language]; !ok {
-		errmsg := fmt.Sprintf("Language [%s] is not supported.", language)
-		http.Error(w, errmsg, http.StatusBadRequest)
-		return
+		file.Close()
+		return nil, "", "", fmt.Errorf("Language [%s] is not supported.", language)
 	}
 
+	bucket = r.FormValue("bucket")
+	return file, language, bucket, nil
+}
+
+func prepareAndSaveSource(file io.Reader, language string) (source string, binaryFileName string, err error) {
 	// ソースファイル名
-	source := setup.LanguageSets[language].FileName
+	source = setup.LanguageSets[language].FileName
 	if source == "" {
-		http.Error(w, "Source file not specified:", http.StatusBadRequest)
-		return
+		return "", "", fmt.Errorf("Source file not specified:")
 	}
 	err = createFileWithDirs(source, nil)
 	if err != nil {
-		http.Error(w, "Failed to create source file:"+err.Error(), http.StatusInternalServerError)
-		return
+		return "", "", fmt.Errorf("Failed to create source file:%w", err)
 	}
 
 	// バイナリファイル名
-	binaryFileName := setup.LanguageSets[language].BinaryPath
+	binaryFileName = setup.LanguageSets[language].BinaryPath
 	err = createFileWithDirs(binaryFileName, nil)
 	if err != nil {
-		http.Error(w, "Failed to create binary file:"+err.Error(), http.StatusInternalServerError)
-		return
+		return "", "", fmt.Errorf("Failed to create binary file:%w", err)
 	}
 
 	// ソースファイルをディスクに書き込む
 	srcBytes, err := io.ReadAll(file)
 	if err != nil {
-		msg := fmt.Sprintf("Failed to read the uploaded file: %v", err)
-		http.Error(w, msg, http.StatusInternalServerError)
-		return
+		return "", "", fmt.Errorf("Failed to read the uploaded file: %w", err)
 	}
 	err = os.WriteFile(source, srcBytes, 0644)
 	if err != nil {
-		msg := fmt.Sprintf("Failed to write the uploaded file to disk: %v", err)
-		http.Error(w, msg, http.StatusInternalServerError)
-		return
+		return "", "", fmt.Errorf("Failed to write the uploaded file to disk: %w", err)
 	}
 
+	return source, binaryFileName, nil
+}
 
-	// コンパイル
+func runCompiler(language string) ([]byte, error) {
 	compileCmd := setup.LanguageSets[language].CompileCmd
 	cmds := strings.Fields(compileCmd)
+	if len(cmds) == 0 {
+		return nil, fmt.Errorf("Compile command is empty")
+	}
 	cmd := exec.Command(cmds[0], cmds[1:]...)
 	msg, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Println(err.Error())
-		msg := fmt.Sprintf("Failed to compile: [%s]%v msg: %s", cmd.String(), err, string(msg))
-		http.Error(w, msg, http.StatusBadRequest)
-		return
+		return msg, fmt.Errorf("Failed to compile: [%s]%w", cmd.String(), err)
 	}
+	return msg, nil
+}
 
-	bucketName := r.FormValue("bucket")
-
-	// google cloud storageにバイナリとソースファイルをアップロード
-	rdm := generateRandomString(10)
+func uploadArtifacts(bucketName string, source string, binaryFileName string, rdm string) (string, error) {
 	// バイナリのアップロード
 	newfilename, err := uploarFileToGoogleCloudStorage(bucketName, binaryFileName, rdm)
 	if err != nil {
-		http.Error(w, "Failed to upload binary file to bucket:"+err.Error(), http.StatusInternalServerError)
-		return
+		return "", fmt.Errorf("Failed to upload binary file to bucket:%w", err)
 	}
 	// ソースコードのアップロード
 	_, err = uploarFileToGoogleCloudStorage(bucketName, source, rdm)
 	if err != nil {
-		http.Error(w, "Failed to upload source file to bucket:"+err.Error(), http.StatusInternalServerError)
+		return "", fmt.Errorf("Failed to upload source file to bucket:%w", err)
+	}
+	return newfilename, nil
+}
+
+func compileHandler(w http.ResponseWriter, r *http.Request) {
+	file, language, bucketName, err := parseCompileRequest(r)
+	if err != nil {
+		if r.Method != http.MethodPost {
+			http.Error(w, err.Error(), http.StatusMethodNotAllowed)
+		} else {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
 		return
 	}
+	defer file.Close()
 
-	// バイナリの読み込み
-	//binary, err := os.ReadFile(binaryFileName)
-	//if err != nil {
-	//http.Error(w, "Failed to read compiled binary"+err.Error(), http.StatusInternalServerError)
-	//return
-	//}
+	source, binaryFileName, err := prepareAndSaveSource(file, language)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	// ソースファイルとバイナリファイルを削除
 	defer os.Remove(source)
 	defer os.Remove(binaryFileName)
+
+	// コンパイル
+	msg, err := runCompiler(language)
+	if err != nil {
+		log.Println(err.Error())
+		msg := fmt.Sprintf("%v msg: %s", err, string(msg))
+		http.Error(w, msg, http.StatusBadRequest)
+		return
+	}
+
+	// google cloud storageにバイナリとソースファイルをアップロード
+	rdm := generateRandomString(10)
+	newfilename, err := uploadArtifacts(bucketName, source, binaryFileName, rdm)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	// バイナリのパスをレスポンスとして返す
 	encodingFilename := url.QueryEscape(newfilename)

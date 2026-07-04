@@ -32,7 +32,7 @@ func normalRunWithTime(cnf *setup.Config, seed int) ([]byte, bool, int64, error)
 		return nil, false, 0, err
 	}
 
-	if err := checkOutputFolder(cnf.OutfilePath); err != nil {
+	if err := EnsureDirExists(cnf.OutfilePath); err != nil {
 		return nil, false, 0, err
 	}
 
@@ -65,24 +65,3 @@ func normalRunWithTime(cnf *setup.Config, seed int) ([]byte, bool, int64, error)
 	return out, timeout, maxRSS, nil
 }
 
-// checkOutputFolder は出力フォルダが存在するか確認し、存在しない場合は作成する
-func checkOutputFolder(dir string) error {
-	// dirが空の時
-	if dir == "" {
-		return nil
-	}
-	stat, err := os.Stat(dir)
-	if err != nil {
-		if os.IsNotExist(err) {
-			err = os.MkdirAll(dir, 0777)
-			if err != nil {
-				return fmt.Errorf("failed to create output folder: %w", err)
-			}
-		} else {
-			return err
-		}
-	} else if !stat.IsDir() {
-		return fmt.Errorf("path is not directory: %s", dir)
-	}
-	return nil
-}

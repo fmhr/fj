@@ -14,7 +14,7 @@ func JsonOutput(datas []SliceMap) error {
 		log.Println("json marshal error")
 		return err
 	}
-	err = createDirIfNotExist("fj/data/")
+	err = EnsureDirExists("fj/data/")
 	if err != nil {
 		log.Println("create dir error")
 		return err
