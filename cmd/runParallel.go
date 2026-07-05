@@ -19,6 +19,11 @@ import (
 	"golang.org/x/text/message"
 )
 
+const (
+	progressBarWidth = 40
+	taskInterval     = 100 * time.Millisecond
+)
+
 type runParallelMetrics struct {
 	sumScore     int
 	logScore     float64
@@ -68,7 +73,7 @@ overloop:
 		default:
 			wg.Add(1)
 			sem <- struct{}{}
-			time.Sleep(100 * time.Millisecond) // 100ms待つ エラー出力を見やすくするため
+			time.Sleep(taskInterval) // エラー出力を見やすくするため
 			go func(seed int) {
 				defer wg.Done()
 				defer func() { <-sem }()
@@ -334,8 +339,6 @@ func runParallel(cnf *setup.Config, seeds []int) {
 	fmt.Println(metrics.sumScore)
 }
 
-const progressBarWidth = 40
-
 // printProgress 進行度を表示する
 func printProgress(current, total int) {
 	percentage := float64(current) / float64(total)
@@ -350,5 +353,3 @@ func printProgress(current, total int) {
 	}
 	fmt.Fprintf(os.Stderr, "\r[%d/%d] [%s] %.2f%%", current, total, string(progressBar), percentage*100)
 }
-
-
