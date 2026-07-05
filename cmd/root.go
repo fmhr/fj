@@ -202,26 +202,26 @@ func updateConfig(config *setup.Config) error {
 	// cloudモードで必要な設定がconfig.tomlにあるか確認する
 	if config.CloudMode {
 		if config.Language == "" {
-			return fmt.Errorf("error: [Language] must not be empty in cloud mode")
+			return fmt.Errorf("language must not be empty in cloud mode")
 		}
 		if config.ExecuteCmd == "" {
-			return fmt.Errorf("error: [ExecuteCmd] must not be empty in cloud mode")
+			return fmt.Errorf("execute command must not be empty in cloud mode")
 		}
 		if config.SourceFilePath == "" {
-			return fmt.Errorf("error: [SourceFilePath] must not be empty in cloud mode")
+			return fmt.Errorf("source file path must not be empty in cloud mode")
 		}
 		// sourceFilePathが存在するか確認する
 		if _, err := os.Stat(config.SourceFilePath); os.IsNotExist(err) {
-			return fmt.Errorf("error: [SourceFilePath] %s does not exist", config.SourceFilePath)
+			return fmt.Errorf("source file path %s does not exist", config.SourceFilePath)
 		}
 		if config.WorkerURL == "" {
-			return fmt.Errorf("error: [WorkerURL] must not be empty in cloud mode")
+			return fmt.Errorf("worker URL must not be empty in cloud mode")
 		}
 		if config.Bucket == "" {
-			return fmt.Errorf("error: [Bucket] must not be empty in cloud mode")
+			return fmt.Errorf("bucket must not be empty in cloud mode")
 		}
 		if config.Reactive && config.BinaryPath == "" {
-			return fmt.Errorf("error: [BinaryPath] must not be empty in cloud mode for reactive problems")
+			return fmt.Errorf("binary path must not be empty in cloud mode for reactive problems")
 		}
 	}
 	return nil

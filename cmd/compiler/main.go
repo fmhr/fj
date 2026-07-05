@@ -25,30 +25,30 @@ import (
 //     srcFile=ソースファイル名, binaryFile=バイナリファイル名
 func parseCompileRequest(r *http.Request) (file io.ReadCloser, language string, bucket string, err error) {
 	if r.Method != http.MethodPost {
-		return nil, "", "", fmt.Errorf("Only POST method is allowed")
+		return nil, "", "", fmt.Errorf("only POST method is allowed")
 	}
 	// マルチパートリーダー
 	err = r.ParseMultipartForm(50 << 20) //10MB limit
 	if err != nil {
-		return nil, "", "", fmt.Errorf("Failed to parse form:%w", err)
+		return nil, "", "", fmt.Errorf("failed to parse form: %w", err)
 	}
 
 	// ソースファイル
 	file, _, err = r.FormFile("file")
 	if err != nil {
-		return nil, "", "", fmt.Errorf("Failed to get the file:%w", err)
+		return nil, "", "", fmt.Errorf("failed to get the file: %w", err)
 	}
 
 	// language
 	language = r.FormValue("language")
 	if language == "" {
 		file.Close()
-		return nil, "", "", fmt.Errorf("Language not specified:")
+		return nil, "", "", fmt.Errorf("language not specified")
 	}
 
 	if _, ok := setup.LanguageSets[language]; !ok {
 		file.Close()
-		return nil, "", "", fmt.Errorf("Language [%s] is not supported.", language)
+		return nil, "", "", fmt.Errorf("language [%s] is not supported", language)
 	}
 
 	bucket = r.FormValue("bucket")
@@ -59,28 +59,28 @@ func prepareAndSaveSource(file io.Reader, language string) (source string, binar
 	// ソースファイル名
 	source = setup.LanguageSets[language].FileName
 	if source == "" {
-		return "", "", fmt.Errorf("Source file not specified:")
+		return "", "", fmt.Errorf("source file not specified")
 	}
 	err = createFileWithDirs(source, nil)
 	if err != nil {
-		return "", "", fmt.Errorf("Failed to create source file:%w", err)
+		return "", "", fmt.Errorf("failed to create source file: %w", err)
 	}
 
 	// バイナリファイル名
 	binaryFileName = setup.LanguageSets[language].BinaryPath
 	err = createFileWithDirs(binaryFileName, nil)
 	if err != nil {
-		return "", "", fmt.Errorf("Failed to create binary file:%w", err)
+		return "", "", fmt.Errorf("failed to create binary file: %w", err)
 	}
 
 	// ソースファイルをディスクに書き込む
 	srcBytes, err := io.ReadAll(file)
 	if err != nil {
-		return "", "", fmt.Errorf("Failed to read the uploaded file: %w", err)
+		return "", "", fmt.Errorf("failed to read uploaded file: %w", err)
 	}
 	err = os.WriteFile(source, srcBytes, 0644)
 	if err != nil {
-		return "", "", fmt.Errorf("Failed to write the uploaded file to disk: %w", err)
+		return "", "", fmt.Errorf("failed to write uploaded file to disk: %w", err)
 	}
 
 	return source, binaryFileName, nil
@@ -90,12 +90,12 @@ func runCompiler(language string) ([]byte, error) {
 	compileCmd := setup.LanguageSets[language].CompileCmd
 	cmds := strings.Fields(compileCmd)
 	if len(cmds) == 0 {
-		return nil, fmt.Errorf("Compile command is empty")
+		return nil, fmt.Errorf("compile command is empty")
 	}
 	cmd := exec.Command(cmds[0], cmds[1:]...)
 	msg, err := cmd.CombinedOutput()
 	if err != nil {
-		return msg, fmt.Errorf("Failed to compile: [%s]%w", cmd.String(), err)
+		return msg, fmt.Errorf("failed to compile [%s]: %w", cmd.String(), err)
 	}
 	return msg, nil
 }
@@ -104,12 +104,12 @@ func uploadArtifacts(bucketName string, source string, binaryFileName string, rd
 	// バイナリのアップロード
 	newfilename, err := uploadFileToGoogleCloudStorage(bucketName, binaryFileName, rdm)
 	if err != nil {
-		return "", fmt.Errorf("Failed to upload binary file to bucket:%w", err)
+		return "", fmt.Errorf("failed to upload binary file to bucket: %w", err)
 	}
 	// ソースコードのアップロード
 	_, err = uploadFileToGoogleCloudStorage(bucketName, source, rdm)
 	if err != nil {
-		return "", fmt.Errorf("Failed to upload source file to bucket:%w", err)
+		return "", fmt.Errorf("failed to upload source file to bucket: %w", err)
 	}
 	return newfilename, nil
 }
