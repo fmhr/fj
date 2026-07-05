@@ -283,7 +283,7 @@ func runParallel(cnf *setup.Config, seeds []int) {
 
 	metrics := calculateMetrics(datas, errSeeds)
 
-	if *bestScore {
+	if cnf.BestScore {
 		applyBestScores(datas)
 	}
 
@@ -309,20 +309,20 @@ func runParallel(cnf *setup.Config, seeds []int) {
 
 	printAverageOfNumericalFields(datas)
 
-	if jsonOutput != nil && *jsonOutput {
+	if cnf.JsonOutput {
 		err := writeJsonOutput(datas)
 		if err != nil {
 			log.Println("Error jsonOutput:", err)
 		}
 	}
-	if csvOutput != nil && *csvOutput {
+	if cnf.CsvOutput {
 		err := writeCsvOutput(datas, "result")
 		if err != nil {
 			log.Println("Error csvOutput:", err)
 		}
 	}
 
-	if *bestScore {
+	if cnf.BestScore {
 		updateBestScoresWithResults(datas)
 	}
 

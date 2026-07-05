@@ -39,6 +39,9 @@ type Config struct {
 	Bucket             string   `toml:"Bucket"`             // バイナリの保存先
 	WorkerURL          string   `toml:"WorkerURL"`          // クラウドジャッジコンテナのURL ここが多数立ち上がる
 	ConcurrentRequests int      `toml:"ConcurrentRequests"` // クラウドジャッジコンテナの並列アクセス数
+	JsonOutput         bool     `toml:"-"`
+	CsvOutput          bool     `toml:"-"`
+	BestScore          bool     `toml:"-"`
 }
 
 // SetConfig はconfig.tomlを読み込む

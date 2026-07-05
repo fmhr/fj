@@ -143,7 +143,7 @@ func Execute() error {
 			if err != nil {
 				return err
 			}
-			if *bestScore {
+			if config.BestScore {
 				if err = updateBestScore(*seed, scoreInt); err != nil {
 					log.Println("failed to update best score:", err)
 					return err
@@ -182,6 +182,16 @@ func ensureConfigToml() error {
 
 // updateConfig はコマンドライン引数でconfigを更新する
 func updateConfig(config *setup.Config) error {
+	if jsonOutput != nil {
+		config.JsonOutput = *jsonOutput
+	}
+	if csvOutput != nil {
+		config.CsvOutput = *csvOutput
+	}
+	if bestScore != nil {
+		config.BestScore = *bestScore
+	}
+
 	config.CloudMode = config.CloudMode || *cloud
 	if !config.CloudMode {
 		config.ExecuteCmd = *cmd
