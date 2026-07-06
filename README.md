@@ -19,52 +19,38 @@ cd tools
 cargo build --release
 cd ..
 
-# 3. 初期化（設定ファイルとベストスコア追跡を作成）
-fj init
+# 3. 設定ファイル用のディレクトリを作成
+mkdir fj
+# 後述の「設定ファイル」の内容で fj/config.toml を手動で作成してください
 
 # 4. 自身のプログラムをコンパイル
 g++ -O2 main.cpp -o a.out
 
-# 5. テスト実行
-fj test ./a.out
+# 5. テスト実行（実行するコマンドは必ず "" で囲んで指定します）
+fj test "./a.out"
 ```
 
 ## コマンド
 
-### `fj init`
-
-設定ファイルとベストスコア追跡を初期化します。
-
-```bash
-# 基本的な初期化（fj/config.toml を生成）
-fj init
-
-# ベストスコア追跡を有効化（最大化問題）
-fj init --best
-
-# 最小化問題の場合
-fj init --best --minimax=min
-```
-
 ### `fj test` (エイリアス: `fj t`)
 
-テストケースを実行します。
+テストケースを実行します。実行コマンドは必ず `""` で囲んで指定してください。
 
 ```bash
 # 単一のテストケース実行（seed=0）
-fj test ./a.out
+fj test "./a.out"
 
 # シード指定
-fj test ./a.out -s 5
+fj test "./a.out" -s 5
 
 # 複数ケース実行
-fj test ./a.out -n 100
+fj test "./a.out" -n 100
 
 # 並列実行
-fj test ./a.out -n 100 -p 4
+fj test "./a.out" -n 100 -p 4
 
 # ベストスコアを更新
-fj test ./a.out -n 100 --best
+fj test "./a.out" -n 100 --best
 ```
 
 | オプション | 短縮形 | 説明 |
@@ -106,7 +92,7 @@ fj info
 
 ## 設定ファイル
 
-`fj init` を実行すると `fj/config.toml` が生成されます。
+プロジェクトルートに `fj` ディレクトリを作成し、 `fj/config.toml` というファイル名で以下の設定例を作成してください。
 
 ### config.toml のデフォルト内容例
 ```toml
