@@ -11,16 +11,22 @@ go install github.com/fmhr/fj@latest
 ## クイックスタート
 
 ```bash
-# 1. テスターをダウンロード（AtCoderからZIPのURLを取得）
+# 1. 公式ローカルテスターをダウンロードして展開
 fj download https://img.atcoder.jp/ahcXXX/tools.zip
 
-# 2. 初期化（設定ファイルとベストスコア追跡を作成）
+# 2. 公式テスターをコンパイル (Rust製の場合の例)
+cd tools
+cargo build --release
+cd ..
+
+# 3. 初期化（設定ファイルとベストスコア追跡を作成）
 fj init
 
-# 3. テスト実行
+# 4. 自身のプログラムをコンパイル
+g++ -O2 main.cpp -o a.out
+
+# 5. テスト実行
 fj test ./a.out
-# または
-fj test "go run main.go"
 ```
 
 ## コマンド
