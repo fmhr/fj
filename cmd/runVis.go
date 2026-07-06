@@ -5,8 +5,6 @@ import (
 	"log"
 	"os/exec"
 	"path/filepath"
-	"regexp"
-	"strconv"
 
 	"github.com/fmhr/fj/cmd/setup"
 )
@@ -19,7 +17,7 @@ func RunVis(cnf *setup.Config, seed int) (SliceMap, error) {
 // その結果をvisに渡して、両方の結果を返す
 // 通常の問題（reactive=false)で使う
 func runVis(cnf *setup.Config, seed int) (kv SliceMap, err error) {
-	out, _, err := normalRun(cnf, seed)
+	out, timeout, maxRSS, err := normalRun(cnf, seed)
 	if err != nil {
 		//log.Println("Error: ", err)
 		if len(out) > 0 {
@@ -30,6 +28,13 @@ func runVis(cnf *setup.Config, seed int) (kv SliceMap, err error) {
 	kv = NewSliceMap()
 	kv.Set("seed", fmt.Sprintf("%d", seed))
 
+	if timeout {
+		kv.Set("result", "TimeOut")
+		kv.Set("Score", "0")
+		kv.Set("time", fmt.Sprintf("%d", cnf.TimeLimitMS))
+		return kv, nil
+	}
+
 	keys, err := ExtractKeyValuePairs(string(out))
 	if err != nil {
 		return kv, err
@@ -38,19 +43,9 @@ func runVis(cnf *setup.Config, seed int) (kv SliceMap, err error) {
 		kv.Set(v.Key, v.Val)
 	}
 
-	// メモリ使用量を正規表現で抽出
-	// BSD timeコマンドの出力を想定
-	// 数字の後に"maximum resident set size"が続くパターンを検索
-	re := regexp.MustCompile(`\s*(\d+)\s+maximum resident set size`)
-	// ステータス出力からメモリ使用量を抽出
-	matches := re.FindStringSubmatch(string(out))
-	if len(matches) > 1 {
-		mb, err := strconv.Atoi(matches[1])
-		if err != nil {
-			return nil, err
-		}
-		mb /= 1024 * 1024
-		kv.Set("Memory", fmt.Sprintf("%d", mb))
+	// メモリ使用量を結果に追加
+	if maxRSS > 0 {
+		kv.Set("Memory", fmt.Sprintf("%d", maxRSS))
 	}
 
 	// vis

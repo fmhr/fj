@@ -1,42 +1,39 @@
 package cmd
 
 import (
-	"log"
-	"os/exec"
+	"fmt"
+	"os"
 	"runtime"
 )
 
 // OS別にコマンドを変更
 func createCommand(cmdStr string) (cmdArgs []string) {
-	var timeCmd string
-	switch runtime.GOOS {
-	case "linux":
-		// GNU time
-		timeCmd = "/usr/bin/time -v"
-	case "darwin", "freebsd":
-		// macOS, FreeBSDではGNU timeがあればそれを使う
-		if commandExist("gtime") {
-			timeCmd = `gtime -f "time:%E memory=%M KB nCPU:%P "`
-		} else {
-			// なければ BSD time
-			timeCmd = "/usr/bin/time -l"
-		}
-	default:
-		// 未対応OS
-		log.Println("OS not supported")
+	if runtime.GOOS == "windows" {
+		cmdArgs = []string{"cmd", "/C", cmdStr}
+	} else {
+		cmdArgs = []string{"/bin/sh", "-c", cmdStr}
 	}
-
-	if timeCmd != "" {
-		cmdStr = timeCmd + " " + cmdStr
-	}
-
-	cmdArgs = []string{"/bin/sh", "-c", cmdStr}
-
 	return cmdArgs
 }
 
-// commandExist はコマンドが存在するか確認する
-func commandExist(cmd string) bool {
-	_, err := exec.LookPath(cmd)
-	return err == nil
+// ensureDirExists はディレクトリが存在するか確認し、存在しない場合は作成します
+func ensureDirExists(dir string) error {
+	if dir == "" {
+		return nil
+	}
+	stat, err := os.Stat(dir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			err = os.MkdirAll(dir, 0755)
+			if err != nil {
+				return fmt.Errorf("failed to create directory: %w", err)
+			}
+		} else {
+			return err
+		}
+	} else if !stat.IsDir() {
+		return fmt.Errorf("path is not a directory: %s", dir)
+	}
+	return nil
 }
+

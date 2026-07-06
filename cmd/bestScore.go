@@ -80,7 +80,7 @@ func writeBestScore(data *BestData) error {
 	return nil
 }
 
-func GetBestScores() (map[int]int, error) {
+func getBestScores() (map[int]int, error) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
@@ -96,9 +96,9 @@ func GetBestScores() (map[int]int, error) {
 	return bestScores, nil
 }
 
-// UpdateBestScore は指定されたseedのベストスコアを設定する
-func UpdateBestScore(seed, score int) error {
-	if score <= 0 {
+// UpdateBestScores は複数のseedのベストスコアを一括で更新する
+func updateBestScores(newScores map[int]int) error {
+	if len(newScores) == 0 {
 		return nil
 	}
 	mutex.Lock()
@@ -108,21 +108,39 @@ func UpdateBestScore(seed, score int) error {
 	if err != nil {
 		return err
 	}
+
+	updatedSeeds := make(map[int]bool)
 	for i, s := range data.Scores {
-		if s.Seed == seed {
-			switch data.MiniMax {
-			case 1:
-				if score > data.Scores[i].BestScore || data.Scores[i].BestScore == -1 {
-					data.Scores[i].BestScore = score
-				}
-			case -1:
-				if score < data.Scores[i].BestScore || data.Scores[i].BestScore == -1 {
-					data.Scores[i].BestScore = score
+		if score, ok := newScores[s.Seed]; ok {
+			if score > 0 {
+				switch data.MiniMax {
+				case 1:
+					if score > data.Scores[i].BestScore || data.Scores[i].BestScore == -1 {
+						data.Scores[i].BestScore = score
+					}
+				case -1:
+					if score < data.Scores[i].BestScore || data.Scores[i].BestScore == -1 {
+						data.Scores[i].BestScore = score
+					}
 				}
 			}
-			return writeBestScore(data)
+			updatedSeeds[s.Seed] = true
 		}
 	}
-	data.Scores = append(data.Scores, ScoreEntry{Seed: seed, BestScore: score})
+
+	for seed, score := range newScores {
+		if score <= 0 {
+			continue
+		}
+		if !updatedSeeds[seed] {
+			data.Scores = append(data.Scores, ScoreEntry{Seed: seed, BestScore: score})
+		}
+	}
+
 	return writeBestScore(data)
+}
+
+// UpdateBestScore は指定されたseedのベストスコアを設定する
+func updateBestScore(seed, score int) error {
+	return updateBestScores(map[int]int{seed: score})
 }

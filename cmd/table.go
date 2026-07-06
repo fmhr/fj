@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-	"log"
 	"os"
 	"slices"
 	"sort"
@@ -43,11 +41,7 @@ func DisplayTable(data []SliceMap) error {
 				//continue
 				value = "-1"
 			}
-			v, err := formatFloat(value)
-			if err != nil {
-				log.Println("Error formatFloat:", err)
-				return err
-			}
+			v := formatFloat(value)
 			row = append(row, v)
 		}
 		table.Append(row)
@@ -69,21 +63,16 @@ func extractHeaders(data []SliceMap) []string {
 	return headers
 }
 
-func formatFloat(value any) (string, error) {
-	switch v := value.(type) {
-	case int:
-		return strconv.Itoa(v), nil
-	case float64:
-		// 小数点以下が0の場合は整数に変換
-		if v == float64(int(v)) {
-			return strconv.Itoa(int(v)), nil
-		}
-		return strconv.FormatFloat(v, 'f', 3, 64), nil
-	case string:
-		return v, nil
+func formatFloat(value string) string {
+	v, err := strconv.ParseFloat(value, 64)
+	if err != nil {
+		return value // 数値としてパースできない場合はそのまま返す
 	}
-	log.Println("invalid type")
-	return "", fmt.Errorf("invalid type")
+	// 小数点以下が0の場合は整数に変換
+	if v == float64(int(v)) {
+		return strconv.Itoa(int(v))
+	}
+	return strconv.FormatFloat(v, 'f', 3, 64)
 }
 
 // toInterfaceSlice converts a string slice to an interface slice

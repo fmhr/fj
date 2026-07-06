@@ -115,7 +115,7 @@ func Execute() error {
 		}
 		// cloud mode ならソースコードをアップロードしてバイナリを受け取る
 		if config.CloudMode {
-			err = CloudCompile(config)
+			err = cloudCompile(config)
 			if err != nil {
 				log.Println("Cloud mode Compile error:", err)
 				return err
@@ -128,8 +128,8 @@ func Execute() error {
 			}
 			r, ok := rtn.Get("result")
 			if ok {
-				if r == "TLE" {
-					log.Println("TLE")
+				if r == "TimeOut" {
+					log.Println("TimeOut")
 				}
 			}
 			for _, kv := range rtn {
@@ -143,8 +143,8 @@ func Execute() error {
 			if err != nil {
 				return err
 			}
-			if *bestScore {
-				if err = UpdateBestScore(*seed, scoreInt); err != nil {
+			if config.BestScore {
+				if err = updateBestScore(*seed, scoreInt); err != nil {
 					log.Println("failed to update best score:", err)
 					return err
 				}
@@ -157,7 +157,7 @@ func Execute() error {
 			for i := startSeed; i < startSeed+*count; i++ {
 				seeds[i-startSeed] = i
 			}
-			RunParallel(config, seeds)
+			runParallel(config, seeds)
 		}
 	case downloadcmd.FullCommand():
 		return download.Download(*testerURL)
@@ -182,6 +182,16 @@ func ensureConfigToml() error {
 
 // updateConfig はコマンドライン引数でconfigを更新する
 func updateConfig(config *setup.Config) error {
+	if jsonOutput != nil {
+		config.JsonOutput = *jsonOutput
+	}
+	if csvOutput != nil {
+		config.CsvOutput = *csvOutput
+	}
+	if bestScore != nil {
+		config.BestScore = *bestScore
+	}
+
 	config.CloudMode = config.CloudMode || *cloud
 	if !config.CloudMode {
 		config.ExecuteCmd = *cmd
@@ -192,26 +202,26 @@ func updateConfig(config *setup.Config) error {
 	// cloudモードで必要な設定がconfig.tomlにあるか確認する
 	if config.CloudMode {
 		if config.Language == "" {
-			return fmt.Errorf("error: [Language] must not be empty in cloud mode")
+			return fmt.Errorf("language must not be empty in cloud mode")
 		}
 		if config.ExecuteCmd == "" {
-			return fmt.Errorf("error: [ExecuteCmd] must not be empty in cloud mode")
+			return fmt.Errorf("execute command must not be empty in cloud mode")
 		}
 		if config.SourceFilePath == "" {
-			return fmt.Errorf("error: [SourceFilePath] must not be empty in cloud mode")
+			return fmt.Errorf("source file path must not be empty in cloud mode")
 		}
 		// sourceFilePathが存在するか確認する
 		if _, err := os.Stat(config.SourceFilePath); os.IsNotExist(err) {
-			return fmt.Errorf("error: [SourceFilePath] %s does not exist", config.SourceFilePath)
+			return fmt.Errorf("source file path %s does not exist", config.SourceFilePath)
 		}
 		if config.WorkerURL == "" {
-			return fmt.Errorf("error: [WorkerURL] must not be empty in cloud mode")
+			return fmt.Errorf("worker URL must not be empty in cloud mode")
 		}
 		if config.Bucket == "" {
-			return fmt.Errorf("error: [Bucket] must not be empty in cloud mode")
+			return fmt.Errorf("bucket must not be empty in cloud mode")
 		}
 		if config.Reactive && config.BinaryPath == "" {
-			return fmt.Errorf("error: [BinaryPath] must not be empty in cloud mode for reactive problems")
+			return fmt.Errorf("binary path must not be empty in cloud mode for reactive problems")
 		}
 	}
 	return nil

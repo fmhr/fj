@@ -8,19 +8,19 @@ import (
 	"time"
 )
 
-func JsonOutput(datas []SliceMap) error {
+func writeJsonOutput(datas []SliceMap) error {
 	fileContent, err := json.MarshalIndent(datas, "", " ")
 	if err != nil {
 		log.Println("json marshal error")
 		return err
 	}
-	err = createDirIfNotExist("fj/data/")
+	err = ensureDirExists("fj/data/")
 	if err != nil {
 		log.Println("create dir error")
 		return err
 	}
 	now := time.Now()
-	filename := fmt.Sprintf("fj/data/result_%s.json", fmt.Sprintf("%04d%02d%02d_%02d%02d%02d", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second()))
+	filename := fmt.Sprintf("fj/data/result_%s.json", now.Format("20060102_150405"))
 	err = os.WriteFile(filename, fileContent, 0644)
 	if err != nil {
 		log.Println("json write error")

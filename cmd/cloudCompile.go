@@ -37,7 +37,7 @@ func checkConfigCloudCompile(config *setup.Config) error {
 //  3. コンパイルコマンド
 //  4. file=ソースファイル, compileCmd=コンパイルコマンド,
 //     srcFile=ソースファイル名, binaryFile=バイナリファイル名
-func CloudCompile(config *setup.Config) error {
+func cloudCompile(config *setup.Config) error {
 	_, ok := setup.LanguageSets[config.Language]
 	if !ok {
 		return fmt.Errorf("error: language [%s] is not supported. suported %v", config.Language, setup.LanguageList())

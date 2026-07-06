@@ -7,16 +7,18 @@ import (
 	"strings"
 )
 
+var (
+	keyValueRe = regexp.MustCompile(`([\p{L}\p{N}\p{M}\p{S}_-]+)=([\d.]+)`)
+	dataRe     = regexp.MustCompile(`([^\n]+) = ([\d.]+)`)
+)
+
 // ExtractKeyValuePairs はコマンドから出力を、キーと値のマップで返します。
 func ExtractKeyValuePairs(msg string) (keys SliceMap, err error) {
 	// 例: "score=100.0 time=1.0"
-	//re := regexp.MustCompile(`(\w+)=([\d.]+)`)
 	keys = NewSliceMap()
-	re := regexp.MustCompile(`([\p{L}\p{N}\p{M}\p{S}_-]+)=([\d.]+)`)
-	matches := re.FindAllStringSubmatch(msg, -1)
+	matches := keyValueRe.FindAllStringSubmatch(msg, -1)
 	for _, match := range matches {
 		key := match[1]
-		//value, err := strconv.ParseFloat(match[2], 64)
 		value := match[2]
 		keys.Set(key, value)
 	}
@@ -24,15 +26,14 @@ func ExtractKeyValuePairs(msg string) (keys SliceMap, err error) {
 }
 
 // extractScore 公式toolのvisコマンドの出力からスコアを抽出します。
-// 小数点を含む数字に対応	しているけど、stringで返すので注意
+// 小数点を含む数字に対応しているけど、stringで返すので注意
 func extractData(src string) (map[string]string, error) {
 	if src == "" {
 		log.Println("Error: source string is empty")
 		return nil, fmt.Errorf("source string is empty")
 	}
 	// 例: "Score = 100"
-	re := regexp.MustCompile(`([^\n]+) = ([\d.]+)`)
-	matches := re.FindAllStringSubmatch(src, -1)
+	matches := dataRe.FindAllStringSubmatch(src, -1)
 	data := make(map[string]string)
 	for _, match := range matches {
 		key := strings.TrimSpace(match[1])
